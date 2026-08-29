@@ -4,7 +4,7 @@ import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest'
 import GeoHeatmapCanvas from './GeoHeatmapCanvas'
 import {drawHeatmap} from './drawHeatmap'
 
-// drawHeatmap 依赖真实 canvas(jsdom 无 2d context),mock 掉以隔离测试集成层
+// drawHeatmap depends on a real canvas (jsdom has no 2d context), so mock it to isolate this integration test layer
 vi.mock('./drawHeatmap', () => ({drawHeatmap: vi.fn()}))
 
 const POINTS = [
