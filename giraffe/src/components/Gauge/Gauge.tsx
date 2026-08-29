@@ -1,7 +1,6 @@
 // Libraries
 import React, {FunctionComponent, useRef, useEffect} from 'react'
 import {range} from '../../utils/range'
-import {get} from '../../utils/get'
 
 // Utils
 import {formatStatValue, MAX_DECIMAL_PLACES} from '../../utils/formatStatValue'
@@ -76,18 +75,12 @@ const updateCanvas = (
 
   // Distill out max and min values
   const minValue = Number(
-    get(
-      colors.find(color => color.type === COLOR_TYPE_MIN),
-      'value',
+    colors.find(color => color.type === COLOR_TYPE_MIN)?.value ??
       DEFAULT_VALUE_MIN
-    )
   )
   const maxValue = Number(
-    get(
-      colors.find(color => color.type === COLOR_TYPE_MAX),
-      'value',
+    colors.find(color => color.type === COLOR_TYPE_MAX)?.value ??
       DEFAULT_VALUE_MAX
-    )
   )
 
   // The following functions must be called in the specified order

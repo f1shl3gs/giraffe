@@ -13,8 +13,6 @@ import {
   Theme,
 } from '../../types'
 
-import {get} from '../../utils/get'
-
 import {TableGraphTransform} from './TableGraphTransform'
 import {TableGraphTable} from './TableGraphTable'
 
@@ -51,7 +49,7 @@ export const TableGraph: FunctionComponent<Props> = (props: Props) => {
 
   const [state, setState] = useState<State>({
     sortOptions: {
-      field: get(properties, 'tableOptions.sortBy.internalName', null),
+      field: properties.tableOptions.sortBy?.internalName ?? null,
       direction: ASCENDING,
     },
   })
