@@ -1,26 +1,15 @@
 import * as React from 'react'
-import {storiesOf} from '@storybook/react'
-import {withKnobs, number, select, boolean, text} from '@storybook/addon-knobs'
+import type {Meta, StoryObj, ArgTypes} from '@storybook/react'
 
 import {Config, Plot, fromFlux, timeFormatter} from '../../giraffe/src'
 import {getRandomTable} from '../../giraffe/src/utils/fixtures/randomTable'
 
 import {
   PlotContainer,
-  xKnob,
-  yKnob,
-  xScaleKnob,
-  yScaleKnob,
-  fillKnob,
   findStringColumns,
-  colorSchemeKnob,
-  legendFontKnob,
-  tickFontKnob,
-  showAxesKnob,
-  interpolationKnob,
-  timeZoneKnob,
-  tooltipOrientationThresholdKnob,
-  tooltipColorizeRowsKnob,
+  findXYColumns,
+  TIME_FORMAT_OPTIONS,
+  COLOR_SCHEME_OPTIONS,
 } from './helpers'
 import {
   colors6,
@@ -38,185 +27,383 @@ import {columnAlignment} from './data/staticLegend'
 
 const maxValue = Math.random() * Math.floor(200)
 let callCounter = 0
+const STATIC_LEGEND_HEIGHT_RATIO_NOT_SET = 0
 
-storiesOf('Static Legend', module)
-  .addDecorator(withKnobs)
-  .add('Line Graph with random fill column names', () => {
-    const lines = number('Number of graph lines', 4)
-    const fillColumnsCount = number('Number of fill columns', 5)
-    const fillColumnNameLength = number('Length of fill column names', 4)
-    const staticLegendHeightRatio = number('Static Legend Height', 0.2, {
-      range: true,
-      min: 0,
-      max: 1,
-      step: 0.01,
-    })
+const columnAlignmentTable = fromFlux(columnAlignment).table
+const columnAlignmentXYOptions = Object.keys(
+  findXYColumns(columnAlignmentTable)
+)
+const columnAlignmentStringColumns = findStringColumns(columnAlignmentTable)
 
-    const fixedWidthText = text('Fixed Width', '')
-    const fixedHeightText = text('Fixed Height', '')
-    const fixedWidth = !fixedWidthText ? -1 : Number(fixedWidthText)
-    const fixedHeight = !fixedHeightText ? -1 : Number(fixedHeightText)
-    const legendHide = boolean('Hide Tooltip?', false)
-    const staticLegendHide = boolean('Hide Static Legend?', false)
+const STATIC_CSV_OPTIONS: Array<{label: string; value: string}> = [
+  {label: 'colors6', value: colors6},
+  {label: 'cpu1', value: cpu1},
+  {label: 'cpu2', value: cpu2},
+  {label: 'graphEdge1', value: graphEdge1},
+  {label: 'hoverAlignment1', value: hoverAlignment1},
+  {label: 'hoverAlignment2', value: hoverAlignment2},
+  {label: 'mem1', value: mem1},
+  {label: 'mem2', value: mem2},
+  {label: 'noLowerAndUpper', value: noLowerAndUpper},
+  {label: 'same3', value: same3},
+]
 
-    const fixedPlotSize = {}
-    if (fixedHeight > 0 && fixedWidth > 0) {
-      fixedPlotSize['height'] = fixedHeight
-      fixedPlotSize['width'] = fixedWidth
-    }
-    const includeNegativeNumbers = boolean('Include negative numbers ?', false)
-    const position = select(
-      'Line Position',
-      {stacked: 'stacked', overlaid: 'overlaid'},
-      'overlaid'
-    )
-    const table = getRandomTable(
-      maxValue,
-      includeNegativeNumbers,
-      lines * 20,
-      20,
-      fillColumnsCount,
-      fillColumnNameLength
-    )
-    const colors = colorSchemeKnob()
-    const legendOrientationThreshold = tooltipOrientationThresholdKnob(20)
-    const staticLegendOrientationThreshold = number(
-      'Static Legend Orientation Threshold',
-      20
-    )
-    const legendColorizeRows = tooltipColorizeRowsKnob()
-    const staticLegendColorizeRows = boolean(
-      'Static Legend Colorize Rows?',
-      true
-    )
-    const legendFont = legendFontKnob()
-    const staticLegendFont = text('Static Legend Font', '12px sans-serif')
-    const staticLegendBorder = text('Static Legend Border', '1px solid orange')
-    const staticLegendBackgroundColor = text(
-      'Static Legend Background Color',
-      'transparent'
-    )
-    const tickFont = tickFontKnob()
-    const x = xKnob(table)
-    const y = yKnob(table)
-    const valueAxisLabel = text('Value Axis Label', 'foo')
-    const xScale = xScaleKnob()
-    const yScale = yScaleKnob()
-    const timeZone = timeZoneKnob()
-    const timeFormat = select(
-      'Time Format',
+const LINE_POSITION_OPTIONS = ['stacked', 'overlaid']
+const HOVER_DIMENSION_OPTIONS = ['auto', 'x', 'y', 'xy']
+const INTERPOLATION_OPTIONS = [
+  'linear',
+  'monotoneX',
+  'monotoneY',
+  'cubic',
+  'step',
+  'stepBefore',
+  'stepAfter',
+  'natural',
+]
+const SCALE_OPTIONS = ['linear', 'log']
+const TIME_ZONE_OPTIONS = ['UTC', 'America/Los_Angeles', 'America/New_York']
+const COLOR_SCHEME_KEYS = Object.keys(COLOR_SCHEME_OPTIONS)
+
+interface Args {
+  lines: number
+  fillColumnsCount: number
+  fillColumnNameLength: number
+  staticLegendHeightRatio: number
+  fixedWidth: string
+  fixedHeight: string
+  legendHide: boolean
+  staticLegendHide: boolean
+  includeNegativeNumbers: boolean
+  position: 'stacked' | 'overlaid'
+  colorScheme: keyof typeof COLOR_SCHEME_OPTIONS
+  legendOrientationThreshold: number
+  staticLegendOrientationThreshold: number
+  legendColorizeRows: boolean
+  staticLegendColorizeRows: boolean
+  legendFont: string
+  staticLegendFont: string
+  staticLegendBorder: string
+  staticLegendBackgroundColor: string
+  tickFont: string
+  x: string
+  y: string
+  valueAxisLabel: string
+  xScale: 'linear' | 'log'
+  yScale: 'linear' | 'log'
+  timeZone: 'UTC' | 'America/Los_Angeles' | 'America/New_York'
+  timeFormat: (typeof TIME_FORMAT_OPTIONS)[number]
+  fill: string | string[]
+  interpolation:
+    | 'linear'
+    | 'monotoneX'
+    | 'monotoneY'
+    | 'cubic'
+    | 'step'
+    | 'stepBefore'
+    | 'stepAfter'
+    | 'natural'
+  showAxes: boolean
+  lineWidth: number
+  shadeBelow: boolean
+  shadeBelowOpacity: number
+  hoverDimension: 'auto' | 'x' | 'y' | 'xy'
+  legendOpacity: number
+  fillColumns: string
+  staticData: string
+  lineOpacity: number
+  shadeOpacity: number
+  upperColumnName: string
+  mainColumnName: string
+  lowerColumnName: string
+  csv: string
+}
+
+export default {
+  title: 'Static Legend',
+} as Meta
+
+type Story = StoryObj<Args>
+
+const sharedArgTypes: Partial<ArgTypes<Args>> = {
+  staticLegendHeightRatio: {
+    control: {type: 'range', min: 0, max: 1, step: 0.01},
+  },
+  legendOpacity: {
+    control: {type: 'range', min: 0, max: 1, step: 0.05},
+  },
+  legendOrientationThreshold: {
+    control: {type: 'number'},
+  },
+  staticLegendOrientationThreshold: {
+    control: {type: 'number'},
+  },
+  lineWidth: {
+    control: {type: 'number'},
+  },
+  shadeBelowOpacity: {
+    control: {type: 'number'},
+  },
+  legendHide: {
+    control: {type: 'boolean'},
+  },
+  staticLegendHide: {
+    control: {type: 'boolean'},
+  },
+  legendColorizeRows: {
+    control: {type: 'boolean'},
+  },
+  staticLegendColorizeRows: {
+    control: {type: 'boolean'},
+  },
+  shadeBelow: {
+    control: {type: 'boolean'},
+  },
+  showAxes: {
+    control: {type: 'boolean'},
+  },
+  position: {
+    control: {type: 'select', options: LINE_POSITION_OPTIONS},
+  },
+  colorScheme: {
+    control: {type: 'select', options: COLOR_SCHEME_KEYS},
+  },
+  xScale: {
+    control: {type: 'select', options: SCALE_OPTIONS},
+  },
+  yScale: {
+    control: {type: 'select', options: SCALE_OPTIONS},
+  },
+  timeZone: {
+    control: {type: 'select', options: TIME_ZONE_OPTIONS},
+  },
+  timeFormat: {
+    control: {type: 'select', options: [...TIME_FORMAT_OPTIONS]},
+  },
+  interpolation: {
+    control: {type: 'select', options: INTERPOLATION_OPTIONS},
+  },
+  hoverDimension: {
+    control: {type: 'select', options: HOVER_DIMENSION_OPTIONS},
+  },
+}
+
+const randomTableArgTypes: Partial<ArgTypes<Args>> = {
+  ...sharedArgTypes,
+  lines: {
+    control: {type: 'number'},
+  },
+  fillColumnsCount: {
+    control: {type: 'number'},
+  },
+  fillColumnNameLength: {
+    control: {type: 'number'},
+  },
+  includeNegativeNumbers: {
+    control: {type: 'boolean'},
+  },
+}
+
+const lineGraphRender = (args: Args) => {
+  const {
+    lines,
+    fillColumnsCount,
+    fillColumnNameLength,
+    staticLegendHeightRatio,
+    fixedWidth: fixedWidthText,
+    fixedHeight: fixedHeightText,
+    legendHide,
+    staticLegendHide,
+    includeNegativeNumbers,
+    position,
+    colorScheme,
+    legendOrientationThreshold,
+    staticLegendOrientationThreshold,
+    legendColorizeRows,
+    staticLegendColorizeRows,
+    legendFont,
+    staticLegendFont,
+    staticLegendBorder,
+    staticLegendBackgroundColor,
+    tickFont,
+    x,
+    y,
+    valueAxisLabel,
+    xScale,
+    yScale,
+    timeZone,
+    timeFormat,
+    fill: fillArg,
+    interpolation,
+    showAxes,
+    lineWidth,
+    shadeBelow,
+    shadeBelowOpacity,
+    hoverDimension,
+    legendOpacity,
+  } = args
+
+  const fixedWidth = !fixedWidthText ? -1 : Number(fixedWidthText)
+  const fixedHeight = !fixedHeightText ? -1 : Number(fixedHeightText)
+  const fixedPlotSize = {}
+  if (fixedHeight > 0 && fixedWidth > 0) {
+    fixedPlotSize['height'] = fixedHeight
+    fixedPlotSize['width'] = fixedWidth
+  }
+  const table = getRandomTable(
+    maxValue,
+    includeNegativeNumbers,
+    lines * 20,
+    20,
+    fillColumnsCount,
+    fillColumnNameLength
+  )
+  const fill = Array.isArray(fillArg)
+    ? fillArg
+    : fillArg !== ''
+      ? fillArg.split(',')
+      : findStringColumns(table)
+
+  const config: Config = {
+    ...fixedPlotSize,
+    table,
+    valueFormatters: {
+      _time: timeFormatter({timeZone, format: timeFormat}),
+      _value: val =>
+        `${val.toFixed(2)}${
+          valueAxisLabel ? ` ${valueAxisLabel}` : valueAxisLabel
+        }`,
+    },
+    xScale,
+    yScale,
+    tickFont,
+    showAxes,
+    legendColorizeRows,
+    legendFont,
+    legendHide,
+    legendOpacity,
+    legendOrientationThreshold,
+    staticLegend: {
+      backgroundColor: staticLegendBackgroundColor,
+      border: staticLegendBorder,
+      colorizeRows: staticLegendColorizeRows,
+      font: staticLegendFont || legendFont,
+      heightRatio: staticLegendHeightRatio,
+      hide: staticLegendHide,
+      orientationThreshold: staticLegendOrientationThreshold,
+    },
+    layers: [
       {
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'hh:mm a': 'hh:mm a',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
+        type: 'line',
+        x,
+        y,
+        fill,
+        position,
+        interpolation,
+        colors: COLOR_SCHEME_OPTIONS[colorScheme],
+        lineWidth,
+        hoverDimension,
+        shadeBelow,
+        shadeBelowOpacity,
       },
-      'YYYY-MM-DD HH:mm:ss ZZ'
-    )
-    const fill = fillKnob(table, findStringColumns(table))
-    const interpolation = interpolationKnob()
-    const showAxes = showAxesKnob()
-    const lineWidth = number('Line Width', 1)
-    const shadeBelow = boolean('Shade Area', false)
-    const shadeBelowOpacity = number('Area Opacity', 0.1)
-    const hoverDimension = select(
-      'Hover Dimension',
-      {auto: 'auto', x: 'x', y: 'y', xy: 'xy'},
-      'auto'
-    )
-    const legendOpacity = number('Legend Opacity', 1.0, {
-      range: true,
-      min: 0,
-      max: 1.0,
-      step: 0.05,
-    })
+    ],
+  }
 
-    const config: Config = {
-      ...fixedPlotSize,
-      table,
-      valueFormatters: {
-        _time: timeFormatter({timeZone, format: timeFormat}),
-        _value: val =>
-          `${val.toFixed(2)}${
-            valueAxisLabel ? ` ${valueAxisLabel}` : valueAxisLabel
-          }`,
-      },
+  return (
+    <PlotContainer>
+      <Plot config={config} />
+    </PlotContainer>
+  )
+}
+
+export const LineGraphWithRandomFillColumnNames: Story = {
+  render: lineGraphRender,
+  args: {
+    lines: 4,
+    fillColumnsCount: 5,
+    fillColumnNameLength: 4,
+    staticLegendHeightRatio: 0.2,
+    fixedWidth: '',
+    fixedHeight: '',
+    legendHide: false,
+    staticLegendHide: false,
+    includeNegativeNumbers: false,
+    position: 'overlaid',
+    colorScheme: 'Nineteen Eighty Four',
+    legendOrientationThreshold: 20,
+    staticLegendOrientationThreshold: 20,
+    legendColorizeRows: true,
+    staticLegendColorizeRows: true,
+    legendFont: '12px sans-serif',
+    staticLegendFont: '12px sans-serif',
+    staticLegendBorder: '1px solid orange',
+    staticLegendBackgroundColor: 'transparent',
+    tickFont: '10px sans-serif',
+    x: '_time',
+    y: '_value',
+    valueAxisLabel: 'foo',
+    xScale: 'linear',
+    yScale: 'linear',
+    timeZone: 'UTC',
+    timeFormat: 'YYYY-MM-DD HH:mm:ss ZZ',
+    fill: '',
+    interpolation: 'monotoneX',
+    showAxes: true,
+    lineWidth: 1,
+    shadeBelow: false,
+    shadeBelowOpacity: 0.1,
+    hoverDimension: 'auto',
+    legendOpacity: 1.0,
+  },
+  argTypes: randomTableArgTypes,
+}
+
+export const LineGraphWithRandomCustomFillColumns: Story = {
+  render: (args: Args) => {
+    const {
+      lines,
+      staticLegendHeightRatio,
+      fixedWidth: fixedWidthText,
+      fixedHeight: fixedHeightText,
+      legendHide,
+      staticLegendHide,
+      includeNegativeNumbers,
+      position,
+      colorScheme,
+      legendOrientationThreshold,
+      staticLegendOrientationThreshold,
+      legendColorizeRows,
+      staticLegendColorizeRows,
+      legendFont,
+      staticLegendFont,
+      staticLegendBorder,
+      staticLegendBackgroundColor,
+      tickFont,
+      x,
+      y,
+      valueAxisLabel,
       xScale,
       yScale,
-      tickFont,
+      timeZone,
+      timeFormat,
+      fill: fillArg,
+      interpolation,
       showAxes,
-      legendColorizeRows,
-      legendFont,
-      legendHide,
+      lineWidth,
+      shadeBelow,
+      shadeBelowOpacity,
+      hoverDimension,
       legendOpacity,
-      legendOrientationThreshold,
-      staticLegend: {
-        backgroundColor: staticLegendBackgroundColor,
-        border: staticLegendBorder,
-        colorizeRows: staticLegendColorizeRows,
-        font: staticLegendFont || legendFont,
-        heightRatio: staticLegendHeightRatio,
-        hide: staticLegendHide,
-        orientationThreshold: staticLegendOrientationThreshold,
-      },
-      layers: [
-        {
-          type: 'line',
-          x,
-          y,
-          fill,
-          position,
-          interpolation,
-          colors,
-          lineWidth,
-          hoverDimension,
-          shadeBelow,
-          shadeBelowOpacity,
-        },
-      ],
-    }
+      fillColumns,
+    } = args
+    const fillColumnNames = fillColumns.split(',')
 
-    return (
-      <PlotContainer>
-        <Plot config={config} />
-      </PlotContainer>
-    )
-  })
-  .add('Line Graph with random custom fill column names', () => {
-    const lines = number('Number of graph lines', 4)
-    const fillColumnsText = text('fillColumns', 'cluster,host,machine,cpu')
-    const fillColumnNames = fillColumnsText.split(',')
-    const staticLegendHeightRatio = number('Static Legend Height', 0.2, {
-      range: true,
-      min: 0,
-      max: 1,
-      step: 0.01,
-    })
-
-    const fixedWidthText = text('Fixed Width', '')
-    const fixedHeightText = text('Fixed Height', '')
     const fixedWidth = !fixedWidthText ? -1 : Number(fixedWidthText)
     const fixedHeight = !fixedHeightText ? -1 : Number(fixedHeightText)
-    const legendHide = boolean('Hide Tooltip?', false)
-    const staticLegendHide = boolean('Hide Static Legend?', false)
     const fixedPlotSize = {}
     if (fixedHeight > 0 && fixedWidth > 0) {
       fixedPlotSize['height'] = fixedHeight
       fixedPlotSize['width'] = fixedWidth
     }
-    const includeNegativeNumbers = boolean('Include negative numbers ?', false)
-    const position = select(
-      'Line Position',
-      {stacked: 'stacked', overlaid: 'overlaid'},
-      'overlaid'
-    )
     const table = getRandomTable(
       maxValue,
       includeNegativeNumbers,
@@ -224,65 +411,11 @@ storiesOf('Static Legend', module)
       20,
       fillColumnNames
     )
-    const colors = colorSchemeKnob()
-    const legendOrientationThreshold = tooltipOrientationThresholdKnob(20)
-    const staticLegendOrientationThreshold = number(
-      'Static Legend Orientation Threshold',
-      20
-    )
-    const legendColorizeRows = tooltipColorizeRowsKnob()
-    const staticLegendColorizeRows = boolean(
-      'Static Legend Colorize Rows?',
-      true
-    )
-    const legendFont = legendFontKnob()
-    const staticLegendFont = text('Static Legend Font', '12px sans-serif')
-    const staticLegendBorder = text('Static Legend Border', '1px solid orange')
-    const staticLegendBackgroundColor = text(
-      'Static Legend Background Color',
-      'transparent'
-    )
-    const tickFont = tickFontKnob()
-    const x = xKnob(table)
-    const y = yKnob(table)
-    const valueAxisLabel = text('Value Axis Label', 'foo')
-    const xScale = xScaleKnob()
-    const yScale = yScaleKnob()
-    const timeZone = timeZoneKnob()
-    const timeFormat = select(
-      'Time Format',
-      {
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'hh:mm a': 'hh:mm a',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
-      },
-      'YYYY-MM-DD HH:mm:ss ZZ'
-    )
-    const fill = fillKnob(table, findStringColumns(table))
-    const interpolation = interpolationKnob()
-    const showAxes = showAxesKnob()
-    const lineWidth = number('Line Width', 1)
-    const shadeBelow = boolean('Shade Area', false)
-    const shadeBelowOpacity = number('Area Opacity', 0.1)
-    const hoverDimension = select(
-      'Hover Dimension',
-      {auto: 'auto', x: 'x', y: 'y', xy: 'xy'},
-      'auto'
-    )
-    const legendOpacity = number('Legend Opacity', 1.0, {
-      range: true,
-      min: 0,
-      max: 1.0,
-      step: 0.05,
-    })
+    const fill = Array.isArray(fillArg)
+      ? fillArg
+      : fillArg !== ''
+        ? fillArg.split(',')
+        : findStringColumns(table)
 
     const config: Config = {
       ...fixedPlotSize,
@@ -320,7 +453,7 @@ storiesOf('Static Legend', module)
           fill,
           position,
           interpolation,
-          colors,
+          colors: COLOR_SCHEME_OPTIONS[colorScheme],
           lineWidth,
           hoverDimension,
           shadeBelow,
@@ -334,102 +467,90 @@ storiesOf('Static Legend', module)
         <Plot config={config} />
       </PlotContainer>
     )
-  })
-  .add('Band Plot with static CSV', () => {
-    const staticData = select(
-      'Static CSV',
-      {
-        colors6,
-        cpu1,
-        cpu2,
-        graphEdge1,
-        hoverAlignment1,
-        hoverAlignment2,
-        mem1,
-        mem2,
-        noLowerAndUpper,
-        same3,
-      },
-      cpu2
-    )
-    const staticLegendHeightRatio = number('Static Legend Height', 0.2, {
-      range: true,
-      min: 0,
-      max: 1,
-      step: 0.01,
-    })
+  },
+  args: {
+    lines: 4,
+    fillColumns: 'cluster,host,machine,cpu',
+    staticLegendHeightRatio: 0.2,
+    fixedWidth: '',
+    fixedHeight: '',
+    legendHide: false,
+    staticLegendHide: false,
+    includeNegativeNumbers: false,
+    position: 'overlaid',
+    colorScheme: 'Nineteen Eighty Four',
+    legendOrientationThreshold: 20,
+    staticLegendOrientationThreshold: 20,
+    legendColorizeRows: true,
+    staticLegendColorizeRows: true,
+    legendFont: '12px sans-serif',
+    staticLegendFont: '12px sans-serif',
+    staticLegendBorder: '1px solid orange',
+    staticLegendBackgroundColor: 'transparent',
+    tickFont: '10px sans-serif',
+    x: '_time',
+    y: '_value',
+    valueAxisLabel: 'foo',
+    xScale: 'linear',
+    yScale: 'linear',
+    timeZone: 'UTC',
+    timeFormat: 'YYYY-MM-DD HH:mm:ss ZZ',
+    fill: '',
+    interpolation: 'monotoneX',
+    showAxes: true,
+    lineWidth: 1,
+    shadeBelow: false,
+    shadeBelowOpacity: 0.1,
+    hoverDimension: 'auto',
+    legendOpacity: 1.0,
+  },
+  argTypes: randomTableArgTypes,
+}
 
-    const fixedWidthText = text('Fixed Width', '')
-    const fixedHeightText = text('Fixed Height', '')
+export const BandPlotWithStaticCSV: Story = {
+  render: (args: Args) => {
+    const {
+      staticData,
+      staticLegendHeightRatio,
+      fixedWidth: fixedWidthText,
+      fixedHeight: fixedHeightText,
+      legendHide,
+      staticLegendHide,
+      colorScheme,
+      legendOrientationThreshold,
+      staticLegendOrientationThreshold,
+      legendColorizeRows,
+      staticLegendColorizeRows,
+      legendFont,
+      staticLegendFont,
+      staticLegendBorder,
+      staticLegendBackgroundColor,
+      tickFont,
+      valueAxisLabel,
+      xScale,
+      yScale,
+      timeZone,
+      timeFormat,
+      interpolation,
+      showAxes,
+      lineWidth,
+      lineOpacity,
+      shadeOpacity,
+      hoverDimension,
+      upperColumnName,
+      mainColumnName,
+      lowerColumnName,
+      legendOpacity,
+    } = args
+
     const fixedWidth = !fixedWidthText ? -1 : Number(fixedWidthText)
     const fixedHeight = !fixedHeightText ? -1 : Number(fixedHeightText)
-    const legendHide = boolean('Hide Tooltip?', false)
-    const staticLegendHide = boolean('Hide Static Legend?', false)
     const fixedPlotSize = {}
     if (fixedHeight > 0 && fixedWidth > 0) {
       fixedPlotSize['height'] = fixedHeight
       fixedPlotSize['width'] = fixedWidth
     }
-    const colors = colorSchemeKnob()
-    const legendOrientationThreshold = tooltipOrientationThresholdKnob(20)
-    const staticLegendOrientationThreshold = number(
-      'Static Legend Orientation Threshold',
-      20
-    )
-    const legendColorizeRows = tooltipColorizeRowsKnob()
-    const staticLegendColorizeRows = boolean(
-      'Static Legend Colorize Rows?',
-      true
-    )
-    const legendFont = legendFontKnob()
-    const staticLegendFont = text('Static Legend Font', '12px sans-serif')
-    const staticLegendBorder = text('Static Legend Border', '1px solid orange')
-    const staticLegendBackgroundColor = text(
-      'Static Legend Background Color',
-      'transparent'
-    )
-    const tickFont = tickFontKnob()
-    const valueAxisLabel = text('Value Axis Label', '')
-    const xScale = xScaleKnob()
-    const yScale = yScaleKnob()
-    const timeZone = timeZoneKnob()
-    const timeFormat = select(
-      'Time Format',
-      {
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'hh:mm a': 'hh:mm a',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
-      },
-      'hh:mm a'
-    )
     const fromFluxTable = fromFlux(staticData).table
-    const interpolation = interpolationKnob()
-    const showAxes = showAxesKnob()
-    const lineWidth = number('Line Width', 3)
-    const lineOpacity = number('Line Opacity', 0.7)
-    const shadeOpacity = number('Shade Opacity', 0.3)
-    const hoverDimension = select(
-      'Hover Dimension',
-      {auto: 'auto', x: 'x', y: 'y', xy: 'xy'},
-      'auto'
-    )
-    const upperColumnName = text('upperColumnName', 'max')
-    const mainColumnName = text('mainColumnName', 'mean')
-    const lowerColumnName = text('lowerColumnName', 'min')
-    const legendOpacity = number('Legend Opacity', 1.0, {
-      range: true,
-      min: 0,
-      max: 1.0,
-      step: 0.05,
-    })
 
     const config: Config = {
       fluxResponse: staticData,
@@ -467,7 +588,7 @@ storiesOf('Static Legend', module)
           y: '_value',
           fill: findStringColumns(fromFluxTable),
           interpolation,
-          colors,
+          colors: COLOR_SCHEME_OPTIONS[colorScheme],
           lineWidth,
           lineOpacity,
           hoverDimension,
@@ -484,90 +605,101 @@ storiesOf('Static Legend', module)
         <Plot config={config} />
       </PlotContainer>
     )
-  })
-  .add('Column Alignment', () => {
-    let table = fromFlux(columnAlignment).table
-    const staticLegendHeightRatio = number('Static Legend Height', 0.2, {
-      range: true,
-      min: 0,
-      max: 1,
-      step: 0.01,
-    })
+  },
+  args: {
+    staticData: cpu2,
+    staticLegendHeightRatio: 0.2,
+    fixedWidth: '',
+    fixedHeight: '',
+    legendHide: false,
+    staticLegendHide: false,
+    colorScheme: 'Nineteen Eighty Four',
+    legendOrientationThreshold: 20,
+    staticLegendOrientationThreshold: 20,
+    legendColorizeRows: true,
+    staticLegendColorizeRows: true,
+    legendFont: '12px sans-serif',
+    staticLegendFont: '12px sans-serif',
+    staticLegendBorder: '1px solid orange',
+    staticLegendBackgroundColor: 'transparent',
+    tickFont: '10px sans-serif',
+    valueAxisLabel: '',
+    xScale: 'linear',
+    yScale: 'linear',
+    timeZone: 'UTC',
+    timeFormat: 'hh:mm a',
+    interpolation: 'monotoneX',
+    showAxes: true,
+    lineWidth: 3,
+    lineOpacity: 0.7,
+    shadeOpacity: 0.3,
+    hoverDimension: 'auto',
+    upperColumnName: 'max',
+    mainColumnName: 'mean',
+    lowerColumnName: 'min',
+    legendOpacity: 1.0,
+  },
+  argTypes: {
+    ...sharedArgTypes,
+    staticData: {
+      control: {type: 'select', options: STATIC_CSV_OPTIONS},
+    },
+    lineOpacity: {
+      control: {type: 'number'},
+    },
+    shadeOpacity: {
+      control: {type: 'number'},
+    },
+  },
+}
 
-    const fixedWidthText = text('Fixed Width', '')
-    const fixedHeightText = text('Fixed Height', '')
+export const ColumnAlignment: Story = {
+  render: (args: Args) => {
+    const {
+      staticLegendHeightRatio,
+      fixedWidth: fixedWidthText,
+      fixedHeight: fixedHeightText,
+      legendHide,
+      staticLegendHide,
+      position,
+      colorScheme,
+      legendOrientationThreshold,
+      staticLegendOrientationThreshold,
+      legendColorizeRows,
+      staticLegendColorizeRows,
+      legendFont,
+      staticLegendFont,
+      staticLegendBorder,
+      staticLegendBackgroundColor,
+      tickFont,
+      x,
+      y,
+      xScale,
+      yScale,
+      timeZone,
+      timeFormat,
+      fill: fillArg,
+      interpolation,
+      showAxes,
+      lineWidth,
+      shadeBelow,
+      shadeBelowOpacity,
+      hoverDimension,
+      legendOpacity,
+    } = args
+
     const fixedWidth = !fixedWidthText ? -1 : Number(fixedWidthText)
     const fixedHeight = !fixedHeightText ? -1 : Number(fixedHeightText)
-    const legendHide = boolean('Hide Tooltip?', false)
-    const staticLegendHide = boolean('Hide Static Legend?', false)
     const fixedPlotSize = {}
     if (fixedHeight > 0 && fixedWidth > 0) {
       fixedPlotSize['height'] = fixedHeight
       fixedPlotSize['width'] = fixedWidth
     }
-    const position = select(
-      'Line Position',
-      {stacked: 'stacked', overlaid: 'overlaid'},
-      'overlaid'
-    )
-    const colors = colorSchemeKnob()
-    const legendOrientationThreshold = tooltipOrientationThresholdKnob(20)
-    const staticLegendOrientationThreshold = number(
-      'Static Legend Orientation Threshold',
-      20
-    )
-    const legendColorizeRows = tooltipColorizeRowsKnob()
-    const staticLegendColorizeRows = boolean(
-      'Static Legend Colorize Rows?',
-      true
-    )
-    const legendFont = legendFontKnob()
-    const staticLegendFont = text('Static Legend Font', '12px sans-serif')
-    const staticLegendBorder = text('Static Legend Border', '1px solid orange')
-    const staticLegendBackgroundColor = text(
-      'Static Legend Background Color',
-      'transparent'
-    )
-    const tickFont = tickFontKnob()
-    const x = xKnob(table)
-    const y = yKnob(table)
-    const xScale = xScaleKnob()
-    const yScale = yScaleKnob()
-    const timeZone = timeZoneKnob()
-    const timeFormat = select(
-      'Time Format',
-      {
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'hh:mm a': 'hh:mm a',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
-      },
-      'YYYY-MM-DD HH:mm:ss ZZ'
-    )
-    const fill = fillKnob(table, findStringColumns(table))
-    const interpolation = interpolationKnob()
-    const showAxes = showAxesKnob()
-    const lineWidth = number('Line Width', 1)
-    const shadeBelow = boolean('Shade Area', false)
-    const shadeBelowOpacity = number('Area Opacity', 0.1)
-    const hoverDimension = select(
-      'Hover Dimension',
-      {auto: 'auto', x: 'x', y: 'y', xy: 'xy'},
-      'auto'
-    )
-    const legendOpacity = number('Legend Opacity', 1.0, {
-      range: true,
-      min: 0,
-      max: 1.0,
-      step: 0.05,
-    })
+    const fill = Array.isArray(fillArg)
+      ? fillArg
+      : fillArg !== ''
+        ? fillArg.split(',')
+        : findStringColumns(columnAlignmentTable)
 
     const config: Config = {
       ...fixedPlotSize,
@@ -604,7 +736,7 @@ storiesOf('Static Legend', module)
           fill,
           position,
           interpolation,
-          colors,
+          colors: COLOR_SCHEME_OPTIONS[colorScheme],
           lineWidth,
           hoverDimension,
           shadeBelow,
@@ -618,91 +750,102 @@ storiesOf('Static Legend', module)
         <Plot config={config} />
       </PlotContainer>
     )
-  })
-  .add('Custom CSV', () => {
-    const csv = text('Past CSV here:', '')
-    let table = fromFlux(csv).table
-    const staticLegendHeightRatio = number('Static Legend Height', 0.2, {
-      range: true,
-      min: 0,
-      max: 1,
-      step: 0.01,
-    })
+  },
+  args: {
+    staticLegendHeightRatio: 0.2,
+    fixedWidth: '',
+    fixedHeight: '',
+    legendHide: false,
+    staticLegendHide: false,
+    position: 'overlaid',
+    colorScheme: 'Nineteen Eighty Four',
+    legendOrientationThreshold: 20,
+    staticLegendOrientationThreshold: 20,
+    legendColorizeRows: true,
+    staticLegendColorizeRows: true,
+    legendFont: '12px sans-serif',
+    staticLegendFont: '12px sans-serif',
+    staticLegendBorder: '1px solid orange',
+    staticLegendBackgroundColor: 'transparent',
+    tickFont: '10px sans-serif',
+    x: '_time',
+    y: '_value',
+    xScale: 'linear',
+    yScale: 'linear',
+    timeZone: 'UTC',
+    timeFormat: 'YYYY-MM-DD HH:mm:ss ZZ',
+    fill: columnAlignmentStringColumns,
+    interpolation: 'monotoneX',
+    showAxes: true,
+    lineWidth: 1,
+    shadeBelow: false,
+    shadeBelowOpacity: 0.1,
+    hoverDimension: 'auto',
+    legendOpacity: 1.0,
+  },
+  argTypes: {
+    ...sharedArgTypes,
+    x: {
+      control: {type: 'select', options: columnAlignmentXYOptions},
+    },
+    y: {
+      control: {type: 'select', options: columnAlignmentXYOptions},
+    },
+    fill: {
+      control: {type: 'multi-select', options: columnAlignmentStringColumns},
+    },
+  },
+}
 
-    const fixedWidthText = text('Fixed Width', '')
-    const fixedHeightText = text('Fixed Height', '')
+export const CustomCSV: Story = {
+  render: (args: Args) => {
+    const {
+      csv,
+      staticLegendHeightRatio,
+      fixedWidth: fixedWidthText,
+      fixedHeight: fixedHeightText,
+      legendHide,
+      staticLegendHide,
+      position,
+      colorScheme,
+      legendOrientationThreshold,
+      staticLegendOrientationThreshold,
+      legendColorizeRows,
+      staticLegendColorizeRows,
+      legendFont,
+      staticLegendFont,
+      staticLegendBorder,
+      staticLegendBackgroundColor,
+      tickFont,
+      x,
+      y,
+      xScale,
+      yScale,
+      timeZone,
+      timeFormat,
+      fill: fillArg,
+      interpolation,
+      showAxes,
+      lineWidth,
+      shadeBelow,
+      shadeBelowOpacity,
+      hoverDimension,
+      legendOpacity,
+    } = args
+
     const fixedWidth = !fixedWidthText ? -1 : Number(fixedWidthText)
     const fixedHeight = !fixedHeightText ? -1 : Number(fixedHeightText)
-    const legendHide = boolean('Hide Tooltip?', false)
-    const staticLegendHide = boolean('Hide Static Legend?', false)
     const fixedPlotSize = {}
     if (fixedHeight > 0 && fixedWidth > 0) {
       fixedPlotSize['height'] = fixedHeight
       fixedPlotSize['width'] = fixedWidth
     }
-    const position = select(
-      'Line Position',
-      {stacked: 'stacked', overlaid: 'overlaid'},
-      'overlaid'
-    )
-    const colors = colorSchemeKnob()
-    const legendOrientationThreshold = tooltipOrientationThresholdKnob(20)
-    const staticLegendOrientationThreshold = number(
-      'Static Legend Orientation Threshold',
-      20
-    )
-    const legendColorizeRows = tooltipColorizeRowsKnob()
-    const staticLegendColorizeRows = boolean(
-      'Static Legend Colorize Rows?',
-      true
-    )
-    const legendFont = legendFontKnob()
-    const staticLegendFont = text('Static Legend Font', '12px sans-serif')
-    const staticLegendBorder = text('Static Legend Border', '1px solid orange')
-    const staticLegendBackgroundColor = text(
-      'Static Legend Background Color',
-      'transparent'
-    )
-    const tickFont = tickFontKnob()
-    const x = xKnob(table)
-    const y = yKnob(table)
-    const xScale = xScaleKnob()
-    const yScale = yScaleKnob()
-    const timeZone = timeZoneKnob()
-    const timeFormat = select(
-      'Time Format',
-      {
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'hh:mm a': 'hh:mm a',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
-      },
-      'YYYY-MM-DD HH:mm:ss ZZ'
-    )
-    const fill = fillKnob(table, findStringColumns(table))
-    const interpolation = interpolationKnob()
-    const showAxes = showAxesKnob()
-    const lineWidth = number('Line Width', 1)
-    const shadeBelow = boolean('Shade Area', false)
-    const shadeBelowOpacity = number('Area Opacity', 0.1)
-    const hoverDimension = select(
-      'Hover Dimension',
-      {auto: 'auto', x: 'x', y: 'y', xy: 'xy'},
-      'auto'
-    )
-    const legendOpacity = number('Legend Opacity', 1.0, {
-      range: true,
-      min: 0,
-      max: 1.0,
-      step: 0.05,
-    })
+    const table = fromFlux(csv).table
+    const fill = Array.isArray(fillArg)
+      ? fillArg
+      : fillArg !== ''
+        ? fillArg.split(',')
+        : findStringColumns(table)
 
     const config: Config = {
       ...fixedPlotSize,
@@ -736,7 +879,7 @@ storiesOf('Static Legend', module)
           fill,
           position,
           interpolation,
-          colors,
+          colors: COLOR_SCHEME_OPTIONS[colorScheme],
           lineWidth,
           hoverDimension,
           shadeBelow,
@@ -750,43 +893,90 @@ storiesOf('Static Legend', module)
         <Plot config={config} />
       </PlotContainer>
     )
-  })
-  .add('render effect', () => {
-    const lines = number('Number of graph lines', 4)
-    const fillColumnsCount = number('Number of fill columns', 7)
-    const fillColumnNameLength = number('Length of fill column names', 4)
+  },
+  args: {
+    csv: '',
+    staticLegendHeightRatio: 0.2,
+    fixedWidth: '',
+    fixedHeight: '',
+    legendHide: false,
+    staticLegendHide: false,
+    position: 'overlaid',
+    colorScheme: 'Nineteen Eighty Four',
+    legendOrientationThreshold: 20,
+    staticLegendOrientationThreshold: 20,
+    legendColorizeRows: true,
+    staticLegendColorizeRows: true,
+    legendFont: '12px sans-serif',
+    staticLegendFont: '12px sans-serif',
+    staticLegendBorder: '1px solid orange',
+    staticLegendBackgroundColor: 'transparent',
+    tickFont: '10px sans-serif',
+    x: '_time',
+    y: '_value',
+    xScale: 'linear',
+    yScale: 'linear',
+    timeZone: 'UTC',
+    timeFormat: 'YYYY-MM-DD HH:mm:ss ZZ',
+    fill: '',
+    interpolation: 'monotoneX',
+    showAxes: true,
+    lineWidth: 1,
+    shadeBelow: false,
+    shadeBelowOpacity: 0.1,
+    hoverDimension: 'auto',
+    legendOpacity: 1.0,
+  },
+  argTypes: sharedArgTypes,
+}
 
-    const STATIC_LEGEND_HEIGHT_RATIO_NOT_SET = 0
-    let staticLegendHeightRatio = STATIC_LEGEND_HEIGHT_RATIO_NOT_SET
-    staticLegendHeightRatio = number(
-      'Static Legend Height',
+export const RenderEffect: Story = {
+  render: (args: Args) => {
+    const {
+      lines,
+      fillColumnsCount,
+      fillColumnNameLength,
       staticLegendHeightRatio,
-      {
-        range: true,
-        min: 0,
-        max: 1,
-        step: 0.01,
-      }
-    )
+      fixedWidth: fixedWidthText,
+      fixedHeight: fixedHeightText,
+      legendHide,
+      staticLegendHide,
+      includeNegativeNumbers,
+      position,
+      colorScheme,
+      legendOrientationThreshold,
+      staticLegendOrientationThreshold,
+      legendColorizeRows,
+      staticLegendColorizeRows,
+      legendFont,
+      staticLegendFont,
+      staticLegendBorder,
+      staticLegendBackgroundColor,
+      tickFont,
+      x,
+      y,
+      valueAxisLabel,
+      xScale,
+      yScale,
+      timeZone,
+      timeFormat,
+      fill: fillArg,
+      interpolation,
+      showAxes,
+      lineWidth,
+      shadeBelow,
+      shadeBelowOpacity,
+      hoverDimension,
+      legendOpacity,
+    } = args
 
-    const fixedWidthText = text('Fixed Width', '')
-    const fixedHeightText = text('Fixed Height', '')
     const fixedWidth = !fixedWidthText ? -1 : Number(fixedWidthText)
     const fixedHeight = !fixedHeightText ? -1 : Number(fixedHeightText)
-    const legendHide = boolean('Hide Tooltip?', false)
-    const staticLegendHide = boolean('Hide Static Legend?', false)
-
     const fixedPlotSize = {}
     if (fixedHeight > 0 && fixedWidth > 0) {
       fixedPlotSize['height'] = fixedHeight
       fixedPlotSize['width'] = fixedWidth
     }
-    const includeNegativeNumbers = boolean('Include negative numbers ?', false)
-    const position = select(
-      'Line Position',
-      {stacked: 'stacked', overlaid: 'overlaid'},
-      'overlaid'
-    )
     const table = getRandomTable(
       maxValue,
       includeNegativeNumbers,
@@ -795,65 +985,11 @@ storiesOf('Static Legend', module)
       fillColumnsCount,
       fillColumnNameLength
     )
-    const colors = colorSchemeKnob()
-    const legendOrientationThreshold = tooltipOrientationThresholdKnob(20)
-    const staticLegendOrientationThreshold = number(
-      'Static Legend Orientation Threshold',
-      20
-    )
-    const legendColorizeRows = tooltipColorizeRowsKnob()
-    const staticLegendColorizeRows = boolean(
-      'Static Legend Colorize Rows?',
-      true
-    )
-    const legendFont = legendFontKnob()
-    const staticLegendFont = text('Static Legend Font', '12px sans-serif')
-    const staticLegendBorder = text('Static Legend Border', '1px solid orange')
-    const staticLegendBackgroundColor = text(
-      'Static Legend Background Color',
-      'transparent'
-    )
-    const tickFont = tickFontKnob()
-    const x = xKnob(table)
-    const y = yKnob(table)
-    const valueAxisLabel = text('Value Axis Label', 'foo')
-    const xScale = xScaleKnob()
-    const yScale = yScaleKnob()
-    const timeZone = timeZoneKnob()
-    const timeFormat = select(
-      'Time Format',
-      {
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'hh:mm a': 'hh:mm a',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
-      },
-      'YYYY-MM-DD HH:mm:ss ZZ'
-    )
-    const fill = fillKnob(table, findStringColumns(table))
-    const interpolation = interpolationKnob()
-    const showAxes = showAxesKnob()
-    const lineWidth = number('Line Width', 1)
-    const shadeBelow = boolean('Shade Area', false)
-    const shadeBelowOpacity = number('Area Opacity', 0.1)
-    const hoverDimension = select(
-      'Hover Dimension',
-      {auto: 'auto', x: 'x', y: 'y', xy: 'xy'},
-      'auto'
-    )
-    const legendOpacity = number('Legend Opacity', 1.0, {
-      range: true,
-      min: 0,
-      max: 1.0,
-      step: 0.05,
-    })
+    const fill = Array.isArray(fillArg)
+      ? fillArg
+      : fillArg !== ''
+        ? fillArg.split(',')
+        : findStringColumns(table)
 
     const renderEffect = args => {
       if (staticLegendHeightRatio === STATIC_LEGEND_HEIGHT_RATIO_NOT_SET) {
@@ -908,7 +1044,7 @@ storiesOf('Static Legend', module)
           fill,
           position,
           interpolation,
-          colors,
+          colors: COLOR_SCHEME_OPTIONS[colorScheme],
           lineWidth,
           hoverDimension,
           shadeBelow,
@@ -922,4 +1058,43 @@ storiesOf('Static Legend', module)
         <Plot config={config} />
       </PlotContainer>
     )
-  })
+  },
+  args: {
+    lines: 4,
+    fillColumnsCount: 7,
+    fillColumnNameLength: 4,
+    staticLegendHeightRatio: STATIC_LEGEND_HEIGHT_RATIO_NOT_SET,
+    fixedWidth: '',
+    fixedHeight: '',
+    legendHide: false,
+    staticLegendHide: false,
+    includeNegativeNumbers: false,
+    position: 'overlaid',
+    colorScheme: 'Nineteen Eighty Four',
+    legendOrientationThreshold: 20,
+    staticLegendOrientationThreshold: 20,
+    legendColorizeRows: true,
+    staticLegendColorizeRows: true,
+    legendFont: '12px sans-serif',
+    staticLegendFont: '12px sans-serif',
+    staticLegendBorder: '1px solid orange',
+    staticLegendBackgroundColor: 'transparent',
+    tickFont: '10px sans-serif',
+    x: '_time',
+    y: '_value',
+    valueAxisLabel: 'foo',
+    xScale: 'linear',
+    yScale: 'linear',
+    timeZone: 'UTC',
+    timeFormat: 'YYYY-MM-DD HH:mm:ss ZZ',
+    fill: '',
+    interpolation: 'monotoneX',
+    showAxes: true,
+    lineWidth: 1,
+    shadeBelow: false,
+    shadeBelowOpacity: 0.1,
+    hoverDimension: 'auto',
+    legendOpacity: 1.0,
+  },
+  argTypes: randomTableArgTypes,
+}

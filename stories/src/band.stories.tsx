@@ -1,9 +1,14 @@
 import * as React from 'react'
-import {storiesOf} from '@storybook/react'
-import {withKnobs, number, select, text} from '@storybook/addon-knobs'
+import type {Meta, StoryObj, ArgTypes} from '@storybook/react'
 
-import {Config, Plot, timeFormatter, fromFlux} from '../../giraffe/src'
-import {findStringColumns} from './helpers'
+import {
+  Config,
+  Plot,
+  timeFormatter,
+  fromFlux,
+  LineInterpolation,
+} from '../../giraffe/src'
+
 import {
   colors6,
   cpu1,
@@ -20,316 +25,387 @@ import {
 
 import {
   PlotContainer,
-  xScaleKnob,
-  yScaleKnob,
-  colorSchemeKnob,
-  legendFontKnob,
-  tickFontKnob,
-  showAxesKnob,
-  interpolationKnob,
-  timeZoneKnob,
-  tooltipColorizeRowsKnob,
+  findStringColumns,
+  TIME_FORMAT_OPTIONS,
+  COLOR_SCHEME_OPTIONS,
 } from './helpers'
 
-storiesOf('Band Chart', module)
-  .addDecorator(withKnobs)
-  .add('Static: groupBy applied', () => {
-    const colors = colorSchemeKnob()
-    const legendFont = legendFontKnob()
-    const tickFont = tickFontKnob()
-    const valueAxisLabel = text('Value Axis Label', '')
-    const xScale = xScaleKnob()
-    const yScale = yScaleKnob()
-    const timeZone = timeZoneKnob()
-    const timeFormat = select(
-      'Time Format',
+interface BandArgs {
+  colorScheme: keyof typeof COLOR_SCHEME_OPTIONS
+  legendFont: string
+  tickFont: string
+  valueAxisLabel: string
+  xScale: string
+  yScale: string
+  timeZone: string
+  timeFormat: string
+  interpolation: LineInterpolation
+  showAxes: boolean
+  lineWidth: number
+  lineOpacity: number
+  shadeOpacity: number
+  hoverDimension: 'auto' | 'x' | 'y' | 'xy'
+  upperColumnName: string
+  mainColumnName: string
+  lowerColumnName: string
+  legendOpacity: number
+  legendOrientationThreshold: number
+  legendColorizeRows: boolean
+  yTickStart: number
+  yTickStep: number
+  xTotalTicks: number
+  staticData: string
+  csv: string
+}
+
+export default {
+  title: 'Band Chart',
+} as Meta
+
+type Story = StoryObj<BandArgs>
+
+const INTERPOLATION_OPTIONS = [
+  'linear',
+  'monotoneX',
+  'monotoneY',
+  'cubic',
+  'step',
+  'stepBefore',
+  'stepAfter',
+  'natural',
+]
+
+const commonArgTypes: Partial<ArgTypes<BandArgs>> = {
+  colorScheme: {
+    control: {type: 'select', options: Object.keys(COLOR_SCHEME_OPTIONS)},
+  },
+  xScale: {control: {type: 'select', options: ['linear', 'log']}},
+  yScale: {control: {type: 'select', options: ['linear', 'log']}},
+  timeZone: {
+    control: {
+      type: 'select',
+      options: ['UTC', 'America/Los_Angeles', 'America/New_York'],
+    },
+  },
+  timeFormat: {control: {type: 'select', options: [...TIME_FORMAT_OPTIONS]}},
+  interpolation: {control: {type: 'select', options: INTERPOLATION_OPTIONS}},
+  showAxes: {control: {type: 'boolean'}},
+  hoverDimension: {
+    control: {type: 'select', options: ['auto', 'x', 'y', 'xy']},
+  },
+  lineWidth: {control: {type: 'number'}},
+  lineOpacity: {control: {type: 'number'}},
+  shadeOpacity: {control: {type: 'number'}},
+  legendOpacity: {
+    control: {type: 'range', min: 0, max: 1.0, step: 0.05},
+  },
+  legendOrientationThreshold: {control: {type: 'number'}},
+  legendColorizeRows: {control: {type: 'boolean'}},
+}
+
+const commonArgs: Partial<BandArgs> = {
+  colorScheme: 'Nineteen Eighty Four',
+  legendFont: '12px sans-serif',
+  tickFont: '10px sans-serif',
+  valueAxisLabel: '',
+  xScale: 'linear',
+  yScale: 'linear',
+  timeZone: 'UTC',
+  interpolation: 'monotoneX',
+  showAxes: true,
+  lineWidth: 3,
+  lineOpacity: 0.7,
+  shadeOpacity: 0.3,
+  hoverDimension: 'auto',
+  legendOpacity: 1.0,
+  legendOrientationThreshold: 15,
+  legendColorizeRows: true,
+}
+
+const render = (args: BandArgs) => {
+  const {
+    colorScheme,
+    legendFont,
+    tickFont,
+    valueAxisLabel,
+    xScale,
+    yScale,
+    timeZone,
+    timeFormat,
+    interpolation,
+    showAxes,
+    lineWidth,
+    lineOpacity,
+    shadeOpacity,
+    hoverDimension,
+    upperColumnName,
+    mainColumnName,
+    lowerColumnName,
+    legendOpacity,
+    legendOrientationThreshold,
+    legendColorizeRows,
+    yTickStart,
+    yTickStep,
+    xTotalTicks,
+  } = args
+
+  const config: Config = {
+    fluxResponse: hoverAlignment3,
+    valueFormatters: {
+      _time: timeFormatter({timeZone, format: timeFormat}),
+      _value: val =>
+        typeof val === 'number'
+          ? `${val.toFixed(2)}${
+              valueAxisLabel ? ` ${valueAxisLabel}` : valueAxisLabel
+            }`
+          : val,
+    },
+    xScale,
+    yScale,
+    legendFont,
+    tickFont,
+    showAxes,
+    legendOpacity,
+    legendOrientationThreshold,
+    legendColorizeRows,
+    xTotalTicks,
+    yTickStart,
+    yTickStep,
+    layers: [
       {
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'hh:mm a': 'hh:mm a',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
+        type: 'band',
+        x: '_time',
+        y: '_value',
+        fill: ['result', 'env'],
+        interpolation,
+        colors: COLOR_SCHEME_OPTIONS[colorScheme],
+        lineWidth,
+        lineOpacity,
+        hoverDimension,
+        shadeOpacity,
+        upperColumnName,
+        mainColumnName,
+        lowerColumnName,
       },
-      'hh:mm a'
-    )
-    const interpolation = interpolationKnob()
-    const showAxes = showAxesKnob()
-    const lineWidth = number('Line Width', 3)
-    const lineOpacity = number('Line Opacity', 0.7)
-    const shadeOpacity = number('Shade Opacity', 0.3)
-    const hoverDimension = select(
-      'Hover Dimension',
-      {auto: 'auto', x: 'x', y: 'y', xy: 'xy'},
-      'auto'
-    )
-    const upperColumnName = text('upperColumnName', 'max')
-    const mainColumnName = text('mainColumnName', 'mean')
-    const lowerColumnName = text('lowerColumnName', 'min')
-    const legendOpacity = number('Legend Opacity', 1.0, {
-      range: true,
-      min: 0,
-      max: 1.0,
-      step: 0.05,
-    })
-    const legendOrientationThreshold = number('legendOrientationThreshold', 15)
-    const legendColorizeRows = tooltipColorizeRowsKnob()
-    const yTickStart = number('yTickStart', 0)
-    const yTickStep = number('yTickStep', 100)
-    const xTotalTicks = number('xTotalTicks', 20)
+    ],
+  }
 
-    const config: Config = {
-      fluxResponse: hoverAlignment3,
-      valueFormatters: {
-        _time: timeFormatter({timeZone, format: timeFormat}),
-        _value: val =>
-          typeof val === 'number'
-            ? `${val.toFixed(2)}${
-                valueAxisLabel ? ` ${valueAxisLabel}` : valueAxisLabel
-              }`
-            : val,
-      },
-      xScale,
-      yScale,
-      legendFont,
-      tickFont,
-      showAxes,
-      legendOpacity,
-      legendOrientationThreshold,
-      legendColorizeRows,
-      xTotalTicks,
-      yTickStart,
-      yTickStep,
-      layers: [
-        {
-          type: 'band',
-          x: '_time',
-          y: '_value',
-          fill: ['result', 'env'],
-          interpolation,
-          colors,
-          lineWidth,
-          lineOpacity,
-          hoverDimension,
-          shadeOpacity,
-          upperColumnName,
-          mainColumnName,
-          lowerColumnName,
-        },
-      ],
-    }
+  return (
+    <PlotContainer>
+      <Plot config={config} />
+    </PlotContainer>
+  )
+}
 
-    return (
-      <PlotContainer>
-        <Plot config={config} />
-      </PlotContainer>
-    )
-  })
-  .add('Static: all string columns', () => {
-    const staticData = select(
-      'Static CSV',
+export const StaticGroupByApplied: Story = {
+  render,
+  args: {
+    ...commonArgs,
+    timeFormat: 'hh:mm a',
+    upperColumnName: 'max',
+    mainColumnName: 'mean',
+    lowerColumnName: 'min',
+    yTickStart: 0,
+    yTickStep: 100,
+    xTotalTicks: 20,
+  },
+  argTypes: {
+    ...commonArgTypes,
+    yTickStart: {control: {type: 'number'}},
+    yTickStep: {control: {type: 'number'}},
+    xTotalTicks: {control: {type: 'number'}},
+  },
+}
+
+const renderAllStringColumns = (args: BandArgs) => {
+  const {
+    staticData,
+    colorScheme,
+    legendFont,
+    tickFont,
+    valueAxisLabel,
+    xScale,
+    yScale,
+    timeZone,
+    timeFormat,
+    interpolation,
+    showAxes,
+    lineWidth,
+    lineOpacity,
+    shadeOpacity,
+    hoverDimension,
+    upperColumnName,
+    mainColumnName,
+    lowerColumnName,
+    legendOpacity,
+    legendOrientationThreshold,
+    legendColorizeRows,
+    xTotalTicks,
+  } = args
+
+  const fromFluxTable = fromFlux(staticData).table
+
+  const config: Config = {
+    fluxResponse: staticData,
+    valueFormatters: {
+      _time: timeFormatter({timeZone, format: timeFormat}),
+      _value: val =>
+        typeof val === 'number'
+          ? `${val.toFixed(2)}${
+              valueAxisLabel ? ` ${valueAxisLabel}` : valueAxisLabel
+            }`
+          : val,
+    },
+    xScale,
+    yScale,
+    legendFont,
+    tickFont,
+    showAxes,
+    legendOpacity,
+    legendOrientationThreshold,
+    legendColorizeRows,
+    xTotalTicks,
+    layers: [
       {
-        colors6,
-        cpu1,
-        cpu2,
-        graphEdge1,
-        hoverAlignment1,
-        hoverAlignment2,
-        mem1,
-        mem2,
-        noLowerAndUpper,
-        same3,
+        type: 'band',
+        x: '_time',
+        y: '_value',
+        fill: findStringColumns(fromFluxTable),
+        interpolation,
+        colors: COLOR_SCHEME_OPTIONS[colorScheme],
+        lineWidth,
+        lineOpacity,
+        hoverDimension,
+        shadeOpacity,
+        upperColumnName,
+        mainColumnName,
+        lowerColumnName,
       },
-      cpu2
-    )
-    const colors = colorSchemeKnob()
-    const legendFont = legendFontKnob()
-    const tickFont = tickFontKnob()
-    const valueAxisLabel = text('Value Axis Label', '')
-    const xScale = xScaleKnob()
-    const yScale = yScaleKnob()
-    const timeZone = timeZoneKnob()
-    const timeFormat = select(
-      'Time Format',
+    ],
+  }
+
+  return (
+    <PlotContainer>
+      <Plot config={config} />
+    </PlotContainer>
+  )
+}
+
+export const StaticAllStringColumns: Story = {
+  render: renderAllStringColumns,
+  args: {
+    ...commonArgs,
+    staticData: cpu2,
+    timeFormat: 'hh:mm a',
+    upperColumnName: 'max',
+    mainColumnName: 'mean',
+    lowerColumnName: 'min',
+    xTotalTicks: 20,
+  },
+  argTypes: {
+    ...commonArgTypes,
+    staticData: {
+      control: {
+        type: 'select',
+        options: [
+          colors6,
+          cpu1,
+          cpu2,
+          graphEdge1,
+          hoverAlignment1,
+          hoverAlignment2,
+          mem1,
+          mem2,
+          noLowerAndUpper,
+          same3,
+        ],
+      },
+    },
+    xTotalTicks: {control: {type: 'number'}},
+  },
+}
+
+const renderCustomCSV = (args: BandArgs) => {
+  const {
+    csv,
+    colorScheme,
+    legendFont,
+    tickFont,
+    valueAxisLabel,
+    xScale,
+    yScale,
+    timeZone,
+    timeFormat,
+    interpolation,
+    showAxes,
+    lineWidth,
+    lineOpacity,
+    shadeOpacity,
+    hoverDimension,
+    upperColumnName,
+    mainColumnName,
+    lowerColumnName,
+    legendOpacity,
+    legendOrientationThreshold,
+    legendColorizeRows,
+  } = args
+
+  const fromFluxTable = fromFlux(csv).table
+
+  const config: Config = {
+    fluxResponse: csv,
+    valueFormatters: {
+      _time: timeFormatter({timeZone, format: timeFormat}),
+      _value: val =>
+        typeof val === 'number'
+          ? `${val.toFixed(2)}${
+              valueAxisLabel ? ` ${valueAxisLabel}` : valueAxisLabel
+            }`
+          : val,
+    },
+    xScale,
+    yScale,
+    legendFont,
+    tickFont,
+    showAxes,
+    legendOpacity,
+    legendOrientationThreshold,
+    legendColorizeRows,
+    layers: [
       {
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'hh:mm a': 'hh:mm a',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
+        type: 'band',
+        x: '_time',
+        y: '_value',
+        fill: findStringColumns(fromFluxTable),
+        interpolation,
+        colors: COLOR_SCHEME_OPTIONS[colorScheme],
+        lineWidth,
+        lineOpacity,
+        hoverDimension,
+        shadeOpacity,
+        upperColumnName,
+        mainColumnName,
+        lowerColumnName,
       },
-      'hh:mm a'
-    )
-    const fromFluxTable = fromFlux(staticData).table
-    const interpolation = interpolationKnob()
-    const showAxes = showAxesKnob()
-    const lineWidth = number('Line Width', 3)
-    const lineOpacity = number('Line Opacity', 0.7)
-    const shadeOpacity = number('Shade Opacity', 0.3)
-    const hoverDimension = select(
-      'Hover Dimension',
-      {auto: 'auto', x: 'x', y: 'y', xy: 'xy'},
-      'auto'
-    )
-    const upperColumnName = text('upperColumnName', 'max')
-    const mainColumnName = text('mainColumnName', 'mean')
-    const lowerColumnName = text('lowerColumnName', 'min')
-    const legendOpacity = number('Legend Opacity', 1.0, {
-      range: true,
-      min: 0,
-      max: 1.0,
-      step: 0.05,
-    })
-    const legendOrientationThreshold = number('legendOrientationThreshold', 15)
-    const legendColorizeRows = tooltipColorizeRowsKnob()
-    const xTotalTicks = number('xTotalTicks', 20)
+    ],
+  }
 
-    const config: Config = {
-      fluxResponse: staticData,
-      valueFormatters: {
-        _time: timeFormatter({timeZone, format: timeFormat}),
-        _value: val =>
-          typeof val === 'number'
-            ? `${val.toFixed(2)}${
-                valueAxisLabel ? ` ${valueAxisLabel}` : valueAxisLabel
-              }`
-            : val,
-      },
-      xScale,
-      yScale,
-      legendFont,
-      tickFont,
-      showAxes,
-      legendOpacity,
-      legendOrientationThreshold,
-      legendColorizeRows,
-      xTotalTicks,
-      layers: [
-        {
-          type: 'band',
-          x: '_time',
-          y: '_value',
-          fill: findStringColumns(fromFluxTable),
-          interpolation,
-          colors,
-          lineWidth,
-          lineOpacity,
-          hoverDimension,
-          shadeOpacity,
-          upperColumnName,
-          mainColumnName,
-          lowerColumnName,
-        },
-      ],
-    }
+  return (
+    <PlotContainer>
+      <Plot config={config} />
+    </PlotContainer>
+  )
+}
 
-    return (
-      <PlotContainer>
-        <Plot config={config} />
-      </PlotContainer>
-    )
-  })
-  .add('Custom CSV', () => {
-    const customCSV = text('Paste CSV here:', '')
-    const colors = colorSchemeKnob()
-    const legendFont = legendFontKnob()
-    const tickFont = tickFontKnob()
-    const valueAxisLabel = text('Value Axis Label', '')
-    const xScale = xScaleKnob()
-    const yScale = yScaleKnob()
-    const timeZone = timeZoneKnob()
-    const timeFormat = select(
-      'Time Format',
-      {
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'hh:mm a': 'hh:mm a',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
-      },
-      'YYYY-MM-DD HH:mm:ss ZZ'
-    )
-    const fromFluxTable = fromFlux(customCSV).table
-    const interpolation = interpolationKnob()
-    const showAxes = showAxesKnob()
-    const lineWidth = number('Line Width', 3)
-    const lineOpacity = number('Line Opacity', 0.7)
-    const shadeOpacity = number('Shade Opacity', 0.3)
-    const hoverDimension = select(
-      'Hover Dimension',
-      {auto: 'auto', x: 'x', y: 'y', xy: 'xy'},
-      'auto'
-    )
-    const upperColumnName = text('upperColumnName', '')
-    const mainColumnName = text('mainColumnName', '')
-    const lowerColumnName = text('lowerColumnName', '')
-    const legendOpacity = number('Legend Opacity', 1.0, {
-      range: true,
-      min: 0,
-      max: 1.0,
-      step: 0.05,
-    })
-    const legendOrientationThreshold = number('legendOrientationThreshold', 15)
-    const legendColorizeRows = tooltipColorizeRowsKnob()
-
-    const config: Config = {
-      fluxResponse: customCSV,
-      valueFormatters: {
-        _time: timeFormatter({timeZone, format: timeFormat}),
-        _value: val =>
-          typeof val === 'number'
-            ? `${val.toFixed(2)}${
-                valueAxisLabel ? ` ${valueAxisLabel}` : valueAxisLabel
-              }`
-            : val,
-      },
-      xScale,
-      yScale,
-      legendFont,
-      tickFont,
-      showAxes,
-      legendOpacity,
-      legendOrientationThreshold,
-      legendColorizeRows,
-      layers: [
-        {
-          type: 'band',
-          x: '_time',
-          y: '_value',
-          fill: findStringColumns(fromFluxTable),
-          interpolation,
-          colors,
-          lineWidth,
-          lineOpacity,
-          hoverDimension,
-          shadeOpacity,
-          upperColumnName,
-          mainColumnName,
-          lowerColumnName,
-        },
-      ],
-    }
-
-    return (
-      <PlotContainer>
-        <Plot config={config} />
-      </PlotContainer>
-    )
-  })
+export const CustomCSV: Story = {
+  render: renderCustomCSV,
+  args: {
+    ...commonArgs,
+    csv: '',
+    timeFormat: 'YYYY-MM-DD HH:mm:ss ZZ',
+    upperColumnName: '',
+    mainColumnName: '',
+    lowerColumnName: '',
+  },
+  argTypes: commonArgTypes,
+}

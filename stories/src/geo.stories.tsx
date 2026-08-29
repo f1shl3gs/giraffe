@@ -1,24 +1,15 @@
 import * as React from 'react'
-import {storiesOf} from '@storybook/react'
-import {
-  boolean,
-  color,
-  number,
-  select,
-  withKnobs,
-  text,
-} from '@storybook/addon-knobs'
+import type {ArgTypes, Meta, StoryObj} from '@storybook/react'
 
 import {Config, Plot} from '../../giraffe/src'
 
-import {
-  PlotContainer,
-  lattitudeKnob,
-  longitudeKnob,
-  s2GeoHashKnob,
-} from './helpers'
+import {PlotContainer, findStringColumns, findXYColumns} from './helpers'
 import {geoTable, geoTracks} from './data/geoLayer'
-import {ClusterAggregation} from '../../giraffe/src/types/geo'
+import {
+  ClusterAggregation,
+  LatLonColumns,
+  TileServerConfiguration,
+} from '../../giraffe/src/types/geo'
 import {fromFlux} from '../../giraffe/src'
 import {geoCSV} from './data/geo'
 
@@ -34,89 +25,92 @@ const bingTileServerConfiguration = {
   bingKey: 'AtqWbnKXzGMWSAsgWknAw2cgBKuGIm9XmSbaS4fSebC5U6BdDTUF3I__u5NAp_Zi',
 }
 
-const geo = storiesOf('Geo', module).addDecorator(withKnobs)
+const geoCSVTable = fromFlux(geoCSV).table
 
-const genericKnobs = () => {
-  const latitude = number('Latitude', 40, {
-    range: true,
-    min: -90,
-    max: 90,
-    step: 1,
-  })
-  const longitude = number('Longitude', -76, {
-    range: true,
-    min: -180,
-    max: 180,
-    step: 1,
-  })
-  const zoom = number('Zoom', 6, {
-    range: true,
-    min: 1,
-    max: 20,
-    step: 1,
-  })
-  const allowPanAndZoom = boolean('Allow pan and zoom', true)
-  const useS2CellID = boolean('Use S2 Cell ID', true)
+const latLonColumnOptions = [
+  ...Object.keys(findXYColumns(geoCSVTable)),
+  ...findStringColumns(geoCSVTable),
+]
 
-  return {allowPanAndZoom, latitude, longitude, zoom, useS2CellID}
+const s2ColumnOptions = findStringColumns(geoCSVTable)
+
+interface GeoArgs {
+  allowPanAndZoom: boolean
+  blur: number
+  circleCount: number
+  clusterAggregationFunction: ClusterAggregation
+  colorClusterMarks: boolean
+  csv: string
+  dataPointCount: number
+  endStopMarkerRadius: number
+  endStopMarkers: boolean
+  lattitudeSelection: string
+  latitude: number
+  longitude: number
+  longitudeSelection: string
+  markerCount: number
+  maximumClusterRadius: number
+  radius: number
+  randomColors: boolean
+  s2Column: string
+  speed: number
+  trackColor1: string
+  trackColor2: string
+  trackCount: number
+  trackWidth: number
+  useS2CellID: boolean
+  zoom: number
 }
 
-const buildCircleMapStory = tileServerConfiguration => () => {
-  const numberOfRecords = number('Circle count', 26, {
-    range: true,
-    min: 0,
-    max: 200000,
-    step: 1,
-  })
-  const {allowPanAndZoom, latitude, longitude, zoom} = genericKnobs()
-  const config: Config = {
-    table: geoTable(numberOfRecords),
-    showAxes: false,
-    layers: [
-      {
-        type: 'geo',
-        lat: latitude,
-        lon: longitude,
-        zoom,
-        allowPanAndZoom,
-        detectCoordinateFields: false,
-        layers: [
-          {
-            type: 'circleMap',
-            radiusField: 'magnitude',
-            radiusDimension: {label: 'Magnitude'},
-            colorDimension: {label: 'Duration'},
-            colorField: 'duration',
-            colors: [
-              {type: 'min', hex: '#ff00b3'},
-              {value: 50, hex: '#343aeb'},
-              {type: 'max', hex: '#343aeb'},
-            ],
-          },
-        ],
-        tileServerConfiguration,
-      },
-    ],
+export default {
+  title: 'Geo',
+} as Meta
+
+type Story = StoryObj<GeoArgs>
+
+const renderCircleMap =
+  (tileServerConfiguration: TileServerConfiguration) => (args: GeoArgs) => {
+    const {allowPanAndZoom, circleCount, latitude, longitude, zoom} = args
+    const config: Config = {
+      table: geoTable(circleCount),
+      showAxes: false,
+      layers: [
+        {
+          type: 'geo',
+          lat: latitude,
+          lon: longitude,
+          zoom,
+          allowPanAndZoom,
+          detectCoordinateFields: false,
+          layers: [
+            {
+              type: 'circleMap',
+              radiusField: 'magnitude',
+              radiusDimension: {label: 'Magnitude'},
+              colorDimension: {label: 'Duration'},
+              colorField: 'duration',
+              colors: [
+                {type: 'min', hex: '#ff00b3'},
+                {value: 50, hex: '#343aeb'},
+                {type: 'max', hex: '#343aeb'},
+              ],
+            },
+          ],
+          tileServerConfiguration,
+        },
+      ],
+    }
+    return (
+      <PlotContainer>
+        <Plot config={config} />
+      </PlotContainer>
+    )
   }
-  return (
-    <PlotContainer>
-      <Plot config={config} />
-    </PlotContainer>
-  )
-}
 
-geo.add('Circle Markers', buildCircleMapStory(osmTileServerConfiguration))
-
-geo.add('Map Markers Static', () => {
-  const numberOfRecords = number('Marker count', 20, {
-    range: true,
-    min: 0,
-    max: 2000,
-    step: 1,
-  })
-  const {allowPanAndZoom, latitude, longitude, zoom} = genericKnobs()
+const renderMapMarkersStatic = (args: GeoArgs) => {
+  const {allowPanAndZoom, latitude, longitude, markerCount, zoom} = args
   const config: Config = {
-    table: geoTable(numberOfRecords),
+    table: geoTable(markerCount),
     showAxes: false,
     layers: [
       {
@@ -149,26 +143,23 @@ geo.add('Map Markers Static', () => {
       <Plot config={config} />
     </PlotContainer>
   )
-})
+}
 
-geo.add('Map Markers Custom CSV', () => {
-  // const csv = text('Paste CSV here:', '')
-  let table = fromFlux(geoCSV).table
-
-  const {allowPanAndZoom, latitude, longitude, zoom, useS2CellID} =
-    genericKnobs()
-
-  let lattitudeSelection, longitudeSelection, s2GeoHash
-
-  if (!useS2CellID) {
-    lattitudeSelection = lattitudeKnob(table)
-    longitudeSelection = longitudeKnob(table)
-  } else {
-    s2GeoHash = s2GeoHashKnob(table, {key: 'tag', column: 's2_cell_id'})
-  }
+const renderMapMarkersCustomCSV = (args: GeoArgs) => {
+  const {
+    allowPanAndZoom,
+    lattitudeSelection,
+    latitude,
+    longitude,
+    longitudeSelection,
+    s2Column,
+    useS2CellID,
+    zoom,
+  } = args
+  const table = geoCSVTable
 
   const config: Config = {
-    table: table,
+    table,
     showAxes: false,
     layers: [
       {
@@ -179,8 +170,13 @@ geo.add('Map Markers Custom CSV', () => {
         allowPanAndZoom,
         detectCoordinateFields: false,
         useS2CellID,
-        s2Column: s2GeoHash.column,
-        latLonColumns: {lat: lattitudeSelection, lon: longitudeSelection},
+        s2Column: useS2CellID ? s2Column : undefined,
+        latLonColumns: useS2CellID
+          ? undefined
+          : ({
+              lat: lattitudeSelection,
+              lon: longitudeSelection,
+            } as unknown as LatLonColumns),
         layers: [
           {
             type: 'pointMap',
@@ -204,27 +200,18 @@ geo.add('Map Markers Custom CSV', () => {
       <Plot config={config} />
     </PlotContainer>
   )
-})
+}
 
-geo.add('Marker Clustering', () => {
-  const {allowPanAndZoom, latitude, longitude, zoom} = genericKnobs()
-  const maxClusterRadius = number('Maximum Cluster Radius', 50, {
-    range: true,
-    min: 1,
-    max: 1000,
-    step: 1,
-  })
-  const areClustersColored = boolean('Color cluster marks', true)
-  const clusterAggregationFunction = select(
-    'Cluster aggregation function',
-    {
-      Mean: ClusterAggregation.mean,
-      Median: ClusterAggregation.median,
-      Min: ClusterAggregation.min,
-      Max: ClusterAggregation.max,
-    },
-    ClusterAggregation.mean
-  )
+const renderMarkerClustering = (args: GeoArgs) => {
+  const {
+    allowPanAndZoom,
+    clusterAggregationFunction,
+    colorClusterMarks,
+    latitude,
+    longitude,
+    maximumClusterRadius,
+    zoom,
+  } = args
   const config: Config = {
     table: geoTable(200),
     showAxes: false,
@@ -248,9 +235,9 @@ geo.add('Marker Clustering', () => {
               {type: 'max', hex: '#ff0000'},
             ],
             isClustered: true,
-            areClustersColored,
+            areClustersColored: colorClusterMarks,
             clusterAggregationFunction,
-            maxClusterRadius,
+            maxClusterRadius: maximumClusterRadius,
             tooltipColumns: [],
           },
         ],
@@ -263,35 +250,20 @@ geo.add('Marker Clustering', () => {
       <Plot config={config} />
     </PlotContainer>
   )
-})
-
-const heatmapKnobs = () => {
-  const radius = number('Radius', 20, {
-    range: true,
-    min: 0,
-    max: 100,
-    step: 1,
-  })
-  const blur = number('Blur', 10, {
-    range: true,
-    min: 0,
-    max: 150,
-    step: 1,
-  })
-  return {radius, blur}
 }
 
-geo.add('Heatmap', () => {
-  const numberOfPoints = number('Data point count', 200, {
-    range: true,
-    min: 0,
-    max: 500,
-    step: 1,
-  })
-  const {allowPanAndZoom, latitude, longitude, zoom} = genericKnobs()
-  const {radius, blur} = heatmapKnobs()
+const renderHeatmap = (args: GeoArgs) => {
+  const {
+    allowPanAndZoom,
+    blur,
+    dataPointCount,
+    latitude,
+    longitude,
+    radius,
+    zoom,
+  } = args
   const config: Config = {
-    table: geoTable(numberOfPoints),
+    table: geoTable(dataPointCount),
     showAxes: false,
     layers: [
       {
@@ -319,64 +291,25 @@ geo.add('Heatmap', () => {
       <Plot config={config} />
     </PlotContainer>
   )
-})
-
-const trackKnobs = () => {
-  const speed = number('Speed', 200, {
-    range: true,
-    min: 1,
-    max: 10000,
-    step: 1,
-  })
-
-  const trackWidth = number('Track width', 4, {
-    range: true,
-    min: 1,
-    max: 15,
-    step: 1,
-  })
-  const color1 = color('Track color 1', '#0000ff')
-  const color2 = color('Track color 2', '#f0f0ff')
-  const randomColors = boolean('Random colors', true)
-
-  const endStopMarkers = boolean('End stop markers', true)
-  const endStopMarkerRadius = number('End stop marker radius', 4, {
-    range: true,
-    min: 1,
-    max: 100,
-    step: 1,
-  })
-
-  return {
-    speed,
-    trackWidth,
-    randomColors,
-    color1,
-    color2,
-    endStopMarkers,
-    endStopMarkerRadius,
-  }
 }
 
-geo.add('Tracks', () => {
-  const numberOfTracks = number('Track count', 3, {
-    range: true,
-    min: 0,
-    max: 100,
-    step: 1,
-  })
-  const {allowPanAndZoom, latitude, longitude, zoom} = genericKnobs()
+const renderTracks = (args: GeoArgs) => {
   const {
-    speed,
-    trackWidth,
-    randomColors,
-    color1,
-    color2,
-    endStopMarkers,
+    allowPanAndZoom,
     endStopMarkerRadius,
-  } = trackKnobs()
+    endStopMarkers,
+    latitude,
+    longitude,
+    randomColors,
+    speed,
+    trackColor1,
+    trackColor2,
+    trackCount,
+    trackWidth,
+    zoom,
+  } = args
   const config: Config = {
-    table: geoTracks(-74, 40, numberOfTracks),
+    table: geoTracks(-74, 40, trackCount),
     showAxes: false,
     layers: [
       {
@@ -397,8 +330,8 @@ geo.add('Tracks', () => {
             colors: randomColors
               ? undefined
               : [
-                  {type: 'min', hex: color1},
-                  {type: 'max', hex: color2},
+                  {type: 'min', hex: trackColor1},
+                  {type: 'max', hex: trackColor2},
                 ],
           },
         ],
@@ -411,24 +344,26 @@ geo.add('Tracks', () => {
       <Plot config={config} />
     </PlotContainer>
   )
-})
+}
 
-geo.add('Tracks with Custom CSV', () => {
-  const csv = text('Paste CSV here:', '')
-  let table = fromFlux(csv).table
-
-  const {allowPanAndZoom, latitude, longitude, zoom} = genericKnobs()
+const renderTracksWithCustomCSV = (args: GeoArgs) => {
   const {
-    speed,
-    trackWidth,
-    randomColors,
-    color1,
-    color2,
-    endStopMarkers,
+    allowPanAndZoom,
+    csv,
     endStopMarkerRadius,
-  } = trackKnobs()
+    endStopMarkers,
+    latitude,
+    longitude,
+    randomColors,
+    speed,
+    trackColor1,
+    trackColor2,
+    trackWidth,
+    zoom,
+  } = args
+  const table = fromFlux(csv).table
   const config: Config = {
-    table: table,
+    table,
     showAxes: false,
     layers: [
       {
@@ -449,8 +384,8 @@ geo.add('Tracks with Custom CSV', () => {
             colors: randomColors
               ? undefined
               : [
-                  {type: 'min', hex: color1},
-                  {type: 'max', hex: color2},
+                  {type: 'min', hex: trackColor1},
+                  {type: 'max', hex: trackColor2},
                 ],
           },
         ],
@@ -463,18 +398,21 @@ geo.add('Tracks with Custom CSV', () => {
       <Plot config={config} />
     </PlotContainer>
   )
-})
+}
 
-geo.add('Layering visualizations', () => {
-  const {allowPanAndZoom, latitude, longitude, zoom} = genericKnobs()
+const renderLayeringVisualizations = (args: GeoArgs) => {
   const {
-    speed,
-    trackWidth,
-    color1,
-    color2,
-    endStopMarkers,
+    allowPanAndZoom,
     endStopMarkerRadius,
-  } = trackKnobs()
+    endStopMarkers,
+    latitude,
+    longitude,
+    speed,
+    trackColor1,
+    trackColor2,
+    trackWidth,
+    zoom,
+  } = args
   const config: Config = {
     table: geoTracks(-74, 40),
     showAxes: false,
@@ -494,8 +432,8 @@ geo.add('Layering visualizations', () => {
             endStopMarkers,
             endStopMarkerRadius,
             colors: [
-              {type: 'min', hex: color1},
-              {type: 'max', hex: color2},
+              {type: 'min', hex: trackColor1},
+              {type: 'max', hex: trackColor2},
             ],
           },
           {
@@ -518,9 +456,261 @@ geo.add('Layering visualizations', () => {
       <Plot config={config} />
     </PlotContainer>
   )
-})
+}
 
-geo.add(
-  'Bing Maps as tile server',
-  buildCircleMapStory(bingTileServerConfiguration)
-)
+const baseArgs = {
+  latitude: 40,
+  longitude: -76,
+  zoom: 6,
+  allowPanAndZoom: true,
+  useS2CellID: true,
+}
+
+const baseArgTypes: Partial<ArgTypes<GeoArgs>> = {
+  latitude: {
+    control: {type: 'range', min: -90, max: 90, step: 1},
+  },
+  longitude: {
+    control: {type: 'range', min: -180, max: 180, step: 1},
+  },
+  zoom: {
+    control: {type: 'range', min: 1, max: 20, step: 1},
+  },
+  allowPanAndZoom: {
+    control: {type: 'boolean'},
+  },
+  useS2CellID: {
+    control: {type: 'boolean'},
+  },
+}
+
+export const CircleMarkers: Story = {
+  render: renderCircleMap(osmTileServerConfiguration),
+  args: {
+    ...baseArgs,
+    circleCount: 26,
+  },
+  argTypes: {
+    ...baseArgTypes,
+    circleCount: {
+      control: {type: 'range', min: 0, max: 200000, step: 1},
+    },
+  },
+}
+
+export const MapMarkersStatic: Story = {
+  render: renderMapMarkersStatic,
+  args: {
+    ...baseArgs,
+    markerCount: 20,
+  },
+  argTypes: {
+    ...baseArgTypes,
+    markerCount: {
+      control: {type: 'range', min: 0, max: 2000, step: 1},
+    },
+  },
+}
+
+export const MapMarkersCustomCSV: Story = {
+  render: renderMapMarkersCustomCSV,
+  args: {
+    ...baseArgs,
+    lattitudeSelection: '_value',
+    longitudeSelection: '_value',
+    s2Column: 's2_cell_id',
+  },
+  argTypes: {
+    ...baseArgTypes,
+    lattitudeSelection: {
+      control: {type: 'select', options: latLonColumnOptions},
+    },
+    longitudeSelection: {
+      control: {type: 'select', options: latLonColumnOptions},
+    },
+    s2Column: {
+      control: {type: 'select', options: s2ColumnOptions},
+    },
+  },
+}
+
+export const MarkerClustering: Story = {
+  render: renderMarkerClustering,
+  args: {
+    ...baseArgs,
+    maximumClusterRadius: 50,
+    colorClusterMarks: true,
+    clusterAggregationFunction: ClusterAggregation.mean,
+  },
+  argTypes: {
+    ...baseArgTypes,
+    maximumClusterRadius: {
+      control: {type: 'range', min: 1, max: 1000, step: 1},
+    },
+    colorClusterMarks: {
+      control: {type: 'boolean'},
+    },
+    clusterAggregationFunction: {
+      control: {
+        type: 'select',
+        options: [
+          ClusterAggregation.mean,
+          ClusterAggregation.median,
+          ClusterAggregation.min,
+          ClusterAggregation.max,
+        ],
+      },
+    },
+  },
+}
+
+export const Heatmap: Story = {
+  render: renderHeatmap,
+  args: {
+    ...baseArgs,
+    dataPointCount: 200,
+    radius: 20,
+    blur: 10,
+  },
+  argTypes: {
+    ...baseArgTypes,
+    dataPointCount: {
+      control: {type: 'range', min: 0, max: 500, step: 1},
+    },
+    radius: {
+      control: {type: 'range', min: 0, max: 100, step: 1},
+    },
+    blur: {
+      control: {type: 'range', min: 0, max: 150, step: 1},
+    },
+  },
+}
+
+export const Tracks: Story = {
+  render: renderTracks,
+  args: {
+    ...baseArgs,
+    trackCount: 3,
+    speed: 200,
+    trackWidth: 4,
+    trackColor1: '#0000ff',
+    trackColor2: '#f0f0ff',
+    randomColors: true,
+    endStopMarkers: true,
+    endStopMarkerRadius: 4,
+  },
+  argTypes: {
+    ...baseArgTypes,
+    trackCount: {
+      control: {type: 'range', min: 0, max: 100, step: 1},
+    },
+    speed: {
+      control: {type: 'range', min: 1, max: 10000, step: 1},
+    },
+    trackWidth: {
+      control: {type: 'range', min: 1, max: 15, step: 1},
+    },
+    trackColor1: {
+      control: {type: 'color'},
+    },
+    trackColor2: {
+      control: {type: 'color'},
+    },
+    randomColors: {
+      control: {type: 'boolean'},
+    },
+    endStopMarkers: {
+      control: {type: 'boolean'},
+    },
+    endStopMarkerRadius: {
+      control: {type: 'range', min: 1, max: 100, step: 1},
+    },
+  },
+}
+
+export const TracksWithCustomCSV: Story = {
+  render: renderTracksWithCustomCSV,
+  args: {
+    ...baseArgs,
+    csv: '',
+    speed: 200,
+    trackWidth: 4,
+    trackColor1: '#0000ff',
+    trackColor2: '#f0f0ff',
+    randomColors: true,
+    endStopMarkers: true,
+    endStopMarkerRadius: 4,
+  },
+  argTypes: {
+    ...baseArgTypes,
+    speed: {
+      control: {type: 'range', min: 1, max: 10000, step: 1},
+    },
+    trackWidth: {
+      control: {type: 'range', min: 1, max: 15, step: 1},
+    },
+    trackColor1: {
+      control: {type: 'color'},
+    },
+    trackColor2: {
+      control: {type: 'color'},
+    },
+    randomColors: {
+      control: {type: 'boolean'},
+    },
+    endStopMarkers: {
+      control: {type: 'boolean'},
+    },
+    endStopMarkerRadius: {
+      control: {type: 'range', min: 1, max: 100, step: 1},
+    },
+  },
+}
+
+export const LayeringVisualizations: Story = {
+  render: renderLayeringVisualizations,
+  args: {
+    ...baseArgs,
+    speed: 200,
+    trackWidth: 4,
+    trackColor1: '#0000ff',
+    trackColor2: '#f0f0ff',
+    endStopMarkers: true,
+    endStopMarkerRadius: 4,
+  },
+  argTypes: {
+    ...baseArgTypes,
+    speed: {
+      control: {type: 'range', min: 1, max: 10000, step: 1},
+    },
+    trackWidth: {
+      control: {type: 'range', min: 1, max: 15, step: 1},
+    },
+    trackColor1: {
+      control: {type: 'color'},
+    },
+    trackColor2: {
+      control: {type: 'color'},
+    },
+    endStopMarkers: {
+      control: {type: 'boolean'},
+    },
+    endStopMarkerRadius: {
+      control: {type: 'range', min: 1, max: 100, step: 1},
+    },
+  },
+}
+
+export const BingMapsAsTileServer: Story = {
+  render: renderCircleMap(bingTileServerConfiguration),
+  args: {
+    ...baseArgs,
+    circleCount: 26,
+  },
+  argTypes: {
+    ...baseArgTypes,
+    circleCount: {
+      control: {type: 'range', min: 0, max: 200000, step: 1},
+    },
+  },
+}

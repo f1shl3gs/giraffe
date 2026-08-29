@@ -1,135 +1,204 @@
 import * as React from 'react'
-import {storiesOf} from '@storybook/react'
-import {withKnobs, text, select} from '@storybook/addon-knobs'
+import type {Meta, StoryObj, ArgTypes} from '@storybook/react'
 
 import {Config, Plot, fromFlux, timeFormatter} from '../../giraffe/src'
 
 import {
   PlotContainer,
-  xKnob,
-  yKnob,
-  xScaleKnob,
-  yScaleKnob,
-  colorSchemeKnob,
-  legendFontKnob,
-  tickFontKnob,
-  showAxesKnob,
-  findStringColumns,
-  timeZoneKnob,
-  tooltipOrientationThresholdKnob,
-  tooltipColorizeRowsKnob,
   getCPUTable,
-  fillKnob,
-  symbolKnob,
+  findXYColumns,
+  findStringColumns,
+  TIME_FORMAT_OPTIONS,
+  COLOR_SCHEME_OPTIONS,
 } from './helpers'
 
-storiesOf('Scatter', module)
-  .addDecorator(withKnobs)
-  .add('Static CSV', () => {
-    const table = getCPUTable()
-    const colors = colorSchemeKnob()
-    const legendFont = legendFontKnob()
-    const tickFont = tickFontKnob()
-    const x = xKnob(table)
-    const y = yKnob(table)
-    const xScale = xScaleKnob()
-    const yScale = yScaleKnob()
-    const fill = fillKnob(table, ['cpu'])
-    const symbol = symbolKnob(table, ['host'])
-    const legendOrientationThreshold = tooltipOrientationThresholdKnob()
-    const legendColorizeRows = tooltipColorizeRowsKnob()
-    const showAxes = showAxesKnob()
+interface ScatterArgs {
+  colorScheme: keyof typeof COLOR_SCHEME_OPTIONS
+  legendFont: string
+  tickFont: string
+  x: string
+  y: string
+  xScale: string
+  yScale: string
+  fill: string[]
+  symbol: string[]
+  legendOrientationThreshold: number
+  legendColorizeRows: boolean
+  showAxes: boolean
+  timeZone: string
+  timeFormat: string
+  csv: string
+}
 
-    const config: Config = {
-      table,
-      valueFormatters: {_value: val => `${Math.round(val)}%`},
-      legendFont,
-      legendOrientationThreshold,
-      legendColorizeRows,
-      tickFont,
-      showAxes,
-      xScale,
-      yScale,
-      layers: [
-        {
-          type: 'scatter',
-          x,
-          y,
-          fill: fill,
-          symbol: symbol,
-          colors,
-        },
-      ],
-    }
+export default {
+  title: 'Scatter',
+} as Meta
 
-    return (
-      <PlotContainer>
-        <Plot config={config} />
-      </PlotContainer>
-    )
-  })
-  .add('Custom CSV', () => {
-    const csv = text('Paste CSV here:', '')
-    let table = fromFlux(csv).table
-    const colors = colorSchemeKnob()
-    const legendFont = legendFontKnob()
-    const tickFont = tickFontKnob()
-    const x = xKnob(table)
-    const y = yKnob(table)
+type Story = StoryObj<ScatterArgs>
 
-    const xScale = xScaleKnob()
-    const yScale = yScaleKnob()
-    const timeZone = timeZoneKnob()
-    const timeFormat = select(
-      'Time Format',
+const cpuTable = getCPUTable()
+
+const commonArgTypes: Partial<ArgTypes<ScatterArgs>> = {
+  colorScheme: {
+    control: {type: 'select', options: Object.keys(COLOR_SCHEME_OPTIONS)},
+  },
+  xScale: {control: {type: 'select', options: ['linear', 'log']}},
+  yScale: {control: {type: 'select', options: ['linear', 'log']}},
+  timeZone: {
+    control: {
+      type: 'select',
+      options: ['UTC', 'America/Los_Angeles', 'America/New_York'],
+    },
+  },
+  timeFormat: {control: {type: 'select', options: [...TIME_FORMAT_OPTIONS]}},
+  showAxes: {control: {type: 'boolean'}},
+  legendOrientationThreshold: {control: {type: 'number'}},
+  legendColorizeRows: {control: {type: 'boolean'}},
+}
+
+const commonArgs: Partial<ScatterArgs> = {
+  colorScheme: 'Nineteen Eighty Four',
+  legendFont: '12px sans-serif',
+  tickFont: '10px sans-serif',
+  xScale: 'linear',
+  yScale: 'linear',
+  legendOrientationThreshold: 5,
+  legendColorizeRows: true,
+  showAxes: true,
+}
+
+const render = (args: ScatterArgs) => {
+  const {
+    colorScheme,
+    legendFont,
+    tickFont,
+    x,
+    y,
+    xScale,
+    yScale,
+    fill,
+    symbol,
+    legendOrientationThreshold,
+    legendColorizeRows,
+    showAxes,
+  } = args
+
+  const table = cpuTable
+
+  const config: Config = {
+    table,
+    valueFormatters: {_value: val => `${Math.round(val)}%`},
+    legendFont,
+    legendOrientationThreshold,
+    legendColorizeRows,
+    tickFont,
+    showAxes,
+    xScale,
+    yScale,
+    layers: [
       {
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'YYYY-MM-DD HH:mm:ss a ZZ': 'YYYY-MM-DD HH:mm:ss a ZZ',
-        'hh:mm a': 'hh:mm a',
-        'hh:mm': 'hh:mm',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
+        type: 'scatter',
+        x,
+        y,
+        fill,
+        symbol,
+        colors: COLOR_SCHEME_OPTIONS[colorScheme],
       },
-      'YYYY-MM-DD HH:mm:ss ZZ'
-    )
-    const showAxes = showAxesKnob()
-    const legendOrientationThreshold = tooltipOrientationThresholdKnob()
-    const legendColorizeRows = tooltipColorizeRowsKnob()
+    ],
+  }
 
-    const config: Config = {
-      table,
-      valueFormatters: {
-        _time: timeFormatter({timeZone, format: timeFormat}),
-        _value: val => `${Math.round(val)}`,
+  return (
+    <PlotContainer>
+      <Plot config={config} />
+    </PlotContainer>
+  )
+}
+
+export const StaticCSV: Story = {
+  render,
+  args: {
+    ...commonArgs,
+    x: '_time',
+    y: '_value',
+    fill: ['cpu'],
+    symbol: ['host'],
+  },
+  argTypes: {
+    ...commonArgTypes,
+    x: {
+      control: {type: 'select', options: Object.keys(findXYColumns(cpuTable))},
+    },
+    y: {
+      control: {type: 'select', options: Object.keys(findXYColumns(cpuTable))},
+    },
+    fill: {
+      control: {type: 'multi-select', options: findStringColumns(cpuTable)},
+    },
+    symbol: {
+      control: {type: 'multi-select', options: findStringColumns(cpuTable)},
+    },
+  },
+}
+
+const renderCustomCSV = (args: ScatterArgs) => {
+  const {
+    csv,
+    colorScheme,
+    legendFont,
+    tickFont,
+    x,
+    y,
+    xScale,
+    yScale,
+    timeZone,
+    timeFormat,
+    showAxes,
+    legendOrientationThreshold,
+    legendColorizeRows,
+  } = args
+
+  const table = fromFlux(csv).table
+
+  const config: Config = {
+    table,
+    valueFormatters: {
+      _time: timeFormatter({timeZone, format: timeFormat}),
+      _value: val => `${Math.round(val)}`,
+    },
+    legendFont,
+    legendOrientationThreshold,
+    legendColorizeRows,
+    tickFont,
+    showAxes,
+    xScale,
+    yScale,
+    layers: [
+      {
+        type: 'scatter',
+        x,
+        y,
+        fill: findStringColumns(table),
+        colors: COLOR_SCHEME_OPTIONS[colorScheme],
       },
-      legendFont,
-      legendOrientationThreshold,
-      legendColorizeRows,
-      tickFont,
-      showAxes,
-      xScale,
-      yScale,
-      layers: [
-        {
-          type: 'scatter',
-          x,
-          y,
-          fill: findStringColumns(table),
-          colors,
-        },
-      ],
-    }
+    ],
+  }
 
-    return (
-      <PlotContainer>
-        <Plot config={config} />
-      </PlotContainer>
-    )
-  })
+  return (
+    <PlotContainer>
+      <Plot config={config} />
+    </PlotContainer>
+  )
+}
+
+export const CustomCSV: Story = {
+  render: renderCustomCSV,
+  args: {
+    ...commonArgs,
+    csv: '',
+    x: '_time',
+    y: '_value',
+    timeZone: 'UTC',
+    timeFormat: 'YYYY-MM-DD HH:mm:ss ZZ',
+  },
+  argTypes: commonArgTypes,
+}

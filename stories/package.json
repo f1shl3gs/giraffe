@@ -8,50 +8,31 @@
     "directory": "stories"
   },
   "scripts": {
-    "lint": "eslint '{src,../giraffe/src}/**/*.{ts,tsx}'",
+    "lint": "oxlint '{src,../giraffe/src}/**/*.{ts,tsx}'",
     "prettier": "prettier --config ../.prettierrc.json --check '{src,../giraffe/src}/**/*.{ts,tsx}'",
     "prettier:fix": "prettier --config ../.prettierrc.json --write '{src,../giraffe/src}/**/*.{ts,tsx}'",
     "typecheck": "tsc --noEmit --pretty",
-    "start": "yarn -s run prettier:fix && yarn -s run storybook",
-    "storybook": "start-storybook -p 50000",
-    "publish": "storybook-to-ghpages --out=.out"
+    "start": "yarn run prettier:fix && yarn run storybook",
+    "storybook": "storybook dev -p 50000",
+    "build": "storybook build -o dist"
   },
   "devDependencies": {
-    "@babel/core": "^7.29.6",
-    "@storybook/addon-knobs": "^6.3.1",
-    "@storybook/core": "^6.3.12",
-    "@storybook/react": "^6.3.12",
-    "@storybook/storybook-deployer": "^2.8.1",
-    "@types/node-sass": "^4.11.2",
-    "@types/react": "^17.0.35",
-    "@types/react-dom": "^17.0.11",
-    "@types/storybook__react": "^4.0.1",
-    "@typescript-eslint/eslint-plugin": "^1.5.0",
-    "@typescript-eslint/parser": "^1.5.0",
-    "babel-loader": "^8.0.5",
-    "css-loader": "^3.6.0",
-    "css-modules-typescript-loader": "4.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^5.0.0",
-    "eslint-plugin-prettier": "^3.0.1",
-    "eslint-plugin-react": "^7.12.4",
-    "file-loader": "^3.0.1",
+    "@storybook/addon-docs": "^10.5.10",
+    "@storybook/cli": "^10.5.10",
+    "@storybook/react": "^10.5.10",
+    "@storybook/react-vite": "^10.5.10",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
     "memoize-one": "^6.0.0",
     "prettier": "^3.9.6",
-    "react-virtualized-auto-sizer": "^1.0.2",
-    "resolve-url-loader": "^3.0.1",
-    "sass": "^1.22.7",
-    "sass-loader": "9.0.2",
-    "style-loader": "^1.2.1",
-    "ts-loader": "^6.0.4",
-    "typescript": "3.8.3",
-    "version-bump-prompt": "^5.0.0",
-    "webpack": "^4.35.3"
+    "sass": "^1.103.1",
+    "storybook": "^10.5.10",
+    "typescript": "7.0.2",
+    "vite": "^8.2.2"
   },
   "dependencies": {
-    "d3-array": "^2.4.0",
-    "react": "^17.0.2",
-    "react-dev-utils": "11.0.4",
-    "react-dom": "^17.0.2"
+    "d3-array": "^3.2.4",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   }
 }

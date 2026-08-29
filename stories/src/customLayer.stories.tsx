@@ -1,15 +1,19 @@
 import * as React from 'react'
-import {storiesOf} from '@storybook/react'
-import {withKnobs} from '@storybook/addon-knobs'
+import type {Meta, StoryObj} from '@storybook/react'
 import {Config, Plot} from '../../giraffe/src'
 
 import {PlotContainer} from './helpers'
 
 import {CPU} from './data/cpu'
 
-storiesOf('Custom Layer', module)
-  .addDecorator(withKnobs)
-  .add('Highlighted Region', () => {
+export default {
+  title: 'Custom Layer',
+} as Meta
+
+type Story = StoryObj
+
+export const HighlightedRegion: Story = {
+  render: () => {
     const config: Config = {
       table: CPU,
       layers: [
@@ -44,4 +48,5 @@ storiesOf('Custom Layer', module)
         <Plot config={config} />
       </PlotContainer>
     )
-  })
+  },
+}

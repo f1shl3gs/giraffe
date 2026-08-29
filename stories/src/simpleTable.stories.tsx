@@ -1,21 +1,29 @@
 import * as React from 'react'
-import {storiesOf} from '@storybook/react'
-import {boolean, text, withKnobs} from '@storybook/addon-knobs'
+import type {Meta, StoryObj} from '@storybook/react'
 import {PlotContainer} from './helpers'
 import {Config, Plot, fromFlux} from '../../giraffe/src'
 import {tableCSV, nonNumbersInNumbersColumn} from './data/tableGraph'
 import {largeDataSet} from './data/largeDataSet'
 import {multiTableUnusualCSV} from './data/multiTableUnusualCSV'
 
-storiesOf('Simple Table', module)
-  .addDecorator(withKnobs)
-  .add('Simple Table', () => {
-    const backgroundColor = text('Background contrast color:', 'black')
+interface SimpleTableArgs {
+  backgroundColor: string
+  showAll: boolean
+  csv: string
+}
 
-    const showAll = boolean('showAll', false)
+export default {
+  title: 'Simple Table',
+} as Meta
+
+type Story = StoryObj<SimpleTableArgs>
+
+const tableRender =
+  (fluxResponse: Config['fluxResponse']) => (args: SimpleTableArgs) => {
+    const {backgroundColor, showAll} = args
 
     const config: Config = {
-      fluxResponse: tableCSV,
+      fluxResponse,
       layers: [
         {
           type: 'simple table',
@@ -31,100 +39,72 @@ storiesOf('Simple Table', module)
         <Plot config={config} />
       </PlotContainer>
     )
-  })
-  .add('Non-numbers in a numbers column', () => {
-    const backgroundColor = text('Background contrast color:', 'black')
+  }
 
-    const showAll = boolean('showAll', false)
+const customRender = (args: SimpleTableArgs) => {
+  const {backgroundColor, showAll, csv} = args
+  const fromFluxResult = fromFlux(csv)
 
-    const config: Config = {
-      fluxResponse: nonNumbersInNumbersColumn,
-      layers: [
-        {
-          type: 'simple table',
-          showAll: showAll,
-        },
-      ],
-    }
+  const config: Config = {
+    fromFluxResult,
+    layers: [
+      {
+        type: 'simple table',
+        showAll: showAll,
+      },
+    ],
+  }
 
-    return (
-      // Simple Table needs a black background by default,
-      //   override Storybook's dark grey
-      <PlotContainer style={{backgroundColor}}>
-        <Plot config={config} />
-      </PlotContainer>
-    )
-  })
-  .add('Very large data set', () => {
-    const backgroundColor = text('Background contrast color:', 'black')
+  return (
+    // Simple Table needs a black background by default,
+    //   override Storybook's dark grey
+    <PlotContainer style={{backgroundColor}}>
+      <Plot config={config} />
+    </PlotContainer>
+  )
+}
 
-    const showAll = boolean('showAll', false)
+const tableArgs = {
+  backgroundColor: 'black',
+  showAll: false,
+}
 
-    const config: Config = {
-      fluxResponse: largeDataSet,
-      layers: [
-        {
-          type: 'simple table',
-          showAll: showAll,
-        },
-      ],
-    }
+const tableArgTypes = {
+  showAll: {
+    control: {type: 'boolean'},
+  },
+} as const
 
-    return (
-      // Simple Table needs a black background by default,
-      //   override Storybook's dark grey
-      <PlotContainer style={{backgroundColor}}>
-        <Plot config={config} />
-      </PlotContainer>
-    )
-  })
-  .add('Multi-table unusual data set', () => {
-    const backgroundColor = text('Background contrast color:', 'black')
+export const SimpleTable: Story = {
+  render: tableRender(tableCSV),
+  args: tableArgs,
+  argTypes: tableArgTypes,
+}
 
-    const showAll = boolean('showAll', false)
+export const NonNumbersInANumbersColumn: Story = {
+  render: tableRender(nonNumbersInNumbersColumn),
+  args: tableArgs,
+  argTypes: tableArgTypes,
+}
 
-    const config: Config = {
-      fluxResponse: multiTableUnusualCSV,
-      layers: [
-        {
-          type: 'simple table',
-          showAll: showAll,
-        },
-      ],
-    }
+export const VeryLargeDataSet: Story = {
+  render: tableRender(largeDataSet),
+  args: tableArgs,
+  argTypes: tableArgTypes,
+}
 
-    return (
-      // Simple Table needs a black background by default,
-      //   override Storybook's dark grey
-      <PlotContainer style={{backgroundColor}}>
-        <Plot config={config} />
-      </PlotContainer>
-    )
-  })
-  .add('Custom CSV:', () => {
-    const csv = text('Paste CSV here:', '')
+export const MultiTableUnusualDataSet: Story = {
+  render: tableRender(multiTableUnusualCSV),
+  args: tableArgs,
+  argTypes: tableArgTypes,
+}
 
-    let fromFluxResult = fromFlux(csv)
-
-    const backgroundColor = text('Background contrast color:', 'black')
-
-    const showAll = boolean('showAll', false)
-
-    const config: Config = {
-      fromFluxResult,
-      layers: [
-        {
-          type: 'simple table',
-          showAll: showAll,
-        },
-      ],
-    }
-
-    return (
-      // Simple Table needs a black background by default,
-      //   override Storybook's dark grey
-      <PlotContainer style={{backgroundColor}}>
-        <Plot config={config} />
-      </PlotContainer>
-    )
-  })
+export const CustomCSV: Story = {
+  render: customRender,
+  args: {
+    csv: '',
+    backgroundColor: 'black',
+    showAll: false,
+  },
+  argTypes: tableArgTypes,
+}

@@ -1,602 +1,910 @@
 import * as React from 'react'
-import {storiesOf} from '@storybook/react'
-import {boolean, number, select, text, withKnobs} from '@storybook/addon-knobs'
+import type {Meta, StoryObj} from '@storybook/react'
 import {Config, Plot, LayerConfig, timeFormatter} from '../../giraffe/src'
 import {TIME, VALUE} from '../../giraffe/src/constants/columnKeys'
+import type {
+  AnnotationDimension,
+  AnnotationPinType,
+  LineHoverDimension,
+  LineInterpolation,
+  LinePosition,
+} from '../../giraffe/src/types'
 
 import {
   PlotContainer,
-  xKnob,
-  yKnob,
-  xScaleKnob,
-  yScaleKnob,
-  fillKnob,
-  colorSchemeKnob,
-  legendFontKnob,
-  multiSelect,
-  tickFontKnob,
-  interpolationKnob,
-  timeZoneKnob,
-  tooltipOrientationThresholdKnob,
-  tooltipColorizeRowsKnob,
-  annotationPinKnob,
+  findStringColumns,
+  findXYColumns,
+  TIME_FORMAT_OPTIONS,
+  COLOR_SCHEME_OPTIONS,
 } from './helpers'
 
 import {annotationsTable, matchAnnotationsToTable} from './data/annotation'
 
-storiesOf('Annotations', module)
-  .addDecorator(withKnobs)
-  .add('Annotations: mark at every point', () => {
-    const table = annotationsTable
-    const includeLineLayer = boolean('Line Layer', false)
-    const annotationColor = text('Annotation color string', 'green')
-    const annotationDimension = select(
-      'Annotation Dimension',
-      {
-        x: 'x',
-        y: 'y',
-      },
-      'x'
-    )
-    const annotationHoverMargin = number('Annotation Hover Margin', 10)
-    const tickFont = tickFontKnob()
-    const valueAxisLabel = text('Value Axis Label', 'foo')
-    const x = xKnob(table)
-    const y = yKnob(table)
-    const fill = fillKnob(table, ['cpu'])
-    const xScale = xScaleKnob()
-    const yScale = yScaleKnob()
-    const timeZone = timeZoneKnob('America/Los_Angeles')
-    const timeFormat = select(
-      'Time Format',
-      {
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'hh:mm a': 'hh:mm a',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss a': 'HH:mm:ss a',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
-      },
-      'hh:mm a'
-    )
-    const legendFont = legendFontKnob()
-    const legendOrientationThreshold = tooltipOrientationThresholdKnob()
-    const legendColorizeRows = tooltipColorizeRowsKnob()
-    const legendHide = boolean('Hide Hover Legend', false)
+const table = annotationsTable
 
-    const xTotalTicks = number('X Total Ticks', 8)
-    const yTotalTicks = number('Y Total Ticks', 10)
-    const position = select(
-      'Line Position',
-      {stacked: 'stacked', overlaid: 'overlaid'},
-      'overlaid'
-    )
-    const interpolation = interpolationKnob()
-    const colors = colorSchemeKnob()
-    const lineWidth = number('Line Width', 1)
-    const hoverDimension = select(
-      'Hover Dimension',
-      {auto: 'auto', x: 'x', y: 'y', xy: 'xy'},
-      'auto'
-    )
+const xOptions = Object.keys(findXYColumns(table))
+const fillOptions = findStringColumns(table)
 
-    const pin = annotationPinKnob()
+const defaultAnnotations = matchAnnotationsToTable({
+  color: 'green',
+  dimension: 'x',
+  table,
+  x: '_time',
+  y: '_value',
+  pin: 'none',
+})
 
-    const layers = [
-      {
-        type: 'annotation',
-        x,
-        y,
-        annotations: matchAnnotationsToTable({
-          color: annotationColor,
-          dimension: annotationDimension,
-          table,
-          x,
-          y,
-          pin,
-        }),
-        fill,
-        hoverDimension,
-        hoverMargin: annotationHoverMargin,
-      },
-    ] as LayerConfig[]
+const annotationSelectionsOptions = defaultAnnotations
+  .map(annotation => String(annotation.startValue))
+  .sort()
 
-    if (includeLineLayer) {
-      layers.unshift({
-        type: 'line',
-        x,
-        y,
-        fill,
-        position,
-        interpolation,
-        colors,
-        lineWidth,
-        hoverDimension,
-      })
-    }
-    const config: Config = {
-      table,
-      valueFormatters: {
-        _time: timeFormatter({timeZone, format: timeFormat}),
-        _value: val =>
-          `${val.toFixed(2)}${
-            valueAxisLabel ? ` ${valueAxisLabel}` : valueAxisLabel
-          }`,
-      },
-      xScale,
-      yScale,
-      legendFont,
-      legendHide,
-      legendOrientationThreshold,
-      legendColorizeRows,
-      tickFont,
-      xTotalTicks,
-      yTotalTicks,
-      layers,
-    }
-    return (
-      <PlotContainer
-        style={{
-          width: 'calc(100vw - 100px)',
-          height: 'calc(100vh - 125px)',
-          margin: '75px 50px 50px 50px',
-        }}
-      >
-        <Plot config={config} />
-      </PlotContainer>
-    )
-  })
-  .add('Annotations: overridden double click behavior', () => {
-    const table = annotationsTable
-    const includeLineLayer = boolean('Line Layer', false)
-    const annotationColor = text('Annotation color string', 'green')
-    const annotationDimension = select(
-      'Annotation Dimension',
-      {
-        x: 'x',
-        y: 'y',
-      },
-      'x'
-    )
-    const tickFont = tickFontKnob()
-    const valueAxisLabel = text('Value Axis Label', 'foo')
-    const x = xKnob(table)
-    const y = yKnob(table)
-    const fill = fillKnob(table, ['cpu'])
-    const xScale = xScaleKnob()
-    const yScale = yScaleKnob()
-    const timeZone = timeZoneKnob('America/Los_Angeles')
-    const timeFormat = select(
-      'Time Format',
-      {
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'hh:mm a': 'hh:mm a',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss a': 'HH:mm:ss a',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
-      },
-      'hh:mm a'
-    )
-    const legendFont = legendFontKnob()
-    const legendOrientationThreshold = tooltipOrientationThresholdKnob()
-    const legendColorizeRows = tooltipColorizeRowsKnob()
+const annotationSelectionsDefault = defaultAnnotations
+  .filter((_, i) => i % 4 === 0)
+  .map(annotation => String(annotation.startValue))
+  .sort()
 
-    const xTotalTicks = number('X Total Ticks', 8)
-    const yTotalTicks = number('Y Total Ticks', 10)
-    const position = select(
-      'Line Position',
-      {stacked: 'stacked', overlaid: 'overlaid'},
-      'overlaid'
-    )
-    const interpolation = interpolationKnob()
-    const colors = colorSchemeKnob()
-    const lineWidth = number('Line Width', 1)
-    const hoverDimension = select(
-      'Hover Dimension',
-      {auto: 'auto', x: 'x', y: 'y', xy: 'xy'},
-      'auto'
-    )
+const firstValue = String(table.getColumn(VALUE, 'number')[0])
 
-    const doubleClickHandler = plotInteraction => {
-      // eslint-disable-next-line
-      console.log(
-        'This double click function is overridden! Returned arguments:',
-        plotInteraction
-      )
-    }
+const annotationContainerStyle = {
+  width: 'calc(100vw - 100px)',
+  height: 'calc(100vh - 125px)',
+  margin: '75px 50px 50px 50px',
+}
 
-    const hoverHandler = plotInteraction => {
-      // eslint-disable-next-line
-      console.log('hover handler:', plotInteraction)
-    }
+interface AnnotationArgs {
+  annotations: string[]
+  annotationColor: string
+  annotationDimension: AnnotationDimension
+  annotationHoverMargin: number
+  colorScheme: string
+  currentTime: string
+  currentValue: string
+  endTime: string
+  endValue: string
+  fill: string[]
+  hoverDimension: LineHoverDimension | 'auto'
+  interpolation: LineInterpolation
+  legendColorizeRows: boolean
+  legendFont: string
+  legendHide: boolean
+  legendOrientationThreshold: number
+  lineLayer: boolean
+  linePosition: LinePosition
+  lineWidth: number
+  pin: AnnotationPinType
+  tickFont: string
+  timeFormat: string
+  timeZone: string
+  valueAxisLabel: string
+  x: string
+  xScale: string
+  xTotalTicks: number
+  y: string
+  yScale: string
+  yTotalTicks: number
+}
 
-    const interactionHandlers = {
-      doubleClick: doubleClickHandler,
-      hover: hoverHandler,
-    }
+export default {
+  title: 'Annotations',
+} as Meta
 
-    const pin = annotationPinKnob()
+type Story = StoryObj<AnnotationArgs>
 
-    const layers = [
-      {
-        type: 'annotation',
-        x,
-        y,
-        annotations: matchAnnotationsToTable({
-          color: annotationColor,
-          dimension: annotationDimension,
-          table,
-          x,
-          y,
-          pin,
-        }),
-        fill,
-      },
-    ] as LayerConfig[]
+const renderMarkAtEveryPoint = (args: AnnotationArgs) => {
+  const {
+    annotationColor,
+    annotationDimension,
+    annotationHoverMargin,
+    colorScheme,
+    fill,
+    hoverDimension,
+    interpolation,
+    legendColorizeRows,
+    legendFont,
+    legendHide,
+    legendOrientationThreshold,
+    lineLayer,
+    linePosition,
+    lineWidth,
+    pin,
+    tickFont,
+    timeFormat,
+    timeZone,
+    valueAxisLabel,
+    x,
+    xScale,
+    xTotalTicks,
+    y,
+    yScale,
+    yTotalTicks,
+  } = args
 
-    if (includeLineLayer) {
-      layers.unshift({
-        type: 'line',
-        x,
-        y,
-        fill,
-        position,
-        interpolation,
-        colors,
-        lineWidth,
-        hoverDimension,
-      })
-    }
-
-    const config: Config = {
-      table,
-      valueFormatters: {
-        _time: timeFormatter({timeZone, format: timeFormat}),
-        _value: val =>
-          `${val.toFixed(2)}${
-            valueAxisLabel ? ` ${valueAxisLabel}` : valueAxisLabel
-          }`,
-      },
-      xScale,
-      yScale,
-      legendFont,
-      legendOrientationThreshold,
-      legendColorizeRows,
-      tickFont,
-      xTotalTicks,
-      yTotalTicks,
-      layers,
-      interactionHandlers,
-    }
-    return (
-      <PlotContainer
-        style={{
-          width: 'calc(100vw - 100px)',
-          height: 'calc(100vh - 125px)',
-          margin: '75px 50px 50px 50px',
-        }}
-      >
-        <Plot config={config} />
-      </PlotContainer>
-    )
-  })
-  .add('Annotations: selectable marks', () => {
-    const table = annotationsTable
-    const includeLineLayer = boolean('Line Layer', true)
-    const annotationColor = text('Annotation color string', 'green')
-    const annotationDimension = select(
-      'Annotation Dimension',
-      {
-        x: 'x',
-        y: 'y',
-      },
-      'x'
-    )
-    const annotationHoverMargin = number('Annotation Hover Margin', 10)
-    const tickFont = tickFontKnob()
-    const valueAxisLabel = text('Value Axis Label', 'foo')
-    const x = xKnob(table)
-    const y = yKnob(table)
-    const fill = fillKnob(table, ['cpu'])
-    const xScale = xScaleKnob()
-    const yScale = yScaleKnob()
-    const timeZone = timeZoneKnob('America/Los_Angeles')
-    const timeFormat = select(
-      'Time Format',
-      {
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'hh:mm a': 'hh:mm a',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss a': 'HH:mm:ss a',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
-      },
-      'hh:mm a'
-    )
-    const legendFont = legendFontKnob()
-    const legendOrientationThreshold = tooltipOrientationThresholdKnob()
-    const legendColorizeRows = tooltipColorizeRowsKnob()
-
-    const xTotalTicks = number('X Total Ticks', 8)
-    const yTotalTicks = number('Y Total Ticks', 10)
-    const position = select(
-      'Line Position',
-      {stacked: 'stacked', overlaid: 'overlaid'},
-      'overlaid'
-    )
-    const interpolation = interpolationKnob()
-    const colors = colorSchemeKnob()
-    const lineWidth = number('Line Width', 1)
-    const hoverDimension = select(
-      'Hover Dimension',
-      {auto: 'auto', x: 'x', y: 'y', xy: 'xy'},
-      'auto'
-    )
-
-    const pin = annotationPinKnob()
-
-    const annotations = matchAnnotationsToTable({
-      color: annotationColor,
-      dimension: annotationDimension,
-      table,
+  const layers = [
+    {
+      type: 'annotation',
       x,
       y,
-      pin,
-    })
-    const annotationsSelections = multiSelect(
-      'annotations',
-      annotations.map(annotation => String(annotation.startValue)).sort(),
-      annotations
-        .filter((_, i) => (i % 4 === 0 ? true : false))
-        .map(annotation => String(annotation.startValue))
-        .sort()
-    )
-
-    const layers = [
-      {
-        type: 'annotation',
-        x,
-        y,
-        annotations: annotationsSelections.map((valueString: string) => ({
-          title: 'Hi!',
-          description: `value: ${valueString}`,
-          color: annotationColor,
-          dimension: annotationDimension,
-          startValue: Number(valueString),
-          stopValue: Number(valueString),
-        })),
-        fill,
-        hoverDimension,
-        hoverMargin: annotationHoverMargin,
-      },
-    ] as LayerConfig[]
-
-    if (includeLineLayer) {
-      layers.unshift({
-        type: 'line',
-        x,
-        y,
-        fill,
-        position,
-        interpolation,
-        colors,
-        lineWidth,
-        hoverDimension,
-      })
-    }
-    const config: Config = {
-      table,
-      valueFormatters: {
-        _time: timeFormatter({timeZone, format: timeFormat}),
-        _value: val =>
-          `${val.toFixed(2)}${
-            valueAxisLabel ? ` ${valueAxisLabel}` : valueAxisLabel
-          }`,
-      },
-      xScale,
-      yScale,
-      legendFont,
-      legendOrientationThreshold,
-      legendColorizeRows,
-      tickFont,
-      xTotalTicks,
-      yTotalTicks,
-      layers,
-    }
-    return (
-      <PlotContainer
-        style={{
-          width: 'calc(100vw - 100px)',
-          height: 'calc(100vh - 125px)',
-          margin: '75px 50px 50px 50px',
-        }}
-      >
-        <Plot config={config} />
-      </PlotContainer>
-    )
-  })
-  .add('Annotations: add your own marks', () => {
-    const table = annotationsTable
-    const includeLineLayer = boolean('Line Layer', true)
-    const annotationColor = text('Annotation color string', 'green')
-    const annotationDimension = select(
-      'Annotation Dimension',
-      {
-        x: 'x',
-        y: 'y',
-      },
-      'x'
-    )
-    const annotationHoverMargin = number('Annotation Hover Margin', 10)
-    const x = xKnob(table)
-    const y = yKnob(table)
-    const currentValue = text(
-      '_startValue',
-      x === VALUE
-        ? String(table.getColumn(x, 'number')[0])
-        : String(table.getColumn(y, 'number')[0])
-    )
-
-    const endValue = text(
-      '_endValue',
-      x === VALUE
-        ? String(table.getColumn(x, 'number')[0])
-        : String(table.getColumn(y, 'number')[0])
-    )
-
-    const currentTime = text('_startTime', String(Date.now() + 1000 * 60 * 6))
-
-    const endTime = text('_endTime', String(Date.now() + 1000 * 60 * 6))
-
-    const columnKey = annotationDimension === 'y' ? y : x
-
-    const annotationsInput =
-      columnKey === TIME
-        ? [[currentTime], [endTime]]
-        : [[currentValue], [endValue]]
-
-    const tickFont = tickFontKnob()
-    const valueAxisLabel = text('Value Axis Label', 'foo')
-    const fill = fillKnob(table, ['cpu'])
-    const xScale = xScaleKnob()
-    const yScale = yScaleKnob()
-    const timeZone = timeZoneKnob('America/Los_Angeles')
-
-    const pinType = select(
-      'pin',
-      {start: 'start', stop: 'stop', none: 'none', circle: 'circle'},
-      'start'
-    )
-    const timeFormat = select(
-      'Time Format',
-      {
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'hh:mm a': 'hh:mm a',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss a': 'HH:mm:ss a',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
-      },
-      'hh:mm a'
-    )
-    const legendFont = legendFontKnob()
-    const legendOrientationThreshold = tooltipOrientationThresholdKnob()
-    const legendColorizeRows = tooltipColorizeRowsKnob()
-    const legendHide = boolean('Hide Hover Legend', false)
-
-    const xTotalTicks = number('X Total Ticks', 8)
-    const yTotalTicks = number('Y Total Ticks', 10)
-    const position = select(
-      'Line Position',
-      {stacked: 'stacked', overlaid: 'overlaid'},
-      'overlaid'
-    )
-    const interpolation = interpolationKnob()
-    const colors = colorSchemeKnob()
-    const lineWidth = number('Line Width', 1)
-    const hoverDimension = select(
-      'Hover Dimension',
-      {auto: 'auto', x: 'x', y: 'y', xy: 'xy'},
-      'auto'
-    )
-
-    const numAnnotations = annotationsInput[0].length
-
-    const annotationLayerData = []
-
-    for (let i = 0; i < numAnnotations; i++) {
-      const startVal = annotationsInput[0][i]
-      const endVal = annotationsInput[1][i]
-      annotationLayerData.push({
-        title: `Hi ${i}`,
-        description: `start/value is ${startVal}`,
+      annotations: matchAnnotationsToTable({
         color: annotationColor,
         dimension: annotationDimension,
-        startValue: Number(startVal),
-        stopValue: Number(endVal),
-        pin: pinType,
-      })
-    }
-
-    const layers = [
-      {
-        type: 'annotation',
+        table,
         x,
         y,
-        annotations: annotationLayerData,
-        fill,
-        hoverDimension,
-        hoverMargin: annotationHoverMargin,
-      },
-    ] as LayerConfig[]
+        pin,
+      }),
+      fill,
+      hoverDimension,
+      hoverMargin: annotationHoverMargin,
+    },
+  ] as LayerConfig[]
 
-    if (includeLineLayer) {
-      layers.unshift({
-        type: 'line',
-        x,
-        y,
-        fill,
-        position,
-        interpolation,
-        colors,
-        lineWidth,
-        hoverDimension,
-      })
-    }
-    const config: Config = {
-      table,
-      valueFormatters: {
-        _time: timeFormatter({timeZone, format: timeFormat}),
-        _value: val =>
-          `${val.toFixed(2)}${
-            valueAxisLabel ? ` ${valueAxisLabel}` : valueAxisLabel
-          }`,
-      },
-      xScale,
-      yScale,
-      legendFont,
-      legendHide,
-      legendOrientationThreshold,
-      legendColorizeRows,
-      tickFont,
-      xTotalTicks,
-      yTotalTicks,
-      layers,
-    }
-    return (
-      <PlotContainer
-        style={{
-          width: 'calc(100vw - 100px)',
-          height: 'calc(100vh - 125px)',
-          margin: '75px 50px 50px 50px',
-        }}
-      >
-        <Plot config={config} />
-      </PlotContainer>
+  if (lineLayer) {
+    layers.unshift({
+      type: 'line',
+      x,
+      y,
+      fill,
+      position: linePosition,
+      interpolation,
+      colors:
+        COLOR_SCHEME_OPTIONS[colorScheme as keyof typeof COLOR_SCHEME_OPTIONS],
+      lineWidth,
+      hoverDimension,
+    })
+  }
+  const config: Config = {
+    table,
+    valueFormatters: {
+      _time: timeFormatter({timeZone, format: timeFormat}),
+      _value: val =>
+        `${val.toFixed(2)}${
+          valueAxisLabel ? ` ${valueAxisLabel}` : valueAxisLabel
+        }`,
+    },
+    xScale,
+    yScale,
+    legendFont,
+    legendHide,
+    legendOrientationThreshold,
+    legendColorizeRows,
+    tickFont,
+    xTotalTicks,
+    yTotalTicks,
+    layers,
+  }
+  return (
+    <PlotContainer style={annotationContainerStyle}>
+      <Plot config={config} />
+    </PlotContainer>
+  )
+}
+
+const renderOverriddenDoubleClick = (args: AnnotationArgs) => {
+  const {
+    annotationColor,
+    annotationDimension,
+    colorScheme,
+    fill,
+    interpolation,
+    legendColorizeRows,
+    legendFont,
+    legendOrientationThreshold,
+    hoverDimension,
+    lineLayer,
+    linePosition,
+    lineWidth,
+    pin,
+    tickFont,
+    timeFormat,
+    timeZone,
+    valueAxisLabel,
+    x,
+    xScale,
+    xTotalTicks,
+    y,
+    yScale,
+    yTotalTicks,
+  } = args
+
+  const doubleClickHandler = plotInteraction => {
+    // eslint-disable-next-line
+    console.log(
+      'This double click function is overridden! Returned arguments:',
+      plotInteraction
     )
-  })
+  }
+
+  const hoverHandler = plotInteraction => {
+    // eslint-disable-next-line
+    console.log('hover handler:', plotInteraction)
+  }
+
+  const interactionHandlers = {
+    doubleClick: doubleClickHandler,
+    hover: hoverHandler,
+  }
+
+  const layers = [
+    {
+      type: 'annotation',
+      x,
+      y,
+      annotations: matchAnnotationsToTable({
+        color: annotationColor,
+        dimension: annotationDimension,
+        table,
+        x,
+        y,
+        pin,
+      }),
+      fill,
+    },
+  ] as LayerConfig[]
+
+  if (lineLayer) {
+    layers.unshift({
+      type: 'line',
+      x,
+      y,
+      fill,
+      position: linePosition,
+      interpolation,
+      colors:
+        COLOR_SCHEME_OPTIONS[colorScheme as keyof typeof COLOR_SCHEME_OPTIONS],
+      lineWidth,
+      hoverDimension,
+    })
+  }
+
+  const config: Config = {
+    table,
+    valueFormatters: {
+      _time: timeFormatter({timeZone, format: timeFormat}),
+      _value: val =>
+        `${val.toFixed(2)}${
+          valueAxisLabel ? ` ${valueAxisLabel}` : valueAxisLabel
+        }`,
+    },
+    xScale,
+    yScale,
+    legendFont,
+    legendOrientationThreshold,
+    legendColorizeRows,
+    tickFont,
+    xTotalTicks,
+    yTotalTicks,
+    layers,
+    interactionHandlers,
+  }
+  return (
+    <PlotContainer style={annotationContainerStyle}>
+      <Plot config={config} />
+    </PlotContainer>
+  )
+}
+
+const renderSelectableMarks = (args: AnnotationArgs) => {
+  const {
+    annotations,
+    annotationColor,
+    annotationDimension,
+    annotationHoverMargin,
+    colorScheme,
+    fill,
+    hoverDimension,
+    interpolation,
+    legendColorizeRows,
+    legendFont,
+    legendOrientationThreshold,
+    lineLayer,
+    linePosition,
+    lineWidth,
+    tickFont,
+    timeFormat,
+    timeZone,
+    valueAxisLabel,
+    x,
+    xScale,
+    xTotalTicks,
+    y,
+    yScale,
+    yTotalTicks,
+  } = args
+
+  const layers = [
+    {
+      type: 'annotation',
+      x,
+      y,
+      annotations: annotations.map((valueString: string) => ({
+        title: 'Hi!',
+        description: `value: ${valueString}`,
+        color: annotationColor,
+        dimension: annotationDimension,
+        startValue: Number(valueString),
+        stopValue: Number(valueString),
+      })),
+      fill,
+      hoverDimension,
+      hoverMargin: annotationHoverMargin,
+    },
+  ] as LayerConfig[]
+
+  if (lineLayer) {
+    layers.unshift({
+      type: 'line',
+      x,
+      y,
+      fill,
+      position: linePosition,
+      interpolation,
+      colors:
+        COLOR_SCHEME_OPTIONS[colorScheme as keyof typeof COLOR_SCHEME_OPTIONS],
+      lineWidth,
+      hoverDimension,
+    })
+  }
+  const config: Config = {
+    table,
+    valueFormatters: {
+      _time: timeFormatter({timeZone, format: timeFormat}),
+      _value: val =>
+        `${val.toFixed(2)}${
+          valueAxisLabel ? ` ${valueAxisLabel}` : valueAxisLabel
+        }`,
+    },
+    xScale,
+    yScale,
+    legendFont,
+    legendOrientationThreshold,
+    legendColorizeRows,
+    tickFont,
+    xTotalTicks,
+    yTotalTicks,
+    layers,
+  }
+  return (
+    <PlotContainer style={annotationContainerStyle}>
+      <Plot config={config} />
+    </PlotContainer>
+  )
+}
+
+const renderAddYourOwnMarks = (args: AnnotationArgs) => {
+  const {
+    annotationColor,
+    annotationDimension,
+    annotationHoverMargin,
+    colorScheme,
+    currentTime,
+    currentValue,
+    endTime,
+    endValue,
+    fill,
+    hoverDimension,
+    interpolation,
+    legendColorizeRows,
+    legendFont,
+    legendHide,
+    legendOrientationThreshold,
+    lineLayer,
+    linePosition,
+    lineWidth,
+    pin,
+    tickFont,
+    timeFormat,
+    timeZone,
+    valueAxisLabel,
+    x,
+    xScale,
+    xTotalTicks,
+    y,
+    yScale,
+    yTotalTicks,
+  } = args
+
+  const columnKey = annotationDimension === 'y' ? y : x
+
+  const annotationsInput =
+    columnKey === TIME
+      ? [[currentTime], [endTime]]
+      : [[currentValue], [endValue]]
+
+  const numAnnotations = annotationsInput[0].length
+
+  const annotationLayerData = []
+
+  for (let i = 0; i < numAnnotations; i++) {
+    const startVal = annotationsInput[0][i]
+    const endVal = annotationsInput[1][i]
+    annotationLayerData.push({
+      title: `Hi ${i}`,
+      description: `start/value is ${startVal}`,
+      color: annotationColor,
+      dimension: annotationDimension,
+      startValue: Number(startVal),
+      stopValue: Number(endVal),
+      pin,
+    })
+  }
+
+  const layers = [
+    {
+      type: 'annotation',
+      x,
+      y,
+      annotations: annotationLayerData,
+      fill,
+      hoverDimension,
+      hoverMargin: annotationHoverMargin,
+    },
+  ] as LayerConfig[]
+
+  if (lineLayer) {
+    layers.unshift({
+      type: 'line',
+      x,
+      y,
+      fill,
+      position: linePosition,
+      interpolation,
+      colors:
+        COLOR_SCHEME_OPTIONS[colorScheme as keyof typeof COLOR_SCHEME_OPTIONS],
+      lineWidth,
+      hoverDimension,
+    })
+  }
+  const config: Config = {
+    table,
+    valueFormatters: {
+      _time: timeFormatter({timeZone, format: timeFormat}),
+      _value: val =>
+        `${val.toFixed(2)}${
+          valueAxisLabel ? ` ${valueAxisLabel}` : valueAxisLabel
+        }`,
+    },
+    xScale,
+    yScale,
+    legendFont,
+    legendHide,
+    legendOrientationThreshold,
+    legendColorizeRows,
+    tickFont,
+    xTotalTicks,
+    yTotalTicks,
+    layers,
+  }
+  return (
+    <PlotContainer style={annotationContainerStyle}>
+      <Plot config={config} />
+    </PlotContainer>
+  )
+}
+
+export const MarkAtEveryPoint: Story = {
+  render: renderMarkAtEveryPoint,
+  args: {
+    lineLayer: false,
+    annotationColor: 'green',
+    annotationDimension: 'x',
+    annotationHoverMargin: 10,
+    tickFont: '10px sans-serif',
+    valueAxisLabel: 'foo',
+    x: '_time',
+    y: '_value',
+    fill: ['cpu'],
+    xScale: 'linear',
+    yScale: 'linear',
+    timeZone: 'America/Los_Angeles',
+    timeFormat: 'hh:mm a',
+    legendFont: '12px sans-serif',
+    legendOrientationThreshold: 5,
+    legendColorizeRows: true,
+    legendHide: false,
+    xTotalTicks: 8,
+    yTotalTicks: 10,
+    linePosition: 'overlaid',
+    interpolation: 'monotoneX',
+    colorScheme: 'Nineteen Eighty Four',
+    lineWidth: 1,
+    hoverDimension: 'auto',
+    pin: 'none',
+  },
+  argTypes: {
+    annotationDimension: {
+      control: {type: 'select', options: ['x', 'y']},
+    },
+    annotationHoverMargin: {
+      control: {type: 'number'},
+    },
+    x: {
+      control: {type: 'select', options: xOptions},
+    },
+    y: {
+      control: {type: 'select', options: xOptions},
+    },
+    fill: {
+      control: {type: 'check', options: fillOptions},
+    },
+    xScale: {
+      control: {type: 'select', options: ['linear', 'log']},
+    },
+    yScale: {
+      control: {type: 'select', options: ['linear', 'log']},
+    },
+    timeZone: {
+      control: {
+        type: 'select',
+        options: ['UTC', 'America/Los_Angeles', 'America/New_York'],
+      },
+    },
+    timeFormat: {
+      control: {type: 'select', options: [...TIME_FORMAT_OPTIONS]},
+    },
+    legendOrientationThreshold: {
+      control: {type: 'number'},
+    },
+    legendColorizeRows: {
+      control: {type: 'boolean'},
+    },
+    legendHide: {
+      control: {type: 'boolean'},
+    },
+    xTotalTicks: {
+      control: {type: 'number'},
+    },
+    yTotalTicks: {
+      control: {type: 'number'},
+    },
+    linePosition: {
+      control: {type: 'select', options: ['overlaid', 'stacked']},
+    },
+    interpolation: {
+      control: {
+        type: 'select',
+        options: [
+          'linear',
+          'monotoneX',
+          'monotoneY',
+          'cubic',
+          'step',
+          'stepBefore',
+          'stepAfter',
+          'natural',
+        ],
+      },
+    },
+    colorScheme: {
+      control: {type: 'select', options: Object.keys(COLOR_SCHEME_OPTIONS)},
+    },
+    lineWidth: {
+      control: {type: 'number'},
+    },
+    hoverDimension: {
+      control: {type: 'select', options: ['auto', 'x', 'y', 'xy']},
+    },
+    pin: {
+      control: {type: 'select', options: ['none', 'circle', 'start', 'stop']},
+    },
+  },
+}
+
+export const OverriddenDoubleClickBehavior: Story = {
+  render: renderOverriddenDoubleClick,
+  args: {
+    lineLayer: false,
+    annotationColor: 'green',
+    annotationDimension: 'x',
+    tickFont: '10px sans-serif',
+    valueAxisLabel: 'foo',
+    x: '_time',
+    y: '_value',
+    fill: ['cpu'],
+    xScale: 'linear',
+    yScale: 'linear',
+    timeZone: 'America/Los_Angeles',
+    timeFormat: 'hh:mm a',
+    legendFont: '12px sans-serif',
+    legendOrientationThreshold: 5,
+    legendColorizeRows: true,
+    xTotalTicks: 8,
+    yTotalTicks: 10,
+    linePosition: 'overlaid',
+    interpolation: 'monotoneX',
+    colorScheme: 'Nineteen Eighty Four',
+    lineWidth: 1,
+    hoverDimension: 'auto',
+    pin: 'none',
+  },
+  argTypes: {
+    annotationDimension: {
+      control: {type: 'select', options: ['x', 'y']},
+    },
+    x: {
+      control: {type: 'select', options: xOptions},
+    },
+    y: {
+      control: {type: 'select', options: xOptions},
+    },
+    fill: {
+      control: {type: 'check', options: fillOptions},
+    },
+    xScale: {
+      control: {type: 'select', options: ['linear', 'log']},
+    },
+    yScale: {
+      control: {type: 'select', options: ['linear', 'log']},
+    },
+    timeZone: {
+      control: {
+        type: 'select',
+        options: ['UTC', 'America/Los_Angeles', 'America/New_York'],
+      },
+    },
+    timeFormat: {
+      control: {type: 'select', options: [...TIME_FORMAT_OPTIONS]},
+    },
+    legendOrientationThreshold: {
+      control: {type: 'number'},
+    },
+    legendColorizeRows: {
+      control: {type: 'boolean'},
+    },
+    xTotalTicks: {
+      control: {type: 'number'},
+    },
+    yTotalTicks: {
+      control: {type: 'number'},
+    },
+    linePosition: {
+      control: {type: 'select', options: ['overlaid', 'stacked']},
+    },
+    interpolation: {
+      control: {
+        type: 'select',
+        options: [
+          'linear',
+          'monotoneX',
+          'monotoneY',
+          'cubic',
+          'step',
+          'stepBefore',
+          'stepAfter',
+          'natural',
+        ],
+      },
+    },
+    colorScheme: {
+      control: {type: 'select', options: Object.keys(COLOR_SCHEME_OPTIONS)},
+    },
+    lineWidth: {
+      control: {type: 'number'},
+    },
+    hoverDimension: {
+      control: {type: 'select', options: ['auto', 'x', 'y', 'xy']},
+    },
+    pin: {
+      control: {type: 'select', options: ['none', 'circle', 'start', 'stop']},
+    },
+  },
+}
+
+export const SelectableMarks: Story = {
+  render: renderSelectableMarks,
+  args: {
+    lineLayer: true,
+    annotationColor: 'green',
+    annotationDimension: 'x',
+    annotationHoverMargin: 10,
+    annotations: annotationSelectionsDefault,
+    tickFont: '10px sans-serif',
+    valueAxisLabel: 'foo',
+    x: '_time',
+    y: '_value',
+    fill: ['cpu'],
+    xScale: 'linear',
+    yScale: 'linear',
+    timeZone: 'America/Los_Angeles',
+    timeFormat: 'hh:mm a',
+    legendFont: '12px sans-serif',
+    legendOrientationThreshold: 5,
+    legendColorizeRows: true,
+    xTotalTicks: 8,
+    yTotalTicks: 10,
+    linePosition: 'overlaid',
+    interpolation: 'monotoneX',
+    colorScheme: 'Nineteen Eighty Four',
+    lineWidth: 1,
+    hoverDimension: 'auto',
+    pin: 'none',
+  },
+  argTypes: {
+    annotations: {
+      control: {type: 'check', options: annotationSelectionsOptions},
+    },
+    annotationDimension: {
+      control: {type: 'select', options: ['x', 'y']},
+    },
+    annotationHoverMargin: {
+      control: {type: 'number'},
+    },
+    x: {
+      control: {type: 'select', options: xOptions},
+    },
+    y: {
+      control: {type: 'select', options: xOptions},
+    },
+    fill: {
+      control: {type: 'check', options: fillOptions},
+    },
+    xScale: {
+      control: {type: 'select', options: ['linear', 'log']},
+    },
+    yScale: {
+      control: {type: 'select', options: ['linear', 'log']},
+    },
+    timeZone: {
+      control: {
+        type: 'select',
+        options: ['UTC', 'America/Los_Angeles', 'America/New_York'],
+      },
+    },
+    timeFormat: {
+      control: {type: 'select', options: [...TIME_FORMAT_OPTIONS]},
+    },
+    legendOrientationThreshold: {
+      control: {type: 'number'},
+    },
+    legendColorizeRows: {
+      control: {type: 'boolean'},
+    },
+    xTotalTicks: {
+      control: {type: 'number'},
+    },
+    yTotalTicks: {
+      control: {type: 'number'},
+    },
+    linePosition: {
+      control: {type: 'select', options: ['overlaid', 'stacked']},
+    },
+    interpolation: {
+      control: {
+        type: 'select',
+        options: [
+          'linear',
+          'monotoneX',
+          'monotoneY',
+          'cubic',
+          'step',
+          'stepBefore',
+          'stepAfter',
+          'natural',
+        ],
+      },
+    },
+    colorScheme: {
+      control: {type: 'select', options: Object.keys(COLOR_SCHEME_OPTIONS)},
+    },
+    lineWidth: {
+      control: {type: 'number'},
+    },
+    hoverDimension: {
+      control: {type: 'select', options: ['auto', 'x', 'y', 'xy']},
+    },
+    pin: {
+      control: {type: 'select', options: ['none', 'circle', 'start', 'stop']},
+    },
+  },
+}
+
+export const AddYourOwnMarks: Story = {
+  render: renderAddYourOwnMarks,
+  args: {
+    lineLayer: true,
+    annotationColor: 'green',
+    annotationDimension: 'x',
+    annotationHoverMargin: 10,
+    x: '_time',
+    y: '_value',
+    currentValue: firstValue,
+    endValue: firstValue,
+    currentTime: String(Date.now() + 1000 * 60 * 6),
+    endTime: String(Date.now() + 1000 * 60 * 6),
+    pin: 'start',
+    tickFont: '10px sans-serif',
+    valueAxisLabel: 'foo',
+    fill: ['cpu'],
+    xScale: 'linear',
+    yScale: 'linear',
+    timeZone: 'America/Los_Angeles',
+    timeFormat: 'hh:mm a',
+    legendFont: '12px sans-serif',
+    legendOrientationThreshold: 5,
+    legendColorizeRows: true,
+    legendHide: false,
+    xTotalTicks: 8,
+    yTotalTicks: 10,
+    linePosition: 'overlaid',
+    interpolation: 'monotoneX',
+    colorScheme: 'Nineteen Eighty Four',
+    lineWidth: 1,
+    hoverDimension: 'auto',
+  },
+  argTypes: {
+    annotationDimension: {
+      control: {type: 'select', options: ['x', 'y']},
+    },
+    annotationHoverMargin: {
+      control: {type: 'number'},
+    },
+    x: {
+      control: {type: 'select', options: xOptions},
+    },
+    y: {
+      control: {type: 'select', options: xOptions},
+    },
+    fill: {
+      control: {type: 'check', options: fillOptions},
+    },
+    xScale: {
+      control: {type: 'select', options: ['linear', 'log']},
+    },
+    yScale: {
+      control: {type: 'select', options: ['linear', 'log']},
+    },
+    timeZone: {
+      control: {
+        type: 'select',
+        options: ['UTC', 'America/Los_Angeles', 'America/New_York'],
+      },
+    },
+    timeFormat: {
+      control: {type: 'select', options: [...TIME_FORMAT_OPTIONS]},
+    },
+    legendOrientationThreshold: {
+      control: {type: 'number'},
+    },
+    legendColorizeRows: {
+      control: {type: 'boolean'},
+    },
+    legendHide: {
+      control: {type: 'boolean'},
+    },
+    xTotalTicks: {
+      control: {type: 'number'},
+    },
+    yTotalTicks: {
+      control: {type: 'number'},
+    },
+    linePosition: {
+      control: {type: 'select', options: ['overlaid', 'stacked']},
+    },
+    interpolation: {
+      control: {
+        type: 'select',
+        options: [
+          'linear',
+          'monotoneX',
+          'monotoneY',
+          'cubic',
+          'step',
+          'stepBefore',
+          'stepAfter',
+          'natural',
+        ],
+      },
+    },
+    colorScheme: {
+      control: {type: 'select', options: Object.keys(COLOR_SCHEME_OPTIONS)},
+    },
+    lineWidth: {
+      control: {type: 'number'},
+    },
+    hoverDimension: {
+      control: {type: 'select', options: ['auto', 'x', 'y', 'xy']},
+    },
+    pin: {
+      control: {type: 'select', options: ['none', 'circle', 'start', 'stop']},
+    },
+  },
+}

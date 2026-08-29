@@ -1,5 +1,5 @@
 import * as React from 'react'
-import {storiesOf} from '@storybook/react'
+import type {Meta, StoryObj} from '@storybook/react'
 
 import {SIN} from './sin'
 
@@ -16,8 +16,16 @@ import {PlotContainer} from './helpers'
 
 import {CPU} from './data/cpu'
 
-storiesOf('Tests', module)
-  .add('Snapshot - with multiple minimum values', () => {
+interface TestsArgs {}
+
+export default {
+  title: 'Tests',
+} as Meta
+
+type Story = StoryObj<TestsArgs>
+
+export const SnapshotWithMultipleMinimumValues: Story = {
+  render: () => {
     // https://github.com/influxdata/giraffe/issues/51
 
     const {table} = fromFlux(
@@ -54,8 +62,11 @@ storiesOf('Tests', module)
     }
 
     return <Plot config={config} />
-  })
-  .add('Snapshot - line layer with shaded area and step interpolation', () => {
+  },
+}
+
+export const SnapshotLineLayerWithShadedAreaAndStepInterpolation: Story = {
+  render: () => {
     const config: Config = {
       width: 600,
       height: 400,
@@ -73,8 +84,11 @@ storiesOf('Tests', module)
     }
 
     return <Plot config={config} />
-  })
-  .add('Snapshot - time zone support', () => {
+  },
+}
+
+export const SnapshotTimeZoneSupport: Story = {
+  render: () => {
     const config: Config = {
       width: 300,
       height: 200,
@@ -130,8 +144,11 @@ storiesOf('Tests', module)
         ))}
       </div>
     )
-  })
-  .add('Snapshot - binary prefix formatting', () => {
+  },
+}
+
+export const SnapshotBinaryPrefixFormatting: Story = {
+  render: () => {
     const table = newTable(4)
       .addColumn('time', 'system', 'number', [0, 1, 2, 3])
       .addColumn(
@@ -158,8 +175,11 @@ storiesOf('Tests', module)
     }
 
     return <Plot config={config} />
-  })
-  .add('Snapshot - with fromRows adapter', () => {
+  },
+}
+
+export const SnapshotWithFromRowsAdapter: Story = {
+  render: () => {
     const table = fromRows([
       {x: 0.6637748924084008, y: 0},
       {x: 0.5484188553850314, y: 0.03450358980217672},
@@ -198,8 +218,11 @@ storiesOf('Tests', module)
     }
 
     return <Plot config={config} />
-  })
-  .add('Snapshot - custom y ticks', () => {
+  },
+}
+
+export const SnapshotCustomYTicks: Story = {
+  render: () => {
     const config: Config = {
       width: 600,
       height: 400,
@@ -216,8 +239,11 @@ storiesOf('Tests', module)
     }
 
     return <Plot config={config} />
-  })
-  .add('Snapshot - specific histogram bin settings should not crash', () => {
+  },
+}
+
+export const SnapshotSpecificHistogramBinSettingsShouldNotCrash: Story = {
+  render: () => {
     const {table} = fromFlux(
       `#group,false,false,true,true,false,false,true,true,true
 #datatype,string,long,dateTime:RFC3339,dateTime:RFC3339,dateTime:RFC3339,long,string,string,string
@@ -249,8 +275,11 @@ storiesOf('Tests', module)
     }
 
     return <Plot config={config} />
-  })
-  .add('Stress Test - Line', () => {
+  },
+}
+
+export const StressTestLine: Story = {
+  render: () => {
     const config: Config = {
       table: SIN,
       layers: [
@@ -268,4 +297,5 @@ storiesOf('Tests', module)
         <Plot config={config} />
       </PlotContainer>
     )
-  })
+  },
+}

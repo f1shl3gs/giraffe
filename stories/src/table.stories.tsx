@@ -1,204 +1,151 @@
 import * as React from 'react'
-import {storiesOf} from '@storybook/react'
-import {boolean, number, select, text, withKnobs} from '@storybook/addon-knobs'
+import type {Meta, StoryObj} from '@storybook/react'
 import {Config, Plot} from '../../giraffe/src'
 
-import {PlotContainer} from './helpers'
+import {PlotContainer, TIME_FORMAT_OPTIONS} from './helpers'
 import {TableGraphLayerConfig} from '../../giraffe/src/types'
 import {HoverTimeProvider} from '../../giraffe/src/components/Table'
 import {DEFAULT_TABLE_COLORS} from '../../giraffe/src'
 
 import {tableCSV} from './data/tableGraph'
 
-storiesOf('Table', module)
-  .addDecorator(withKnobs)
-  .add('Table', () => {
-    const timeFormat = select(
-      'Time Format',
-      {
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'hh:mm a': 'hh:mm a',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
-      },
-      'YYYY-MM-DD HH:mm:ss ZZ'
-    )
-    const theme = select('Theme', {dark: 'dark', light: 'light'}, 'dark')
-    const fixFirstColumn = boolean('Fix First Column', false)
-    const enforceDecimalPlaces = boolean('Enforce Decimals', true)
-    const numberOfDecimalPlaces = number('Number of Decimal Places', 3)
-    const config: Config = {
-      fluxResponse: tableCSV,
-      layers: [
-        {
-          type: 'table',
-          properties: {
-            colors: DEFAULT_TABLE_COLORS,
-            tableOptions: {
-              fixFirstColumn,
-              verticalTimeAxis: true,
-            },
-            fieldOptions: [
-              {
-                displayName: '_start',
-                internalName: '_start',
-                visible: true,
-              },
-              {
-                displayName: '_stop',
-                internalName: '_stop',
-                visible: true,
-              },
-              {
-                displayName: '_time',
-                internalName: '_time',
-                visible: true,
-              },
-              {
-                displayName: '_value',
-                internalName: '_value',
-                visible: true,
-              },
-              {
-                displayName: '_field',
-                internalName: '_field',
-                visible: true,
-              },
-              {
-                displayName: '_measurement',
-                internalName: '_measurement',
-                visible: true,
-              },
-              {
-                displayName: 'cpu',
-                internalName: 'cpu',
-                visible: true,
-              },
-              {
-                displayName: 'host',
-                internalName: 'host',
-                visible: true,
-              },
-            ],
-            timeFormat,
-            decimalPlaces: {
-              digits: numberOfDecimalPlaces,
-              isEnforced: enforceDecimalPlaces,
-            },
-          },
-          timeZone: 'Local',
-          tableTheme: theme,
-        } as TableGraphLayerConfig,
-      ],
-    }
-    return (
-      <HoverTimeProvider>
-        <PlotContainer>
-          <Plot config={config} />
-        </PlotContainer>
-      </HoverTimeProvider>
-    )
-  })
-  .add('Custom CSV', () => {
-    let fluxResponse = text('Paste CSV here:', '')
+interface TableArgs {
+  timeFormat: string
+  theme: string
+  fixFirstColumn: boolean
+  enforceDecimalPlaces: boolean
+  numberOfDecimalPlaces: number
+  csv: string
+}
 
-    const timeFormat = select(
-      'Time Format',
+export default {
+  title: 'Table',
+} as Meta
+
+type Story = StoryObj<TableArgs>
+
+const fieldOptions = [
+  {
+    displayName: '_start',
+    internalName: '_start',
+    visible: true,
+  },
+  {
+    displayName: '_stop',
+    internalName: '_stop',
+    visible: true,
+  },
+  {
+    displayName: '_time',
+    internalName: '_time',
+    visible: true,
+  },
+  {
+    displayName: '_value',
+    internalName: '_value',
+    visible: true,
+  },
+  {
+    displayName: '_field',
+    internalName: '_field',
+    visible: true,
+  },
+  {
+    displayName: '_measurement',
+    internalName: '_measurement',
+    visible: true,
+  },
+  {
+    displayName: 'cpu',
+    internalName: 'cpu',
+    visible: true,
+  },
+  {
+    displayName: 'host',
+    internalName: 'host',
+    visible: true,
+  },
+]
+
+const render = (args: TableArgs, fluxResponse: string) => {
+  const {
+    timeFormat,
+    theme,
+    fixFirstColumn,
+    enforceDecimalPlaces,
+    numberOfDecimalPlaces,
+  } = args
+
+  const config: Config = {
+    fluxResponse,
+    layers: [
       {
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'hh:mm a': 'hh:mm a',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
-      },
-      'YYYY-MM-DD HH:mm:ss ZZ'
-    )
-    const theme = select('Theme', {dark: 'dark', light: 'light'}, 'dark')
-    const fixFirstColumn = boolean('Fix First Column', false)
-    const enforceDecimalPlaces = boolean('Enforce Decimals', true)
-    const numberOfDecimalPlaces = number('Number of Decimal Places', 3)
-    const config: Config = {
-      fluxResponse,
-      layers: [
-        {
-          type: 'table',
-          properties: {
-            colors: DEFAULT_TABLE_COLORS,
-            tableOptions: {
-              fixFirstColumn,
-              verticalTimeAxis: true,
-            },
-            fieldOptions: [
-              {
-                displayName: '_start',
-                internalName: '_start',
-                visible: true,
-              },
-              {
-                displayName: '_stop',
-                internalName: '_stop',
-                visible: true,
-              },
-              {
-                displayName: '_time',
-                internalName: '_time',
-                visible: true,
-              },
-              {
-                displayName: '_value',
-                internalName: '_value',
-                visible: true,
-              },
-              {
-                displayName: '_field',
-                internalName: '_field',
-                visible: true,
-              },
-              {
-                displayName: '_measurement',
-                internalName: '_measurement',
-                visible: true,
-              },
-              {
-                displayName: 'cpu',
-                internalName: 'cpu',
-                visible: true,
-              },
-              {
-                displayName: 'host',
-                internalName: 'host',
-                visible: true,
-              },
-            ],
-            timeFormat,
-            decimalPlaces: {
-              digits: numberOfDecimalPlaces,
-              isEnforced: enforceDecimalPlaces,
-            },
+        type: 'table',
+        properties: {
+          colors: DEFAULT_TABLE_COLORS,
+          tableOptions: {
+            fixFirstColumn,
+            verticalTimeAxis: true,
           },
-          timeZone: 'Local',
-          tableTheme: theme,
-        } as TableGraphLayerConfig,
-      ],
-    }
-    return (
-      <HoverTimeProvider>
-        <PlotContainer>
-          <Plot config={config} />
-        </PlotContainer>
-      </HoverTimeProvider>
-    )
-  })
+          fieldOptions,
+          timeFormat,
+          decimalPlaces: {
+            digits: numberOfDecimalPlaces,
+            isEnforced: enforceDecimalPlaces,
+          },
+        },
+        timeZone: 'Local',
+        tableTheme: theme,
+      } as TableGraphLayerConfig,
+    ],
+  }
+
+  return (
+    <HoverTimeProvider>
+      <PlotContainer>
+        <Plot config={config} />
+      </PlotContainer>
+    </HoverTimeProvider>
+  )
+}
+
+const baseArgs = {
+  timeFormat: 'YYYY-MM-DD HH:mm:ss ZZ',
+  theme: 'dark',
+  fixFirstColumn: false,
+  enforceDecimalPlaces: true,
+  numberOfDecimalPlaces: 3,
+}
+
+const baseArgTypes = {
+  timeFormat: {
+    control: {type: 'select', options: TIME_FORMAT_OPTIONS},
+  },
+  theme: {
+    control: {type: 'select', options: ['dark', 'light']},
+  },
+  fixFirstColumn: {
+    control: {type: 'boolean'},
+  },
+  enforceDecimalPlaces: {
+    control: {type: 'boolean'},
+  },
+  numberOfDecimalPlaces: {
+    control: {type: 'number'},
+  },
+} as const
+
+export const Table: Story = {
+  render: args => render(args, tableCSV),
+  args: baseArgs,
+  argTypes: baseArgTypes,
+}
+
+export const CustomCSV: Story = {
+  render: args => render(args, args.csv),
+  args: {
+    ...baseArgs,
+    csv: '',
+  },
+  argTypes: baseArgTypes,
+}

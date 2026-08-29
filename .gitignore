@@ -11,4 +11,5 @@ coverage
 .npmrc
 
 .idea
-.yarn
+.yarn/cache
+.yarn/install-state.gz

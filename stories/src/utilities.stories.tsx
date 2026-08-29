@@ -1,37 +1,24 @@
 import * as React from 'react'
-import {storiesOf} from '@storybook/react'
-import {withKnobs, number, select, boolean, text} from '@storybook/addon-knobs'
+import type {ArgTypes, Meta, StoryObj} from '@storybook/react'
 
 import {
   Config,
-  MAGMA,
   Plot,
   exportImage,
   fromFlux,
   timeFormatter,
 } from '../../giraffe/src'
+import type {LineInterpolation, LinePosition} from '../../giraffe/src'
 import {stackedLineTable} from './data/stackedLineLayer'
-
 import {PlotEnv} from '../../giraffe/src/utils/PlotEnv'
 
 import {
   PlotContainer,
-  colorSchemeKnob,
-  fillKnob,
+  COLOR_SCHEME_OPTIONS,
+  TIME_FORMAT_OPTIONS,
   findStringColumns,
-  interpolationKnob,
-  legendFontKnob,
-  showAxesKnob,
+  findXYColumns,
   getCPUTable,
-  tickFontKnob,
-  timeZoneKnob,
-  tooltipColorizeRowsKnob,
-  tooltipHideKnob,
-  tooltipOrientationThresholdKnob,
-  xKnob,
-  xScaleKnob,
-  yKnob,
-  yScaleKnob,
 } from './helpers'
 
 import {
@@ -48,63 +35,251 @@ import {
   same3,
 } from './data/bandCSV'
 
-storiesOf('Utilities', module)
-  .addDecorator(withKnobs)
-  .add('Screenshot A Stacked Line Layer', () => {
-    const table = stackedLineTable
-    const colors = colorSchemeKnob()
-    const legendFont = legendFontKnob()
-    const tickFont = tickFontKnob()
-    const x = xKnob(table)
-    const y = yKnob(table)
-    const valueAxisLabel = text('Value Axis Label', 'foo')
-    const xScale = xScaleKnob()
-    const yScale = yScaleKnob()
-    const timeZone = timeZoneKnob()
-    const timeFormat = select(
-      'Time Format',
-      {
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'hh:mm a': 'hh:mm a',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
-      },
-      'YYYY-MM-DD HH:mm:ss ZZ'
-    )
-    const fill = fillKnob(table, ['cpu'])
-    const position = select(
-      'Line Position',
-      {stacked: 'stacked', overlaid: 'overlaid'},
-      'stacked'
-    )
-    const interpolation = interpolationKnob()
-    const showAxes = showAxesKnob()
-    const lineWidth = number('Line Width', 1)
-    const shadeBelow = boolean('Shade Area', false)
-    const shadeBelowOpacity = number('Area Opacity', 0.1)
-    const hoverDimension = select(
-      'Hover Dimension',
-      {auto: 'auto', x: 'x', y: 'y', xy: 'xy'},
-      'auto'
-    )
-    const legendOpacity = number('Legend Opacity', 1.0, {
-      range: true,
-      min: 0,
-      max: 1.0,
-      step: 0.05,
-    })
-    const legendOrientationThreshold = tooltipOrientationThresholdKnob()
-    const legendColorizeRows = tooltipColorizeRowsKnob()
+interface UtilitiesArgs {
+  colorScheme: keyof typeof COLOR_SCHEME_OPTIONS
+  legendFont: string
+  tickFont: string
+  valueAxisLabel: string
+  x: string
+  y: string
+  fill: string[]
+  position: LinePosition
+  xScale: string
+  yScale: string
+  timeZone: string
+  timeFormat: string
+  interpolation: LineInterpolation
+  showAxes: boolean
+  lineWidth: number
+  lineOpacity: number
+  shadeOpacity: number
+  shadeBelow: boolean
+  shadeBelowOpacity: number
+  hoverDimension: 'auto' | 'x' | 'y' | 'xy'
+  legendOpacity: number
+  legendOrientationThreshold: number
+  legendColorizeRows: boolean
+  legendHide: boolean
+  binCount: number
+  upperColumnName: string
+  mainColumnName: string
+  lowerColumnName: string
+  yTickStart: number
+  yTickStep: number
+  xTotalTicks: number
+  staticData: string
+}
+
+export default {
+  title: 'Utilities',
+} as Meta
+
+type Story = StoryObj<UtilitiesArgs>
+
+const cpuTable = getCPUTable()
+const CPU_XY_COLUMN_OPTIONS = Object.keys(findXYColumns(cpuTable))
+const STACKED_XY_COLUMN_OPTIONS = Object.keys(findXYColumns(stackedLineTable))
+const CPU_FILL_OPTIONS = findStringColumns(cpuTable)
+const STACKED_FILL_OPTIONS = findStringColumns(stackedLineTable)
+const COLOR_SCHEME_KEY_OPTIONS = Object.keys(COLOR_SCHEME_OPTIONS)
+const TIME_ZONE_OPTIONS = ['UTC', 'America/Los_Angeles', 'America/New_York']
+const INTERPOLATION_OPTIONS: LineInterpolation[] = [
+  'linear',
+  'monotoneX',
+  'monotoneY',
+  'cubic',
+  'step',
+  'stepBefore',
+  'stepAfter',
+  'natural',
+]
+const POSITION_OPTIONS: LinePosition[] = ['overlaid', 'stacked']
+const HOVER_DIMENSION_OPTIONS = ['auto', 'x', 'y', 'xy']
+
+const baseArgs: Partial<UtilitiesArgs> = {
+  colorScheme: 'Nineteen Eighty Four',
+  legendFont: '12px sans-serif',
+  tickFont: '10px sans-serif',
+  valueAxisLabel: 'foo',
+  x: '_time',
+  y: '_value',
+  fill: ['cpu'],
+  xScale: 'linear',
+  yScale: 'linear',
+  timeZone: 'UTC',
+  timeFormat: 'YYYY-MM-DD HH:mm:ss ZZ',
+  interpolation: 'monotoneX',
+  showAxes: true,
+  lineWidth: 1,
+  shadeBelow: false,
+  shadeBelowOpacity: 0.1,
+  hoverDimension: 'auto',
+  legendOpacity: 1.0,
+  legendOrientationThreshold: 5,
+  legendColorizeRows: true,
+}
+
+const baseArgTypes: Partial<ArgTypes<UtilitiesArgs>> = {
+  colorScheme: {
+    control: {type: 'select', options: COLOR_SCHEME_KEY_OPTIONS},
+  },
+  legendFont: {
+    control: {type: 'text'},
+  },
+  tickFont: {
+    control: {type: 'text'},
+  },
+  valueAxisLabel: {
+    control: {type: 'text'},
+  },
+  xScale: {
+    control: {type: 'select', options: ['linear', 'log']},
+  },
+  yScale: {
+    control: {type: 'select', options: ['linear', 'log']},
+  },
+  timeZone: {
+    control: {type: 'select', options: TIME_ZONE_OPTIONS},
+  },
+  timeFormat: {
+    control: {type: 'select', options: [...TIME_FORMAT_OPTIONS]},
+  },
+  position: {
+    control: {type: 'select', options: POSITION_OPTIONS},
+  },
+  interpolation: {
+    control: {type: 'select', options: INTERPOLATION_OPTIONS},
+  },
+  hoverDimension: {
+    control: {type: 'select', options: HOVER_DIMENSION_OPTIONS},
+  },
+  showAxes: {
+    control: {type: 'boolean'},
+  },
+  lineWidth: {
+    control: {type: 'number'},
+  },
+  lineOpacity: {
+    control: {type: 'number'},
+  },
+  shadeOpacity: {
+    control: {type: 'number'},
+  },
+  shadeBelow: {
+    control: {type: 'boolean'},
+  },
+  shadeBelowOpacity: {
+    control: {type: 'number'},
+  },
+  legendOpacity: {
+    control: {type: 'range', min: 0, max: 1, step: 0.05},
+  },
+  legendOrientationThreshold: {
+    control: {type: 'number'},
+  },
+  legendColorizeRows: {
+    control: {type: 'boolean'},
+  },
+  legendHide: {
+    control: {type: 'boolean'},
+  },
+  binCount: {
+    control: {type: 'number'},
+  },
+  upperColumnName: {
+    control: {type: 'text'},
+  },
+  mainColumnName: {
+    control: {type: 'text'},
+  },
+  lowerColumnName: {
+    control: {type: 'text'},
+  },
+  yTickStart: {
+    control: {type: 'number'},
+  },
+  yTickStep: {
+    control: {type: 'number'},
+  },
+  xTotalTicks: {
+    control: {type: 'number'},
+  },
+  staticData: {
+    control: {
+      type: 'select',
+      options: [
+        colors6,
+        cpu1,
+        cpu2,
+        graphEdge1,
+        hoverAlignment1,
+        hoverAlignment2,
+        mem1,
+        mem2,
+        noLowerAndUpper,
+        same3,
+      ],
+    },
+  },
+}
+
+const renderScreenshot = (config: Config) => {
+  const axesCanvasRef: React.RefObject<HTMLCanvasElement> = React.createRef()
+  const layerCanvasRef: React.RefObject<HTMLCanvasElement> = React.createRef()
+
+  const plotEnv = new PlotEnv()
+  plotEnv.config = config as any
+
+  return (
+    <PlotContainer>
+      <button
+        onClick={() => {
+          if (layerCanvasRef.current && axesCanvasRef.current) {
+            exportImage(layerCanvasRef.current, axesCanvasRef.current, {
+              top: plotEnv.margins.top,
+            }).then(image => window.open(image, '_blank'))
+          }
+        }}
+      >
+        Click to Open a screenshot in new Window/Tab
+      </button>
+      <Plot
+        config={config}
+        axesCanvasRef={axesCanvasRef}
+        layerCanvasRef={layerCanvasRef}
+      />
+    </PlotContainer>
+  )
+}
+
+export const ScreenshotAStackedLineLayer: Story = {
+  render: args => {
+    const {
+      colorScheme,
+      legendFont,
+      tickFont,
+      valueAxisLabel,
+      x,
+      y,
+      xScale,
+      yScale,
+      timeZone,
+      timeFormat,
+      fill,
+      position,
+      interpolation,
+      showAxes,
+      lineWidth,
+      shadeBelow,
+      shadeBelowOpacity,
+      hoverDimension,
+      legendOpacity,
+      legendOrientationThreshold,
+      legendColorizeRows,
+    } = args
 
     const config: Config = {
-      table,
+      table: stackedLineTable,
       valueFormatters: {
         _time: timeFormatter({timeZone, format: timeFormat}),
         _value: val =>
@@ -128,7 +303,7 @@ storiesOf('Utilities', module)
           fill,
           position,
           interpolation,
-          colors,
+          colors: COLOR_SCHEME_OPTIONS[colorScheme],
           lineWidth,
           hoverDimension,
           shadeBelow,
@@ -137,83 +312,53 @@ storiesOf('Utilities', module)
       ],
     }
 
-    const axesCanvasRef: React.RefObject<HTMLCanvasElement> = React.createRef()
-    const layerCanvasRef: React.RefObject<HTMLCanvasElement> = React.createRef()
+    return renderScreenshot(config)
+  },
+  args: {
+    ...baseArgs,
+    position: 'stacked',
+  },
+  argTypes: {
+    ...baseArgTypes,
+    x: {
+      control: {type: 'select', options: STACKED_XY_COLUMN_OPTIONS},
+    },
+    y: {
+      control: {type: 'select', options: STACKED_XY_COLUMN_OPTIONS},
+    },
+    fill: {
+      control: {type: 'multi-select', options: STACKED_FILL_OPTIONS},
+    },
+  },
+}
 
-    const plotEnv = new PlotEnv()
-    plotEnv.config = config as any
-
-    return (
-      <PlotContainer>
-        <button
-          onClick={() => {
-            if (layerCanvasRef.current && axesCanvasRef.current) {
-              exportImage(layerCanvasRef.current, axesCanvasRef.current, {
-                top: plotEnv.margins.top,
-              }).then(image => window.open(image, '_blank'))
-            }
-          }}
-        >
-          Click to Open a screenshot in new Window/Tab
-        </button>
-        <Plot
-          config={config}
-          axesCanvasRef={axesCanvasRef}
-          layerCanvasRef={layerCanvasRef}
-        />
-      </PlotContainer>
-    )
-  })
-  .add('Screenshot A Line', () => {
-    const table = getCPUTable()
-    const colors = colorSchemeKnob()
-    const legendFont = legendFontKnob()
-    const tickFont = tickFontKnob()
-    const x = xKnob(table)
-    const y = yKnob(table)
-    const xScale = xScaleKnob()
-    const yScale = yScaleKnob()
-    const timeZone = timeZoneKnob()
-    const timeFormat = select(
-      'Time Format',
-      {
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'hh:mm a': 'hh:mm a',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
-      },
-      'YYYY-MM-DD HH:mm:ss ZZ'
-    )
-    const fill = fillKnob(table, ['cpu'])
-    const interpolation = interpolationKnob()
-    const showAxes = showAxesKnob()
-    const lineWidth = number('Line Width', 1)
-    const shadeBelow = boolean('Shade Area', false)
-    const shadeBelowOpacity = number('Area Opacity', 0.1)
-    const hoverDimension = select(
-      'Hover Dimension',
-      {auto: 'auto', x: 'x', y: 'y', xy: 'xy'},
-      'auto'
-    )
-    const legendOpacity = number('Legend Opacity', 1.0, {
-      range: true,
-      min: 0,
-      max: 1.0,
-      step: 0.05,
-    })
-    const legendOrientationThreshold = tooltipOrientationThresholdKnob()
-    const legendColorizeRows = tooltipColorizeRowsKnob()
-    const legendHide = tooltipHideKnob()
+export const ScreenshotALine: Story = {
+  render: args => {
+    const {
+      colorScheme,
+      legendFont,
+      tickFont,
+      x,
+      y,
+      xScale,
+      yScale,
+      timeZone,
+      timeFormat,
+      fill,
+      interpolation,
+      showAxes,
+      lineWidth,
+      shadeBelow,
+      shadeBelowOpacity,
+      hoverDimension,
+      legendOpacity,
+      legendOrientationThreshold,
+      legendColorizeRows,
+      legendHide,
+    } = args
 
     const config: Config = {
-      table,
+      table: cpuTable,
       valueFormatters: {
         _time: timeFormatter({timeZone, format: timeFormat}),
         _value: val => `${Math.round(val)}%`,
@@ -234,7 +379,7 @@ storiesOf('Utilities', module)
           y,
           fill,
           interpolation,
-          colors,
+          colors: COLOR_SCHEME_OPTIONS[colorScheme],
           lineWidth,
           hoverDimension,
           shadeBelow,
@@ -243,48 +388,43 @@ storiesOf('Utilities', module)
       ],
     }
 
-    const axesCanvasRef: React.RefObject<HTMLCanvasElement> = React.createRef()
-    const layerCanvasRef: React.RefObject<HTMLCanvasElement> = React.createRef()
+    return renderScreenshot(config)
+  },
+  args: {
+    ...baseArgs,
+    legendHide: false,
+  },
+  argTypes: {
+    ...baseArgTypes,
+    x: {
+      control: {type: 'select', options: CPU_XY_COLUMN_OPTIONS},
+    },
+    y: {
+      control: {type: 'select', options: CPU_XY_COLUMN_OPTIONS},
+    },
+    fill: {
+      control: {type: 'multi-select', options: CPU_FILL_OPTIONS},
+    },
+  },
+}
 
-    const plotEnv = new PlotEnv()
-    plotEnv.config = config as any
-
-    return (
-      <PlotContainer>
-        <button
-          onClick={() => {
-            if (layerCanvasRef.current && axesCanvasRef.current) {
-              exportImage(layerCanvasRef.current, axesCanvasRef.current, {
-                top: plotEnv.margins.top,
-              }).then(image => window.open(image, '_blank'))
-            }
-          }}
-        >
-          Click to Open a screenshot in new Window/Tab
-        </button>
-        <Plot
-          config={config}
-          axesCanvasRef={axesCanvasRef}
-          layerCanvasRef={layerCanvasRef}
-        />
-      </PlotContainer>
-    )
-  })
-  .add('Screenshot A Heatmap', () => {
-    const table = getCPUTable()
-    const colors = colorSchemeKnob(MAGMA)
-    const legendFont = legendFontKnob()
-    const tickFont = tickFontKnob()
-    const x = xKnob(table)
-    const y = yKnob(table)
-    const xScale = xScaleKnob()
-    const yScale = yScaleKnob()
-    const showAxes = showAxesKnob()
-    const legendOrientationThreshold = tooltipOrientationThresholdKnob()
-    const legendColorizeRows = tooltipColorizeRowsKnob()
+export const ScreenshotAHeatmap: Story = {
+  render: args => {
+    const {
+      colorScheme,
+      legendFont,
+      tickFont,
+      x,
+      y,
+      xScale,
+      yScale,
+      showAxes,
+      legendOrientationThreshold,
+      legendColorizeRows,
+    } = args
 
     const config: Config = {
-      table,
+      table: cpuTable,
       legendFont,
       legendOrientationThreshold,
       legendColorizeRows,
@@ -295,51 +435,50 @@ storiesOf('Utilities', module)
       width: 500,
       height: 500,
       valueFormatters: {_value: val => `${Math.round(val)}%`},
-      layers: [{type: 'heatmap', x, y, colors}],
+      layers: [
+        {
+          type: 'heatmap',
+          x,
+          y,
+          colors: COLOR_SCHEME_OPTIONS[colorScheme],
+        },
+      ],
     }
 
-    const axesCanvasRef: React.RefObject<HTMLCanvasElement> = React.createRef()
-    const layerCanvasRef: React.RefObject<HTMLCanvasElement> = React.createRef()
+    return renderScreenshot(config)
+  },
+  args: {
+    ...baseArgs,
+    colorScheme: 'Magma',
+  },
+  argTypes: {
+    ...baseArgTypes,
+    x: {
+      control: {type: 'select', options: CPU_XY_COLUMN_OPTIONS},
+    },
+    y: {
+      control: {type: 'select', options: CPU_XY_COLUMN_OPTIONS},
+    },
+  },
+}
 
-    const plotEnv = new PlotEnv()
-    plotEnv.config = config as any
-
-    return (
-      <PlotContainer>
-        <button
-          onClick={() => {
-            if (layerCanvasRef.current && axesCanvasRef.current) {
-              exportImage(layerCanvasRef.current, axesCanvasRef.current, {
-                top: plotEnv.margins.top,
-              }).then(image => window.open(image, '_blank'))
-            }
-          }}
-        >
-          Click to Open a screenshot in new Window/Tab
-        </button>
-        <Plot
-          config={config}
-          axesCanvasRef={axesCanvasRef}
-          layerCanvasRef={layerCanvasRef}
-        />
-      </PlotContainer>
-    )
-  })
-  .add('Screenshot A Histogram', () => {
-    const table = getCPUTable()
-    const colors = colorSchemeKnob()
-    const legendFont = legendFontKnob()
-    const tickFont = tickFontKnob()
-    const x = xKnob(table, '_value')
-    const xScale = xScaleKnob()
-    const yScale = yScaleKnob()
-    const showAxes = showAxesKnob()
-    const binCount = number('Bin Count', 10)
-    const legendOrientationThreshold = tooltipOrientationThresholdKnob()
-    const legendColorizeRows = tooltipColorizeRowsKnob()
+export const ScreenshotAHistogram: Story = {
+  render: args => {
+    const {
+      colorScheme,
+      legendFont,
+      tickFont,
+      x,
+      xScale,
+      yScale,
+      showAxes,
+      binCount,
+      legendOrientationThreshold,
+      legendColorizeRows,
+    } = args
 
     const config: Config = {
-      table,
+      table: cpuTable,
       legendFont,
       legendOrientationThreshold,
       legendColorizeRows,
@@ -347,86 +486,60 @@ storiesOf('Utilities', module)
       showAxes,
       xScale,
       yScale,
-      valueFormatters: {[x]: x => `${Math.round(x)}%`},
-      layers: [{type: 'histogram', x, fill: ['cpu'], colors, binCount}],
+      valueFormatters: {[x]: val => `${Math.round(val)}%`},
+      layers: [
+        {
+          type: 'histogram',
+          x,
+          fill: ['cpu'],
+          colors: COLOR_SCHEME_OPTIONS[colorScheme],
+          binCount,
+        },
+      ],
     }
 
-    const axesCanvasRef: React.RefObject<HTMLCanvasElement> = React.createRef()
-    const layerCanvasRef: React.RefObject<HTMLCanvasElement> = React.createRef()
+    return renderScreenshot(config)
+  },
+  args: {
+    ...baseArgs,
+    x: '_value',
+    binCount: 10,
+  },
+  argTypes: {
+    ...baseArgTypes,
+    x: {
+      control: {type: 'select', options: CPU_XY_COLUMN_OPTIONS},
+    },
+  },
+}
 
-    const plotEnv = new PlotEnv()
-    plotEnv.config = config as any
-
-    return (
-      <PlotContainer>
-        <button
-          onClick={() => {
-            if (layerCanvasRef.current && axesCanvasRef.current) {
-              exportImage(layerCanvasRef.current, axesCanvasRef.current, {
-                top: plotEnv.margins.top,
-              }).then(image => window.open(image, '_blank'))
-            }
-          }}
-        >
-          Click to Open a screenshot in new Window/Tab
-        </button>
-        <Plot
-          config={config}
-          axesCanvasRef={axesCanvasRef}
-          layerCanvasRef={layerCanvasRef}
-        />
-      </PlotContainer>
-    )
-  })
-  .add('Screenshot A Band Chart', () => {
-    const colors = colorSchemeKnob()
-    const legendFont = legendFontKnob()
-    const tickFont = tickFontKnob()
-    const valueAxisLabel = text('Value Axis Label', '')
-    const xScale = xScaleKnob()
-    const yScale = yScaleKnob()
-    const timeZone = timeZoneKnob()
-    const timeFormat = select(
-      'Time Format',
-      {
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'hh:mm a': 'hh:mm a',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
-      },
-      'hh:mm a'
-    )
-    const interpolation = interpolationKnob()
-    const showAxes = showAxesKnob()
-    const lineWidth = number('Line Width', 3)
-    const lineOpacity = number('Line Opacity', 0.7)
-    const shadeOpacity = number('Shade Opacity', 0.3)
-    const hoverDimension = select(
-      'Hover Dimension',
-      {auto: 'auto', x: 'x', y: 'y', xy: 'xy'},
-      'auto'
-    )
-    const upperColumnName = text('upperColumnName', 'max')
-    const mainColumnName = text('mainColumnName', 'mean')
-    const lowerColumnName = text('lowerColumnName', 'min')
-    const legendOpacity = number('Legend Opacity', 1.0, {
-      range: true,
-      min: 0,
-      max: 1.0,
-      step: 0.05,
-    })
-    const legendOrientationThreshold = number('legendOrientationThreshold', 15)
-    const legendColorizeRows = tooltipColorizeRowsKnob()
-    const yTickStart = number('yTickStart', 0)
-    const yTickStep = number('yTickStep', 100)
-    const xTotalTicks = number('xTotalTicks', 20)
+export const ScreenshotABandChart: Story = {
+  render: args => {
+    const {
+      colorScheme,
+      legendFont,
+      tickFont,
+      valueAxisLabel,
+      xScale,
+      yScale,
+      timeZone,
+      timeFormat,
+      interpolation,
+      showAxes,
+      lineWidth,
+      lineOpacity,
+      shadeOpacity,
+      hoverDimension,
+      upperColumnName,
+      mainColumnName,
+      lowerColumnName,
+      legendOpacity,
+      legendOrientationThreshold,
+      legendColorizeRows,
+      yTickStart,
+      yTickStep,
+      xTotalTicks,
+    } = args
 
     const config: Config = {
       fluxResponse: hoverAlignment3,
@@ -457,7 +570,7 @@ storiesOf('Utilities', module)
           y: '_value',
           fill: ['result', 'env'],
           interpolation,
-          colors,
+          colors: COLOR_SCHEME_OPTIONS[colorScheme],
           lineWidth,
           lineOpacity,
           hoverDimension,
@@ -469,97 +582,54 @@ storiesOf('Utilities', module)
       ],
     }
 
-    const axesCanvasRef: React.RefObject<HTMLCanvasElement> = React.createRef()
-    const layerCanvasRef: React.RefObject<HTMLCanvasElement> = React.createRef()
+    return renderScreenshot(config)
+  },
+  args: {
+    ...baseArgs,
+    valueAxisLabel: '',
+    timeFormat: 'hh:mm a',
+    lineWidth: 3,
+    lineOpacity: 0.7,
+    shadeOpacity: 0.3,
+    legendOrientationThreshold: 15,
+    upperColumnName: 'max',
+    mainColumnName: 'mean',
+    lowerColumnName: 'min',
+    yTickStart: 0,
+    yTickStep: 100,
+    xTotalTicks: 20,
+  },
+  argTypes: baseArgTypes,
+}
 
-    const plotEnv = new PlotEnv()
-    plotEnv.config = config as any
+export const ScreenshotAStaticBandChart: Story = {
+  render: args => {
+    const {
+      staticData,
+      colorScheme,
+      legendFont,
+      tickFont,
+      valueAxisLabel,
+      xScale,
+      yScale,
+      timeZone,
+      timeFormat,
+      interpolation,
+      showAxes,
+      lineWidth,
+      lineOpacity,
+      shadeOpacity,
+      hoverDimension,
+      upperColumnName,
+      mainColumnName,
+      lowerColumnName,
+      legendOpacity,
+      legendOrientationThreshold,
+      legendColorizeRows,
+      xTotalTicks,
+    } = args
 
-    return (
-      <PlotContainer>
-        <button
-          onClick={() => {
-            if (layerCanvasRef.current && axesCanvasRef.current) {
-              exportImage(layerCanvasRef.current, axesCanvasRef.current, {
-                top: plotEnv.margins.top,
-              }).then(image => window.open(image, '_blank'))
-            }
-          }}
-        >
-          Click to Open a screenshot in new Window/Tab
-        </button>
-        <Plot
-          config={config}
-          axesCanvasRef={axesCanvasRef}
-          layerCanvasRef={layerCanvasRef}
-        />
-      </PlotContainer>
-    )
-  })
-  .add('Screenshot A Static Band Chart', () => {
-    const staticData = select(
-      'Static CSV',
-      {
-        colors6,
-        cpu1,
-        cpu2,
-        graphEdge1,
-        hoverAlignment1,
-        hoverAlignment2,
-        mem1,
-        mem2,
-        noLowerAndUpper,
-        same3,
-      },
-      cpu2
-    )
-    const colors = colorSchemeKnob()
-    const legendFont = legendFontKnob()
-    const tickFont = tickFontKnob()
-    const valueAxisLabel = text('Value Axis Label', '')
-    const xScale = xScaleKnob()
-    const yScale = yScaleKnob()
-    const timeZone = timeZoneKnob()
-    const timeFormat = select(
-      'Time Format',
-      {
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'hh:mm a': 'hh:mm a',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
-      },
-      'hh:mm a'
-    )
     const fromFluxTable = fromFlux(staticData).table
-    const interpolation = interpolationKnob()
-    const showAxes = showAxesKnob()
-    const lineWidth = number('Line Width', 3)
-    const lineOpacity = number('Line Opacity', 0.7)
-    const shadeOpacity = number('Shade Opacity', 0.3)
-    const hoverDimension = select(
-      'Hover Dimension',
-      {auto: 'auto', x: 'x', y: 'y', xy: 'xy'},
-      'auto'
-    )
-    const upperColumnName = text('upperColumnName', 'max')
-    const mainColumnName = text('mainColumnName', 'mean')
-    const lowerColumnName = text('lowerColumnName', 'min')
-    const legendOpacity = number('Legend Opacity', 1.0, {
-      range: true,
-      min: 0,
-      max: 1.0,
-      step: 0.05,
-    })
-    const legendOrientationThreshold = number('legendOrientationThreshold', 15)
-    const legendColorizeRows = tooltipColorizeRowsKnob()
-    const xTotalTicks = number('xTotalTicks', 20)
 
     const config: Config = {
       fluxResponse: staticData,
@@ -588,7 +658,7 @@ storiesOf('Utilities', module)
           y: '_value',
           fill: findStringColumns(fromFluxTable),
           interpolation,
-          colors,
+          colors: COLOR_SCHEME_OPTIONS[colorScheme],
           lineWidth,
           lineOpacity,
           hoverDimension,
@@ -600,30 +670,21 @@ storiesOf('Utilities', module)
       ],
     }
 
-    const axesCanvasRef: React.RefObject<HTMLCanvasElement> = React.createRef()
-    const layerCanvasRef: React.RefObject<HTMLCanvasElement> = React.createRef()
-
-    const plotEnv = new PlotEnv()
-    plotEnv.config = config as any
-
-    return (
-      <PlotContainer>
-        <button
-          onClick={() => {
-            if (layerCanvasRef.current && axesCanvasRef.current) {
-              exportImage(layerCanvasRef.current, axesCanvasRef.current, {
-                top: plotEnv.margins.top,
-              }).then(image => window.open(image, '_blank'))
-            }
-          }}
-        >
-          Click to Open a screenshot in new Window/Tab
-        </button>
-        <Plot
-          config={config}
-          axesCanvasRef={axesCanvasRef}
-          layerCanvasRef={layerCanvasRef}
-        />
-      </PlotContainer>
-    )
-  })
+    return renderScreenshot(config)
+  },
+  args: {
+    ...baseArgs,
+    staticData: cpu2,
+    valueAxisLabel: '',
+    timeFormat: 'hh:mm a',
+    lineWidth: 3,
+    lineOpacity: 0.7,
+    shadeOpacity: 0.3,
+    legendOrientationThreshold: 15,
+    upperColumnName: 'max',
+    mainColumnName: 'mean',
+    lowerColumnName: 'min',
+    xTotalTicks: 20,
+  },
+  argTypes: baseArgTypes,
+}

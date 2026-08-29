@@ -1,7 +1,5 @@
 import * as React from 'react'
-import {storiesOf} from '@storybook/react'
-import {select, text, withKnobs} from '@storybook/addon-knobs'
-import {cpuTable} from './data/mosaicTable'
+import type {Meta, StoryObj, ArgTypes} from '@storybook/react'
 
 import {
   Config,
@@ -11,346 +9,447 @@ import {
   timeFormatter,
 } from '../../giraffe/src'
 import {VALUE} from '../../giraffe/src/constants/columnKeys'
+import {cpuTable} from './data/mosaicTable'
+
 import {
   PlotContainer,
-  colorSchemeKnob,
+  findXYColumns,
   findStringColumns,
-  legendFontKnob,
-  multiSelect,
-  showAxesKnob,
-  tickFontKnob,
-  timeZoneKnob,
-  tooltipOrientationThresholdKnob,
-  xKnob,
+  TIME_FORMAT_OPTIONS,
+  COLOR_SCHEME_OPTIONS,
 } from './helpers'
 import {circle_ci_branch, cloudy} from './data/mosaicCSV'
 import {nfl} from './data/nflCSV'
 
-storiesOf('Mosaic', module)
-  .addDecorator(withKnobs)
-  .add('Example', () => {
-    const fillColumns = findStringColumns(cpuTable)
-    const colors = colorSchemeKnob()
-    const legendFont = legendFontKnob()
-    const x = xKnob(cpuTable)
-    const yLabelColumnSeparator = text('yLabelColumnSeparator', '')
-    const selectedFill = select('fill', fillColumns, VALUE)
-    const yColumns = multiSelect('Data yColumns', fillColumns, ['cpu', 'host'])
-    const yLabelColumns = multiSelect('Label yColumns', fillColumns, ['cpu'])
-    const timeZone = timeZoneKnob()
-    const timeFormat = select(
-      'Time Format',
+interface MosaicArgs {
+  colorScheme: keyof typeof COLOR_SCHEME_OPTIONS
+  legendFont: string
+  tickFont: string
+  x: string
+  y: string
+  yLabelColumnSeparator: string
+  fill: string
+  yColumns: string[]
+  yLabelColumns: string[]
+  timeZone: string
+  timeFormat: string
+  showAxes: boolean
+  hoverDimension: string
+  legendOrientationThreshold: number
+  csv: string
+}
+
+export default {
+  title: 'Mosaic',
+} as Meta
+
+type Story = StoryObj<MosaicArgs>
+
+const circleCiBranchTable = fromFlux(circle_ci_branch).table
+const cloudyTable = fromFlux(cloudy).table
+const nflTable = fromFlux(nfl).table
+
+const commonArgTypes: Partial<ArgTypes<MosaicArgs>> = {
+  colorScheme: {
+    control: {type: 'select', options: Object.keys(COLOR_SCHEME_OPTIONS)},
+  },
+  timeZone: {
+    control: {
+      type: 'select',
+      options: ['UTC', 'America/Los_Angeles', 'America/New_York'],
+    },
+  },
+  timeFormat: {control: {type: 'select', options: [...TIME_FORMAT_OPTIONS]}},
+  showAxes: {control: {type: 'boolean'}},
+  legendOrientationThreshold: {control: {type: 'number'}},
+}
+
+const commonArgs: Partial<MosaicArgs> = {
+  colorScheme: 'Nineteen Eighty Four',
+  legendFont: '12px sans-serif',
+  yLabelColumnSeparator: '',
+  fill: VALUE,
+  timeZone: 'UTC',
+  showAxes: true,
+  legendOrientationThreshold: 5,
+}
+
+const render = (args: MosaicArgs) => {
+  const {
+    colorScheme,
+    legendFont,
+    x,
+    yLabelColumnSeparator,
+    fill,
+    yColumns,
+    yLabelColumns,
+    timeZone,
+    timeFormat,
+    showAxes,
+    hoverDimension,
+    legendOrientationThreshold,
+  } = args
+
+  const config: Config = {
+    table: cpuTable,
+    valueFormatters: {
+      _time: timeFormatter({timeZone, format: timeFormat}),
+    },
+    legendFont,
+    legendOrientationThreshold,
+    showAxes,
+    layers: [
       {
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'hh:mm a': 'hh:mm a',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
-      },
-      'hh:mm a'
-    )
-    const showAxes = showAxesKnob()
-    const hoverDimension = select('Hover Dimension', {x: 'x', xy: 'xy'}, 'xy')
-    const legendOrientationThreshold = tooltipOrientationThresholdKnob()
+        type: 'mosaic',
+        x,
+        y: yColumns,
+        yLabelColumnSeparator,
+        yLabelColumns,
+        fill: [fill],
+        hoverDimension,
+        colors: COLOR_SCHEME_OPTIONS[colorScheme],
+      } as LayerConfig,
+    ],
+  }
 
-    const config: Config = {
-      table: cpuTable,
-      valueFormatters: {
-        _time: timeFormatter({timeZone, format: timeFormat}),
-      },
-      legendFont,
-      legendOrientationThreshold,
-      showAxes,
-      layers: [
-        {
-          type: 'mosaic',
-          x,
-          y: yColumns,
-          yLabelColumnSeparator,
-          yLabelColumns,
-          fill: [selectedFill],
-          hoverDimension,
-          colors,
-        } as LayerConfig,
-      ],
-    }
+  return (
+    <PlotContainer>
+      <Plot config={config} />
+    </PlotContainer>
+  )
+}
 
-    return (
-      <PlotContainer>
-        <Plot config={config} />
-      </PlotContainer>
-    )
-  })
-  .add('Static Data: circle_ci:branch', () => {
-    const table = fromFlux(circle_ci_branch).table
-    const fillColumns = findStringColumns(table)
-    const x = xKnob(table)
-    const yLabelColumnSeparator = text('yLabelColumnSeparator', '')
-    const selectedFill = select('fill', fillColumns, VALUE)
-    const yColumns = multiSelect('Data yColumns', fillColumns, [
-      'project',
-      'workflow_name',
-    ])
-    const yLabelColumns = multiSelect('Label yColumns', fillColumns, [
-      'project',
-      'workflow_name',
-    ])
-    const colors = colorSchemeKnob()
-    const legendFont = legendFontKnob()
-    const timeZone = timeZoneKnob()
-    const timeFormat = select(
-      'Time Format',
+export const Example: Story = {
+  render,
+  args: {
+    ...commonArgs,
+    x: '_time',
+    yColumns: ['cpu', 'host'],
+    yLabelColumns: ['cpu'],
+    timeFormat: 'hh:mm a',
+    hoverDimension: 'xy',
+  },
+  argTypes: {
+    ...commonArgTypes,
+    x: {
+      control: {type: 'select', options: Object.keys(findXYColumns(cpuTable))},
+    },
+    fill: {control: {type: 'select', options: findStringColumns(cpuTable)}},
+    yColumns: {
+      control: {type: 'multi-select', options: findStringColumns(cpuTable)},
+    },
+    yLabelColumns: {
+      control: {type: 'multi-select', options: findStringColumns(cpuTable)},
+    },
+    hoverDimension: {control: {type: 'select', options: ['x', 'xy']}},
+  },
+}
+
+const renderCircleCiBranch = (args: MosaicArgs) => {
+  const {
+    colorScheme,
+    legendFont,
+    x,
+    yLabelColumnSeparator,
+    fill,
+    yColumns,
+    yLabelColumns,
+    timeZone,
+    timeFormat,
+    showAxes,
+    hoverDimension,
+    legendOrientationThreshold,
+  } = args
+
+  const config: Config = {
+    fluxResponse: circle_ci_branch,
+    valueFormatters: {
+      _time: timeFormatter({timeZone, format: timeFormat}),
+    },
+    legendFont,
+    legendOrientationThreshold,
+    showAxes,
+    layers: [
       {
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'hh:mm a': 'hh:mm a',
-        'MM/DD HH:mm:ss': 'MM/DD HH:mm:ss',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
-      },
-      'MM/DD HH:mm:ss'
-    )
-    const showAxes = showAxesKnob()
-    const hoverDimension = select(
-      'Hover Dimension',
-      {x: 'x', y: 'y', xy: 'xy'},
-      'xy'
-    )
-    const legendOrientationThreshold = tooltipOrientationThresholdKnob()
+        type: 'mosaic',
+        x,
+        y: yColumns,
+        yLabelColumnSeparator,
+        yLabelColumns,
+        fill: [fill],
+        hoverDimension,
+        colors: COLOR_SCHEME_OPTIONS[colorScheme],
+      } as LayerConfig,
+    ],
+  }
 
-    const config: Config = {
-      fluxResponse: circle_ci_branch,
-      valueFormatters: {
-        _time: timeFormatter({timeZone, format: timeFormat}),
-      },
-      legendFont,
-      legendOrientationThreshold,
-      showAxes,
-      layers: [
-        {
-          type: 'mosaic',
-          x,
-          y: yColumns,
-          yLabelColumnSeparator,
-          yLabelColumns,
-          fill: [selectedFill],
-          hoverDimension,
-          colors,
-        } as LayerConfig,
-      ],
-    }
+  return (
+    <PlotContainer>
+      <Plot config={config} />
+    </PlotContainer>
+  )
+}
 
-    return (
-      <PlotContainer>
-        <Plot config={config} />
-      </PlotContainer>
-    )
-  })
-  .add('Static Data: cloudy', () => {
-    const table = fromFlux(cloudy).table
-    const fillColumns = findStringColumns(table)
-    const x = xKnob(table)
-    const yLabelColumnSeparator = text('yLabelColumnSeparator', '')
-    const selectedFill = select('fill', fillColumns, VALUE)
-    const yColumns = multiSelect('Data yColumns', fillColumns, ['city'])
-    const yLabelColumns = multiSelect('Label yColumns', fillColumns, ['city'])
-    const colors = colorSchemeKnob()
-    const tickFont = tickFontKnob()
-    const legendFont = legendFontKnob()
-    const timeZone = timeZoneKnob()
-    const timeFormat = select(
-      'Time Format',
+export const StaticDataCircleCiBranch: Story = {
+  render: renderCircleCiBranch,
+  args: {
+    ...commonArgs,
+    x: '_time',
+    yColumns: ['project', 'workflow_name'],
+    yLabelColumns: ['project', 'workflow_name'],
+    timeFormat: 'MM/DD HH:mm:ss',
+    hoverDimension: 'xy',
+  },
+  argTypes: {
+    ...commonArgTypes,
+    x: {
+      control: {
+        type: 'select',
+        options: Object.keys(findXYColumns(circleCiBranchTable)),
+      },
+    },
+    fill: {
+      control: {
+        type: 'select',
+        options: findStringColumns(circleCiBranchTable),
+      },
+    },
+    yColumns: {
+      control: {
+        type: 'multi-select',
+        options: findStringColumns(circleCiBranchTable),
+      },
+    },
+    yLabelColumns: {
+      control: {
+        type: 'multi-select',
+        options: findStringColumns(circleCiBranchTable),
+      },
+    },
+    hoverDimension: {control: {type: 'select', options: ['x', 'y', 'xy']}},
+  },
+}
+
+const renderCloudy = (args: MosaicArgs) => {
+  const {
+    colorScheme,
+    tickFont,
+    legendFont,
+    x,
+    yLabelColumnSeparator,
+    fill,
+    yColumns,
+    yLabelColumns,
+    timeZone,
+    timeFormat,
+    showAxes,
+    hoverDimension,
+    legendOrientationThreshold,
+  } = args
+
+  const config: Config = {
+    fluxResponse: cloudy,
+    valueFormatters: {
+      _time: timeFormatter({timeZone, format: timeFormat}),
+    },
+    legendFont,
+    legendOrientationThreshold,
+    showAxes,
+    tickFont,
+    layers: [
       {
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'hh:mm a': 'hh:mm a',
-        'MM/DD HH:mm:ss': 'MM/DD HH:mm:ss',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
-      },
-      'MM/DD HH:mm:ss'
-    )
-    const showAxes = showAxesKnob()
-    const hoverDimension = select(
-      'Hover Dimension',
-      {x: 'x', y: 'y', xy: 'xy'},
-      'xy'
-    )
-    const legendOrientationThreshold = tooltipOrientationThresholdKnob()
+        type: 'mosaic',
+        x,
+        y: yColumns,
+        yLabelColumnSeparator,
+        yLabelColumns,
+        fill: [fill],
+        hoverDimension,
+        colors: COLOR_SCHEME_OPTIONS[colorScheme],
+      } as LayerConfig,
+    ],
+  }
 
-    const config: Config = {
-      fluxResponse: cloudy,
-      valueFormatters: {
-        _time: timeFormatter({timeZone, format: timeFormat}),
-      },
-      legendFont,
-      legendOrientationThreshold,
-      showAxes,
-      tickFont,
-      layers: [
-        {
-          type: 'mosaic',
-          x,
-          y: yColumns,
-          yLabelColumnSeparator,
-          yLabelColumns,
-          fill: [selectedFill],
-          hoverDimension,
-          colors,
-        } as LayerConfig,
-      ],
-    }
+  return (
+    <PlotContainer>
+      <Plot config={config} />
+    </PlotContainer>
+  )
+}
 
-    return (
-      <PlotContainer>
-        <Plot config={config} />
-      </PlotContainer>
-    )
-  })
-  .add('NFL 2020 Regular Season', () => {
-    const table = fromFlux(nfl).table
-    const fillColumns = findStringColumns(table)
-    const x = xKnob(table)
-    const yLabelColumnSeparator = text('yLabelColumnSeparator', '')
-    const selectedFill = select('fill', fillColumns, VALUE)
-    const yColumns = multiSelect('Data yColumns', fillColumns, ['team'])
-    const yLabelColumns = multiSelect('Label yColumns', fillColumns, ['team'])
-    const colors = colorSchemeKnob()
-    const tickFont = tickFontKnob()
-    const legendFont = legendFontKnob()
-    const timeZone = timeZoneKnob()
-    const timeFormat = select(
-      'Time Format',
+export const StaticDataCloudy: Story = {
+  render: renderCloudy,
+  args: {
+    ...commonArgs,
+    tickFont: '10px sans-serif',
+    x: '_time',
+    yColumns: ['city'],
+    yLabelColumns: ['city'],
+    timeFormat: 'MM/DD HH:mm:ss',
+    hoverDimension: 'xy',
+  },
+  argTypes: {
+    ...commonArgTypes,
+    x: {
+      control: {
+        type: 'select',
+        options: Object.keys(findXYColumns(cloudyTable)),
+      },
+    },
+    fill: {control: {type: 'select', options: findStringColumns(cloudyTable)}},
+    yColumns: {
+      control: {
+        type: 'multi-select',
+        options: findStringColumns(cloudyTable),
+      },
+    },
+    yLabelColumns: {
+      control: {
+        type: 'multi-select',
+        options: findStringColumns(cloudyTable),
+      },
+    },
+    hoverDimension: {control: {type: 'select', options: ['x', 'y', 'xy']}},
+  },
+}
+
+const renderNFL = (args: MosaicArgs) => {
+  const {
+    colorScheme,
+    tickFont,
+    legendFont,
+    x,
+    yLabelColumnSeparator,
+    fill,
+    yColumns,
+    yLabelColumns,
+    timeZone,
+    timeFormat,
+    showAxes,
+    hoverDimension,
+    legendOrientationThreshold,
+  } = args
+
+  const config: Config = {
+    fluxResponse: nfl,
+    valueFormatters: {
+      _time: timeFormatter({timeZone, format: timeFormat}),
+    },
+    legendFont,
+    legendOrientationThreshold,
+    showAxes,
+    tickFont,
+    layers: [
       {
-        'MM/DD/YY': 'MM/DD/YY',
-        'MM/DD/YYYY': 'MM/DD/YYYY',
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'hh:mm a': 'hh:mm a',
-        'MM/DD HH:mm:ss': 'MM/DD HH:mm:ss',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
+        type: 'mosaic',
+        x,
+        y: yColumns,
+        yLabelColumnSeparator,
+        yLabelColumns,
+        fill: [fill],
+        hoverDimension,
+        colors: COLOR_SCHEME_OPTIONS[colorScheme],
+      } as LayerConfig,
+    ],
+  }
+
+  return (
+    <PlotContainer>
+      <Plot config={config} />
+    </PlotContainer>
+  )
+}
+
+export const Nfl2020RegularSeason: Story = {
+  render: renderNFL,
+  args: {
+    ...commonArgs,
+    tickFont: '10px sans-serif',
+    x: '_time',
+    yColumns: ['team'],
+    yLabelColumns: ['team'],
+    timeFormat: 'MM/DD/YY',
+    hoverDimension: 'xy',
+  },
+  argTypes: {
+    ...commonArgTypes,
+    x: {
+      control: {type: 'select', options: Object.keys(findXYColumns(nflTable))},
+    },
+    fill: {control: {type: 'select', options: findStringColumns(nflTable)}},
+    yColumns: {
+      control: {
+        type: 'multi-select',
+        options: findStringColumns(nflTable),
       },
-      'MM/DD/YY'
-    )
-    const showAxes = showAxesKnob()
-    const hoverDimension = select(
-      'Hover Dimension',
-      {x: 'x', y: 'y', xy: 'xy'},
-      'xy'
-    )
-    const legendOrientationThreshold = tooltipOrientationThresholdKnob()
-
-    const config: Config = {
-      fluxResponse: nfl,
-      valueFormatters: {
-        _time: timeFormatter({timeZone, format: timeFormat}),
+    },
+    yLabelColumns: {
+      control: {
+        type: 'multi-select',
+        options: findStringColumns(nflTable),
       },
-      legendFont,
-      legendOrientationThreshold,
-      showAxes,
-      tickFont,
-      layers: [
-        {
-          type: 'mosaic',
-          x,
-          y: yColumns,
-          yLabelColumnSeparator,
-          yLabelColumns,
-          fill: [selectedFill],
-          hoverDimension,
-          colors,
-        } as LayerConfig,
-      ],
-    }
+    },
+    hoverDimension: {control: {type: 'select', options: ['x', 'y', 'xy']}},
+  },
+}
 
-    return (
-      <PlotContainer>
-        <Plot config={config} />
-      </PlotContainer>
-    )
-  })
-  .add('Custom CSV', () => {
-    const customCSV = text('Paste CSV here:', '')
-    const x = text('x', '_time')
-    const y = text('y', '')
-    const yLabelColumnSeparator = text('yLabelColumnSeparator', '')
-    const fill = text('fill', '_value')
-    const colors = colorSchemeKnob()
-    const legendFont = legendFontKnob()
+const renderCustomCSV = (args: MosaicArgs) => {
+  const {
+    csv,
+    x,
+    y,
+    yLabelColumnSeparator,
+    fill,
+    colorScheme,
+    legendFont,
+    timeZone,
+    timeFormat,
+    showAxes,
+    hoverDimension,
+    legendOrientationThreshold,
+  } = args
 
-    const timeZone = timeZoneKnob()
-    const timeFormat = select(
-      'Time Format',
+  const config: Config = {
+    fluxResponse: csv,
+    valueFormatters: {
+      _time: timeFormatter({timeZone, format: timeFormat}),
+    },
+    legendFont,
+    legendOrientationThreshold,
+    showAxes,
+    layers: [
       {
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'MM/DD hh:mm a': 'MM/DD hh:mm a',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'hh:mm a': 'hh:mm a',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
-      },
-      'hh:mm a'
-    )
-    const showAxes = showAxesKnob()
-    const hoverDimension = select('Hover Dimension', {x: 'x', xy: 'xy'}, 'xy')
-    const legendOrientationThreshold = tooltipOrientationThresholdKnob()
+        type: 'mosaic',
+        x,
+        y: y.split(','),
+        yLabelColumns: y.split(','),
+        yLabelColumnSeparator,
+        fill: [fill],
+        hoverDimension,
+        colors: COLOR_SCHEME_OPTIONS[colorScheme],
+      } as LayerConfig,
+    ],
+  }
 
-    const config: Config = {
-      fluxResponse: customCSV,
-      valueFormatters: {
-        _time: timeFormatter({timeZone, format: timeFormat}),
-      },
-      legendFont,
-      legendOrientationThreshold,
-      showAxes,
-      layers: [
-        {
-          type: 'mosaic',
-          x,
-          y: y.split(','),
-          yLabelColumns: y.split(','),
-          yLabelColumnSeparator,
-          fill: [fill],
-          hoverDimension,
-          colors,
-        } as LayerConfig,
-      ],
-    }
+  return (
+    <PlotContainer>
+      <Plot config={config} />
+    </PlotContainer>
+  )
+}
 
-    return (
-      <PlotContainer>
-        <Plot config={config} />
-      </PlotContainer>
-    )
-  })
+export const CustomCSV: Story = {
+  render: renderCustomCSV,
+  args: {
+    ...commonArgs,
+    csv: '',
+    x: '_time',
+    y: '',
+    timeFormat: 'hh:mm a',
+    hoverDimension: 'xy',
+  },
+  argTypes: {
+    ...commonArgTypes,
+    hoverDimension: {control: {type: 'select', options: ['x', 'xy']}},
+  },
+}

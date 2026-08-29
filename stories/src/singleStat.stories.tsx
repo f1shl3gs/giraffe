@@ -1,6 +1,5 @@
-import React from 'react'
-import {storiesOf} from '@storybook/react'
-import {boolean, number, select, text, withKnobs} from '@storybook/addon-knobs'
+import * as React from 'react'
+import type {Meta, StoryObj} from '@storybook/react'
 import {
   Config,
   LASER,
@@ -11,54 +10,79 @@ import {
 } from '../../giraffe/src'
 
 import {
+  COLOR_SCHEME_OPTIONS,
   PlotContainer,
-  xKnob,
-  yKnob,
-  xScaleKnob,
-  yScaleKnob,
-  fillKnob,
-  colorSchemeKnob,
-  legendFontKnob,
-  tickFontKnob,
-  showAxesKnob,
-  interpolationKnob,
-  timeZoneKnob,
-  tooltipOrientationThresholdKnob,
-  tooltipColorizeRowsKnob,
+  findStringColumns,
+  findXYColumns,
 } from './helpers'
 
 import {singleStatTable} from './data/singleStatLayer'
 
-storiesOf('Single Stat', module)
-  .addDecorator(withKnobs)
-  .add('Single Stat', () => {
-    const decimalPlaces = Number(text('Decimal Places', '4'))
-    const textOpacity = number('Single Stat Opacity', 1, {
-      range: true,
-      min: 0,
-      max: 1,
-      step: 0.01,
-    })
-    const viewBoxWidth = number('SVG viewBox width', 55, {
-      range: true,
-      min: 0,
-      max: 1000,
-      step: 1,
-    })
-    const viewBoxX = number('SVG viewBox x', 0, {
-      range: true,
-      min: -500,
-      max: 500,
-      step: 1,
-    })
-    const viewBoxY = number('SVG viewBox y', 0, {
-      range: true,
-      min: -500,
-      max: 500,
-      step: 1,
-    })
-    const prefix = text('Prefix', '')
-    const suffix = text('Suffix', '')
+interface SingleStatArgs {
+  decimalPlaces: number
+  textOpacity: number
+  viewBoxWidth: number
+  viewBoxX: number
+  viewBoxY: number
+  prefix: string
+  suffix: string
+  csv: string
+  includeSingleStatLayer: boolean
+  colorScheme: string
+  legendFont: string
+  tickFont: string
+  x: string
+  y: string
+  valueAxisLabel: string
+  xScale: string
+  yScale: string
+  timeZone: string
+  timeFormat: string
+  fill: string[]
+  position: string
+  interpolation: string
+  showAxes: boolean
+  lineWidth: number
+  shadeBelow: boolean
+  shadeBelowOpacity: number
+  hoverDimension: string
+  legendOrientationThreshold: number
+  legendColorizeRows: boolean
+}
+
+export default {
+  title: 'Single Stat',
+} as Meta
+
+type Story = StoryObj<SingleStatArgs>
+
+const COLUMNS = findXYColumns(singleStatTable)
+const STRING_COLUMNS = findStringColumns(singleStatTable)
+
+const textOpacityControl = {
+  control: {type: 'range', min: 0, max: 1, step: 0.01},
+} as const
+const viewBoxWidthControl = {
+  control: {type: 'range', min: 0, max: 1000, step: 1},
+} as const
+const viewBoxXControl = {
+  control: {type: 'range', min: -500, max: 500, step: 1},
+} as const
+const viewBoxYControl = {
+  control: {type: 'range', min: -500, max: 500, step: 1},
+} as const
+
+export const SingleStat: Story = {
+  render: args => {
+    const {
+      prefix,
+      suffix,
+      decimalPlaces,
+      textOpacity,
+      viewBoxWidth,
+      viewBoxX,
+      viewBoxY,
+    } = args
     const config: Config = {
       table: singleStatTable,
       showAxes: false,
@@ -92,36 +116,37 @@ storiesOf('Single Stat', module)
         <Plot config={config} />
       </PlotContainer>
     )
-  })
-  .add('Single Stat - custom CSV', () => {
-    const csv = text('Paste CSV here:', '')
-    const decimalPlaces = Number(text('Decimal Places', '4'))
-    const textOpacity = number('Single Stat Opacity', 1, {
-      range: true,
-      min: 0,
-      max: 1,
-      step: 0.01,
-    })
-    const viewBoxWidth = number('SVG viewBox width', 55, {
-      range: true,
-      min: 0,
-      max: 1000,
-      step: 1,
-    })
-    const viewBoxX = number('SVG viewBox x', 0, {
-      range: true,
-      min: -500,
-      max: 500,
-      step: 1,
-    })
-    const viewBoxY = number('SVG viewBox y', 0, {
-      range: true,
-      min: -500,
-      max: 500,
-      step: 1,
-    })
-    const prefix = text('Prefix', '')
-    const suffix = text('Suffix', '')
+  },
+  args: {
+    decimalPlaces: 4,
+    textOpacity: 1,
+    viewBoxWidth: 55,
+    viewBoxX: 0,
+    viewBoxY: 0,
+    prefix: '',
+    suffix: '',
+  },
+  argTypes: {
+    decimalPlaces: {control: {type: 'number'}},
+    textOpacity: textOpacityControl,
+    viewBoxWidth: viewBoxWidthControl,
+    viewBoxX: viewBoxXControl,
+    viewBoxY: viewBoxYControl,
+  },
+}
+
+export const SingleStatCustomCsv: Story = {
+  render: args => {
+    const {
+      csv,
+      prefix,
+      suffix,
+      decimalPlaces,
+      textOpacity,
+      viewBoxWidth,
+      viewBoxX,
+      viewBoxY,
+    } = args
     const config: Config = {
       fluxResponse: csv,
       showAxes: false,
@@ -155,81 +180,60 @@ storiesOf('Single Stat', module)
         <Plot config={config} />
       </PlotContainer>
     )
-  })
-  .add('Single Stat on top of Line Layer', () => {
-    const includeSingleStatLayer = boolean('Single Stat', true)
-    const decimalPlaces = Number(text('Decimal Places', '2'))
-    const textOpacity = number('Single Stat Opacity', 1, {
-      range: true,
-      min: 0,
-      max: 1,
-      step: 0.01,
-    })
-    const viewBoxWidth = number('SVG viewBox width', 55, {
-      range: true,
-      min: 0,
-      max: 1000,
-      step: 1,
-    })
-    const viewBoxX = number('SVG viewBox x', 0, {
-      range: true,
-      min: -500,
-      max: 500,
-      step: 1,
-    })
-    const viewBoxY = number('SVG viewBox y', 0, {
-      range: true,
-      min: -500,
-      max: 500,
-      step: 1,
-    })
-    const prefix = text('Prefix', '')
-    const suffix = text('Suffix', '')
-    const table = singleStatTable
-    const colors = colorSchemeKnob()
-    const legendFont = legendFontKnob()
-    const tickFont = tickFontKnob()
-    const x = xKnob(table)
-    const y = yKnob(table)
-    const valueAxisLabel = text('Value Axis Label', 'foo')
-    const xScale = xScaleKnob()
-    const yScale = yScaleKnob()
-    const timeZone = timeZoneKnob()
-    const timeFormat = select(
-      'Time Format',
-      {
-        'DD/MM/YYYY HH:mm:ss.sss': 'DD/MM/YYYY HH:mm:ss.sss',
-        'MM/DD/YYYY HH:mm:ss.sss': 'MM/DD/YYYY HH:mm:ss.sss',
-        'YYYY/MM/DD HH:mm:ss': 'YYYY/MM/DD HH:mm:ss',
-        'YYYY-MM-DD HH:mm:ss ZZ': 'YYYY-MM-DD HH:mm:ss ZZ',
-        'hh:mm a': 'hh:mm a',
-        'HH:mm': 'HH:mm',
-        'HH:mm:ss': 'HH:mm:ss',
-        'HH:mm:ss ZZ': 'HH:mm:ss ZZ',
-        'HH:mm:ss.sss': 'HH:mm:ss.sss',
-        'MMMM D, YYYY HH:mm:ss': 'MMMM D, YYYY HH:mm:ss',
-        'dddd, MMMM D, YYYY HH:mm:ss': 'dddd, MMMM D, YYYY HH:mm:ss',
-      },
-      'YYYY-MM-DD HH:mm:ss ZZ'
-    )
-    const fill = fillKnob(table, ['cpu'])
-    const position = select(
-      'Line Position',
-      {stacked: 'stacked', overlaid: 'overlaid'},
-      'overlaid'
-    )
-    const interpolation = interpolationKnob()
-    const showAxes = showAxesKnob()
-    const lineWidth = number('Line Width', 1)
-    const shadeBelow = boolean('Shade Area', false)
-    const shadeBelowOpacity = number('Area Opacity', 0.1)
-    const hoverDimension = select(
-      'Hover Dimension',
-      {auto: 'auto', x: 'x', y: 'y', xy: 'xy'},
-      'auto'
-    )
-    const legendOrientationThreshold = tooltipOrientationThresholdKnob()
-    const legendColorizeRows = tooltipColorizeRowsKnob()
+  },
+  args: {
+    csv: '',
+    decimalPlaces: 4,
+    textOpacity: 1,
+    viewBoxWidth: 55,
+    viewBoxX: 0,
+    viewBoxY: 0,
+    prefix: '',
+    suffix: '',
+  },
+  argTypes: {
+    decimalPlaces: {control: {type: 'number'}},
+    textOpacity: textOpacityControl,
+    viewBoxWidth: viewBoxWidthControl,
+    viewBoxX: viewBoxXControl,
+    viewBoxY: viewBoxYControl,
+  },
+}
+
+export const SingleStatOnTopOfLineLayer: Story = {
+  render: args => {
+    const {
+      includeSingleStatLayer,
+      decimalPlaces,
+      textOpacity,
+      viewBoxWidth,
+      viewBoxX,
+      viewBoxY,
+      prefix,
+      suffix,
+      colorScheme,
+      legendFont,
+      tickFont,
+      x,
+      y,
+      valueAxisLabel,
+      xScale,
+      yScale,
+      timeZone,
+      timeFormat,
+      fill,
+      position,
+      interpolation,
+      showAxes,
+      lineWidth,
+      shadeBelow,
+      shadeBelowOpacity,
+      hoverDimension,
+      legendOrientationThreshold,
+      legendColorizeRows,
+    } = args
+    const colors =
+      COLOR_SCHEME_OPTIONS[colorScheme as keyof typeof COLOR_SCHEME_OPTIONS]
 
     const layers = [
       {
@@ -274,7 +278,7 @@ storiesOf('Single Stat', module)
     }
 
     const config: Config = {
-      table,
+      table: singleStatTable,
       valueFormatters: {
         _time: timeFormatter({timeZone, format: timeFormat}),
         _value: val =>
@@ -297,4 +301,100 @@ storiesOf('Single Stat', module)
         <Plot config={config} />
       </PlotContainer>
     )
-  })
+  },
+  args: {
+    includeSingleStatLayer: true,
+    decimalPlaces: 2,
+    textOpacity: 1,
+    viewBoxWidth: 55,
+    viewBoxX: 0,
+    viewBoxY: 0,
+    prefix: '',
+    suffix: '',
+    colorScheme: 'Nineteen Eighty Four',
+    legendFont: '12px sans-serif',
+    tickFont: '10px sans-serif',
+    x: '_time',
+    y: '_value',
+    valueAxisLabel: 'foo',
+    xScale: 'linear',
+    yScale: 'linear',
+    timeZone: 'UTC',
+    timeFormat: 'YYYY-MM-DD HH:mm:ss ZZ',
+    fill: ['cpu'],
+    position: 'overlaid',
+    interpolation: 'monotoneX',
+    showAxes: true,
+    lineWidth: 1,
+    shadeBelow: false,
+    shadeBelowOpacity: 0.1,
+    hoverDimension: 'auto',
+    legendOrientationThreshold: 5,
+    legendColorizeRows: true,
+  },
+  argTypes: {
+    decimalPlaces: {control: {type: 'number'}},
+    textOpacity: textOpacityControl,
+    viewBoxWidth: viewBoxWidthControl,
+    viewBoxX: viewBoxXControl,
+    viewBoxY: viewBoxYControl,
+    includeSingleStatLayer: {control: {type: 'boolean'}},
+    colorScheme: {
+      control: {type: 'select', options: Object.keys(COLOR_SCHEME_OPTIONS)},
+    },
+    x: {control: {type: 'select', options: Object.keys(COLUMNS)}},
+    y: {control: {type: 'select', options: Object.keys(COLUMNS)}},
+    xScale: {control: {type: 'select', options: ['linear', 'log']}},
+    yScale: {control: {type: 'select', options: ['linear', 'log']}},
+    timeZone: {
+      control: {
+        type: 'select',
+        options: ['UTC', 'America/Los_Angeles', 'America/New_York'],
+      },
+    },
+    timeFormat: {
+      control: {
+        type: 'select',
+        options: [
+          'DD/MM/YYYY HH:mm:ss.sss',
+          'MM/DD/YYYY HH:mm:ss.sss',
+          'YYYY/MM/DD HH:mm:ss',
+          'YYYY-MM-DD HH:mm:ss ZZ',
+          'hh:mm a',
+          'HH:mm',
+          'HH:mm:ss',
+          'HH:mm:ss ZZ',
+          'HH:mm:ss.sss',
+          'MMMM D, YYYY HH:mm:ss',
+          'dddd, MMMM D, YYYY HH:mm:ss',
+        ],
+      },
+    },
+    fill: {control: {type: 'check', options: STRING_COLUMNS}},
+    position: {control: {type: 'select', options: ['stacked', 'overlaid']}},
+    interpolation: {
+      control: {
+        type: 'select',
+        options: [
+          'linear',
+          'monotoneX',
+          'monotoneY',
+          'cubic',
+          'step',
+          'stepBefore',
+          'stepAfter',
+          'natural',
+        ],
+      },
+    },
+    showAxes: {control: {type: 'boolean'}},
+    lineWidth: {control: {type: 'number'}},
+    shadeBelow: {control: {type: 'boolean'}},
+    shadeBelowOpacity: {control: {type: 'number'}},
+    hoverDimension: {
+      control: {type: 'select', options: ['auto', 'x', 'y', 'xy']},
+    },
+    legendOrientationThreshold: {control: {type: 'number'}},
+    legendColorizeRows: {control: {type: 'boolean'}},
+  },
+}
