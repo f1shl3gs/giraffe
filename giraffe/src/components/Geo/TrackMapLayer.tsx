@@ -1,8 +1,10 @@
 // Libraries
 import React from 'react'
 import {FunctionComponent} from 'react'
-import AntPath from 'react-leaflet-ant-path'
 import {CircleMarker} from 'react-leaflet'
+
+// Components
+import {AnimatedPath} from './AnimatedPath'
 
 // Types
 import {GeoTable} from './processing/GeoTable'
@@ -84,7 +86,11 @@ export const TrackMapLayer: FunctionComponent<Props> = props => {
                 radius={endStopMarkerRadius}
               />
             )}
-            <AntPath key={index} positions={track} options={optionsWithColor} />
+            <AnimatedPath
+              key={index}
+              positions={track}
+              options={optionsWithColor}
+            />
           </>
         )
       }, options)}

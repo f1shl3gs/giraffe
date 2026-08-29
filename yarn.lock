@@ -1932,7 +1932,6 @@ __metadata:
     d3-time: "npm:^3.1.0"
     jsdom: "npm:^30.0.1"
     leaflet: "npm:^1.6.0"
-    leaflet-ant-path: "npm:^1.3.0"
     leaflet.markercluster: "npm:^1.4.1"
     loader-utils: "npm:^2.0.4"
     memoize-one: "npm:^6.0.0"
@@ -1945,7 +1944,6 @@ __metadata:
     react: "npm:^19.2.8"
     react-dom: "npm:^19.2.8"
     react-leaflet: "npm:^2.6.3"
-    react-leaflet-ant-path: "npm:^1.1.0"
     react-leaflet-control: "npm:^2.1.2"
     react-leaflet-markercluster: "npm:^2.0.0"
     rolldown: "npm:^1.2.5"
@@ -10376,13 +10374,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"leaflet-ant-path@npm:^1.3.0":
-  version: 1.3.0
-  resolution: "leaflet-ant-path@npm:1.3.0"
-  checksum: 10c0/4f77a629ed5cfe1d56e1ba816880e72236c67e065528ad14a9bec22ced97bdd1a4ce34035ae9678d850cce6f44513671373b05adc51189cf17fa867049a2a9fd
-  languageName: node
-  linkType: hard
-
 "leaflet.markercluster@npm:^1.4.1":
   version: 1.5.3
   resolution: "leaflet.markercluster@npm:1.5.3"
@@ -12782,7 +12773,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.5.10, prop-types@npm:^15.5.8, prop-types@npm:^15.6.0, prop-types@npm:^15.6.1, prop-types@npm:^15.6.2, prop-types@npm:^15.7.2":
+"prop-types@npm:^15.5.8, prop-types@npm:^15.6.0, prop-types@npm:^15.6.1, prop-types@npm:^15.6.2, prop-types@npm:^15.7.2":
   version: 15.7.2
   resolution: "prop-types@npm:15.7.2"
   dependencies:
@@ -13181,15 +13172,6 @@ __metadata:
   version: 17.0.2
   resolution: "react-is@npm:17.0.2"
   checksum: 10c0/2bdb6b93fbb1820b024b496042cce405c57e2f85e777c9aabd55f9b26d145408f9f74f5934676ffdc46f3dcff656d78413a6e43968e7b3f92eea35b3052e9053
-  languageName: node
-  linkType: hard
-
-"react-leaflet-ant-path@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "react-leaflet-ant-path@npm:1.1.0"
-  dependencies:
-    prop-types: "npm:^15.5.10"
-  checksum: 10c0/48c1c5b1f8f0bdebf3f53f8792d09922e5e18fd914503e64019bbd429e3c60594615dd6cc5ec5576dd85de271cb3bcedace44aba92790ed448448b1e9aa486e3
   languageName: node
   linkType: hard
 
