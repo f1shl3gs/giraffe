@@ -863,6 +863,7 @@ __metadata:
     "@testing-library/react": "npm:^16.3.2"
     "@types/jsdom": "npm:^30"
     "@types/loader-utils": "npm:^3"
+    "@types/papaparse": "npm:^5.5.2"
     "@types/react": "npm:^19.2.18"
     "@types/react-dom": "npm:^19.2.5"
     "@vitest/coverage-v8": "npm:^4.1.11"
@@ -881,7 +882,7 @@ __metadata:
     memoize-one: "npm:^6.0.0"
     merge-images: "npm:^2.0.0"
     oxlint: "npm:^1.80.0"
-    papaparse: "npm:^5.3.0"
+    papaparse: "npm:^5.7.0"
     postcss: "npm:^8.5.26"
     postcss-modules: "npm:^9.0.1"
     prettier: "npm:^3.9.6"
@@ -2115,6 +2116,15 @@ __metadata:
   version: 16.11.7
   resolution: "@types/node@npm:16.11.7"
   checksum: 10c0/9988649cb988b8caa4b1883e994929502c787eda383b8c8c51a1394c4ea6cd5ec36f4dc40972ad5043e124329ba4c5172ebb962e9cc67240d059bbee7c97c0bc
+  languageName: node
+  linkType: hard
+
+"@types/papaparse@npm:^5.5.2":
+  version: 5.5.2
+  resolution: "@types/papaparse@npm:5.5.2"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/27b097b6f8f204b20ade1f2cbf4798eb38caa5fbfa3180fd0faa5e3f9aea371c1786ae180d56f3287556463eefe3100c953e316ea6ee99d7ae1d04111cfc9e50
   languageName: node
   linkType: hard
 
@@ -4758,10 +4768,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"papaparse@npm:^5.3.0":
-  version: 5.3.1
-  resolution: "papaparse@npm:5.3.1"
-  checksum: 10c0/b107ad7cb214bb336a962ba2cede6f6c0a639b428ac4d0470118a8ebce1ff2446c110f0c0217c05f324914a20aec154f443b31014329a31642f4e184120c4143
+"papaparse@npm:^5.7.0":
+  version: 5.7.0
+  resolution: "papaparse@npm:5.7.0"
+  checksum: 10c0/aeea2122ffa7abf33206ab9465e1adcb678ca0e9b08fbd3cea53bf6dc07d5903e69f387dc4dde2498e2478130ba3db79d1fd3956bf638c00be802f0d275e006d
   languageName: node
   linkType: hard
 
