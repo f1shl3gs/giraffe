@@ -49,9 +49,7 @@ export const drawRects = ({
     let fill = fillScale(fillCol[i])
 
     if (hoveredRowIndices && hoveredRowIndices.includes(i)) {
-      fill = color(fill)
-        .brighter(1)
-        .hex()
+      fill = color(fill).brighter(1).hex()
     }
 
     if (strokeWidth || strokeOpacity) {

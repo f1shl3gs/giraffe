@@ -5,11 +5,7 @@ import {newTable} from '../utils/newTable'
 
 describe('mosaic transformation', () => {
   const timeCol = [
-    1612482900000,
-    1612483000000,
-    1612483100000,
-    1612483200000,
-    1612483300000,
+    1612482900000, 1612483000000, 1612483100000, 1612483200000, 1612483300000,
     1612483400000,
   ]
   const valueCol = ['red', 'green', 'green', 'yellow', 'red', 'yellow']

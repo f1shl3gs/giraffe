@@ -275,19 +275,23 @@ export const Pagination = forwardRef<PaginationNavRef, PaginationNavProps>(
                 size={size}
               />
             ))}
-          {// compute whether it should be an ellipse or a number
-          breakpoints.secondBreakpoint !== totalPages - 1 && (
-            <PaginationTruncationItem size={size}></PaginationTruncationItem>
-          )}
-          {//compute last number
-          totalPages !== 1 && (
-            <PaginationItem
-              page={totalPages.toString()}
-              isActive={checkActive(totalPages)}
-              onClick={() => moveToPage(totalPages)}
-              size={size}
-            />
-          )}
+          {
+            // compute whether it should be an ellipse or a number
+            breakpoints.secondBreakpoint !== totalPages - 1 && (
+              <PaginationTruncationItem size={size}></PaginationTruncationItem>
+            )
+          }
+          {
+            //compute last number
+            totalPages !== 1 && (
+              <PaginationItem
+                page={totalPages.toString()}
+                isActive={checkActive(totalPages)}
+                onClick={() => moveToPage(totalPages)}
+                size={size}
+              />
+            )
+          }
           {!hideDirectionIcon && (
             <PaginationDirectionItem
               direction={Direction.Right}

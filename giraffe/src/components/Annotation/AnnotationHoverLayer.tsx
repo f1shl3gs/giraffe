@@ -10,7 +10,9 @@ interface AnnotationHoverLayerProps extends AnnotationLayerProps {
   width: number
 }
 
-export const AnnotationHoverLayer: FunctionComponent<AnnotationHoverLayerProps> = props => {
+export const AnnotationHoverLayer: FunctionComponent<
+  AnnotationHoverLayerProps
+> = props => {
   const {
     annotationPositions,
     plotConfig,

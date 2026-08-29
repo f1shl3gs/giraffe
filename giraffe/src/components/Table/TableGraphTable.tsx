@@ -3,8 +3,8 @@ import React, {FunctionComponent, useState, useEffect, useRef} from 'react'
 import {timeFormatter} from '../../utils/formatters'
 
 // Components
-import {ColumnSizer, SizedColumnProps} from 'react-virtualized'
-import AutoSizer from 'react-virtualized-auto-sizer'
+import {AutoSizer} from '../AutoSizer'
+import {ColumnSizer, SizedColumns} from '../ColumnSizer'
 import {TableCell} from './TableCell'
 import {MultiGrid, MultiGridInputHandles, PropsMultiGrid} from './MultiGrid'
 
@@ -296,40 +296,42 @@ const getTableWidth = (gridContainer: HTMLDivElement): number => {
     : 0
 }
 
-const calculateColumnWidth = (
-  state: State,
-  props: Props,
-  gridContainer: HTMLDivElement,
-  columnSizerWidth: number
-) => (column: {index: number}): number => {
-  const {index} = column
+const calculateColumnWidth =
+  (
+    state: State,
+    props: Props,
+    gridContainer: HTMLDivElement,
+    columnSizerWidth: number
+  ) =>
+  (column: {index: number}): number => {
+    const {index} = column
 
-  const {
-    transformedDataBundle: {transformedData, columnWidths},
-  } = props
+    const {
+      transformedDataBundle: {transformedData, columnWidths},
+    } = props
 
-  const {totalColumnWidths} = state
-  const columnLabel = transformedData[0][index]
+    const {totalColumnWidths} = state
+    const columnLabel = transformedData[0][index]
 
-  const original = columnWidths[columnLabel] || 0
+    const original = columnWidths[columnLabel] || 0
 
-  if (getFixFirstColumn(props) && index === 0) {
-    return original
+    if (getFixFirstColumn(props) && index === 0) {
+      return original
+    }
+
+    if (getTableWidth(gridContainer) <= totalColumnWidths) {
+      return original
+    }
+
+    if (getColumnCount(props) <= 1) {
+      return columnSizerWidth
+    }
+
+    const difference = getTableWidth(gridContainer) - totalColumnWidths
+    const increment = difference / getComputedColumnCount(props)
+
+    return original + increment
   }
-
-  if (getTableWidth(gridContainer) <= totalColumnWidths) {
-    return original
-  }
-
-  if (getColumnCount(props) <= 1) {
-    return columnSizerWidth
-  }
-
-  const difference = getTableWidth(gridContainer) - totalColumnWidths
-  const increment = difference / getComputedColumnCount(props)
-
-  return original + increment
-}
 
 const TableGraphTableComponent: FunctionComponent<Props> = (props: Props) => {
   const {
@@ -395,7 +397,7 @@ const TableGraphTableComponent: FunctionComponent<Props> = (props: Props) => {
                   adjustedWidth,
                   columnWidth,
                   registerChild,
-                }: SizedColumnProps) => {
+                }: SizedColumns) => {
                   return (
                     <MultiGrid
                       height={height}

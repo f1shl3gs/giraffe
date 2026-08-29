@@ -13,7 +13,7 @@ interface Props {
   onSelect: (name: string) => void
 }
 
-const getName = (groupKey: GroupKey): JSX.Element[] => {
+const getName = (groupKey: GroupKey): React.JSX.Element[] => {
   const noNameKeys = ['_start', '_stop']
   return Object.entries(groupKey)
     .filter(([k]) => !noNameKeys.includes(k))

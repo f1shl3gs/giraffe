@@ -1,4 +1,7 @@
-@import '../../../style/variables.scss';
+@use 'sass:color';
+
+@use '../../../style/variables' as *;
+
 
 $table-border--primary: $cf-grey-25;
 $table-border--secondary: $cf-grey-15;
@@ -245,7 +248,7 @@ $table-row-background: $cf-grey-15;
 .cf-table--row__primary {
   @include tableColorModifier(
     $c-sapphire,
-    mix($c-ocean, $c-sapphire, 50%),
+    color.mix($c-ocean, $c-sapphire, 50%),
     $c-ocean,
     $c-pool,
     $g20-white
@@ -254,7 +257,7 @@ $table-row-background: $cf-grey-15;
 .cf-table--row__secondary {
   @include tableColorModifier(
     $c-void,
-    mix($c-amethyst, $c-void, 50%),
+    color.mix($c-amethyst, $c-void, 50%),
     $c-amethyst,
     $c-star,
     $g20-white
@@ -263,7 +266,7 @@ $table-row-background: $cf-grey-15;
 .cf-table--row__success {
   @include tableColorModifier(
     $c-emerald,
-    mix($c-viridian, $c-emerald, 50%),
+    color.mix($c-viridian, $c-emerald, 50%),
     $c-viridian,
     $c-rainforest,
     $g20-white
@@ -272,7 +275,7 @@ $table-row-background: $cf-grey-15;
 .cf-table--row__warning {
   @include tableColorModifier(
     $c-tiger,
-    mix($c-pineapple, $c-tiger, 50%),
+    color.mix($c-pineapple, $c-tiger, 50%),
     $c-pineapple,
     $c-thunder,
     $g3-castle
@@ -281,7 +284,7 @@ $table-row-background: $cf-grey-15;
 .cf-table--row__danger {
   @include tableColorModifier(
     $c-ruby,
-    mix($c-fire, $c-ruby, 50%),
+    color.mix($c-fire, $c-ruby, 50%),
     $c-fire,
     $c-dreamsicle,
     $g20-white

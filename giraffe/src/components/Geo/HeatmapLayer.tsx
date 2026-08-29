@@ -1,6 +1,8 @@
 // Libraries
 import React, {FunctionComponent} from 'react'
-import LeafletHeatmapLayer from 'react-leaflet-heatmap-layer'
+import {useLeaflet} from 'react-leaflet'
+
+import GeoHeatmapCanvas from './heatmap/GeoHeatmapCanvas'
 
 // Types
 import {GeoTable} from './processing/GeoTable'
@@ -23,6 +25,7 @@ const DEFAULT_GRADIENT = {0.4: 'blue', 0.8: 'orange', 1.0: 'red'}
 
 const HeatmapLayer: FunctionComponent<Props> = props => {
   const {properties, table, intensityFieldName, radius, blur} = props
+  const {map} = useLeaflet()
   const {bounds} = properties.intensityDimension
   const intensityMinAndMax = intensityFieldName
     ? calculateMinAndMax(bounds, table, intensityFieldName)
@@ -54,16 +57,16 @@ const HeatmapLayer: FunctionComponent<Props> = props => {
     points.push({...latLon, intensity: normalizedValue})
   }
   return (
-    <LeafletHeatmapLayer
-      blur={blur || DEFAULT_BLUR}
-      radius={radius || DEFAULT_RADIUS}
-      points={points}
-      max={1}
-      minOpacity={0.5}
-      gradient={leafletGradient}
-      longitudeExtractor={p => p.lon}
-      latitudeExtractor={p => p.lat}
-      intensityExtractor={p => p.intensity}
+    <GeoHeatmapCanvas
+      {...{
+        points,
+        radius: radius || DEFAULT_RADIUS,
+        blur: blur || DEFAULT_BLUR,
+        max: 1,
+        minOpacity: 0.5,
+        gradient: leafletGradient,
+        map,
+      }}
     />
   )
 }

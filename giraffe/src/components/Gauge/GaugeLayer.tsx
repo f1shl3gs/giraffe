@@ -1,6 +1,8 @@
 // Libraries
 import React, {FunctionComponent} from 'react'
-import AutoSizer from 'react-virtualized-auto-sizer'
+
+// Components
+import {AutoSizer} from '../AutoSizer'
 
 // Types
 import {GaugeLayerConfig} from '../../types'

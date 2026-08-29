@@ -1,11 +1,12 @@
 {
   "private": true,
+  "packageManager": "yarn@4.18.0",
   "workspaces": [
     "giraffe",
     "stories"
   ],
   "scripts": {
-    "lint": "eslint '{giraffe,stories}/src/**/*.{ts,tsx}'",
+    "lint": "oxlint giraffe/src",
     "prettier": "prettier --config .prettierrc.json --check '{giraffe,stories}/**/*.{ts,tsx}'",
     "prettier:fix": "prettier --config .prettierrc.json --write '{giraffe,stories}/**/*.{ts,tsx}'",
     "publish": "echo 'To publish giraffe, run ./giraffe/publish $version'"
@@ -14,13 +15,10 @@
     "immer": "^9.0.6",
     "jsprim": "^1.4.2",
     "minimatch": "^3.0.5",
-    "shell-quote": "^1.7.3",
-    "**/@influxdata/**/giraffe-stories/**/react-dev-utils/**/loader-utils": "^2.0.4",
-    "**/@influxdata/**/giraffe-stories/**/sass-loader/**/loader-utils": "^2.0.4",
-    "**/@influxdata/**/giraffe/**/awesome-typescript-loader/**/loader-utils": "^1.4.2",
-    "**/@influxdata/**/giraffe-stories/**/babel-loader/**/loader-utils": "^1.4.2",
-    "**/@influxdata/**/giraffe-stories/**/css-modules-typescript-loader/**/loader-utils": "^1.4.2",
-    "**/@influxdata/**/giraffe-stories/**/file-loader/**/loader-utils": "^1.4.2",
-    "**/@influxdata/**/giraffe-stories/**/ts-loader/**/loader-utils": "^1.4.2"
+    "shell-quote": "^1.7.3"
+  },
+  "devDependencies": {
+    "oxlint": "^1.80.0",
+    "prettier": "^3.9.6"
   }
 }

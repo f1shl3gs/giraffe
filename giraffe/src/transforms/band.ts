@@ -99,7 +99,13 @@ export const groupLineIndicesIntoBands = (
   const columnKeysWithoutResult = Array.isArray(columnKeys)
     ? columnKeys.filter(key => key !== RESULT)
     : []
-  const bandLineIndexMap = {}
+  const bandLineIndexMap: {
+    [lineName: string]: {
+      lower: number | null
+      upper: number | null
+      row: number | null
+    }
+  } = {}
 
   if (Array.isArray(mappings)) {
     mappings.forEach((line, index) => {

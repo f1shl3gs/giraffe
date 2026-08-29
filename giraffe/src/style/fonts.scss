@@ -1,0 +1,54 @@
+// Global font-face declarations.
+//
+// Declared ONCE here and side-effect imported by src/index.ts — component-level
+// stylesheets must NOT re-declare these (the previous triple inlining of icomoon
+// cost ~180 kB of duplicate base64 in every bundle).
+// Font binaries live in src/fonts/ and are inlined as data URIs by the build.
+
+@font-face {
+  font-family: 'icomoon';
+  font-style: normal;
+  font-weight: normal;
+  src: url('../fonts/icomoon.eot') format('embedded-opentype');
+  src: url('../fonts/icomoon.eot') format('embedded-opentype'),
+    url('../fonts/icomoon.woff2') format('woff2'),
+    url('../fonts/icomoon.ttf') format('truetype'),
+    url('../fonts/icomoon.woff') format('woff'),
+    url('../fonts/icomoon.svg') format('svg');
+}
+
+@font-face {
+  font-family: 'Proxima Nova';
+  font-style: normal;
+  font-weight: 300;
+  src: url('../fonts/ProximaNova-Light.woff2') format('woff2');
+  font-display: block;
+}
+@font-face {
+  font-family: 'Proxima Nova';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../fonts/ProximaNova-Regular.woff2') format('woff2');
+  font-display: block;
+}
+@font-face {
+  font-family: 'Proxima Nova';
+  font-style: normal;
+  font-weight: 500;
+  src: url('../fonts/ProximaNova-Medium.woff2') format('woff2');
+  font-display: block;
+}
+@font-face {
+  font-family: 'Proxima Nova';
+  font-style: normal;
+  font-weight: 700;
+  src: url('../fonts/ProximaNova-Bold.woff2') format('woff2');
+  font-display: block;
+}
+@font-face {
+  font-family: 'Proxima Nova';
+  font-style: normal;
+  font-weight: 900;
+  src: url('../fonts/ProximaNova-Black.woff2') format('woff2');
+  font-display: block;
+}

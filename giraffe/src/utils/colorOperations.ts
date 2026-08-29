@@ -1,5 +1,3 @@
-import chroma from 'chroma-js'
-
 import {
   THRESHOLD_COLORS,
   BASE_THRESHOLD_ID,
@@ -8,11 +6,76 @@ import {
 
 import {Color} from '../types'
 
+// Parses '#rgb' / '#rrggbb' hex colors (the only format used by thresholds).
+const parseHexRgb = (input: string): [number, number, number] | null => {
+  const nibble = (code: number): number | null => {
+    // 0 ~ 9
+    if (code >= 48 && code <= 57) {
+      return code - 48
+    }
+    // a ~ f
+    if (code >= 97 && code <= 102) {
+      return code - 87
+    }
+    // A ~ F
+    if (code >= 65 && code <= 70) {
+      return code - 55
+    }
+    return null
+  }
+
+  const readColor = (first: number, second?: number): number | null => {
+    const high = nibble(first)
+    if (high === null) {
+      return null
+    }
+
+    // handle input like '#fff'
+    if (second === undefined) {
+      return (high << 4) | high
+    }
+
+    const low = nibble(second)
+    if (low === null) {
+      return null
+    }
+
+    return (high << 4) | low
+  }
+
+  const hex = input.startsWith('#') ? input.slice(1) : input
+  switch (hex.length) {
+    case 3: {
+      const red = readColor(hex.charCodeAt(0))
+      const green = readColor(hex.charCodeAt(1))
+      const blue = readColor(hex.charCodeAt(2))
+      if (red === null || green === null || blue === null) {
+        return null
+      }
+
+      return [red, green, blue]
+    }
+    case 6: {
+      const red = readColor(hex.charCodeAt(0), hex.charCodeAt(1))
+      const green = readColor(hex.charCodeAt(2), hex.charCodeAt(3))
+      const blue = readColor(hex.charCodeAt(4), hex.charCodeAt(5))
+      if (red === null || green === null || blue === null) {
+        return null
+      }
+
+      return [red, green, blue]
+    }
+    default: {
+      return null
+    }
+  }
+}
+
 const getLegibleTextColor = bgColorHex => {
   const darkText = '#292933'
   const lightText = '#ffffff'
 
-  const [red, green, blue] = chroma(bgColorHex).rgb()
+  const [red, green, blue] = parseHexRgb(bgColorHex.trim()) ?? [139, 0, 0]
   const average = (red + green + blue) / 3
   const mediumGrey = 128
 
@@ -23,11 +86,8 @@ const findNearestCrossedThreshold = (colors: Color[], lastValue) => {
   const sortedColors = Array.isArray(colors)
     ? colors.sort((color1, color2) => color1.value - color2.value)
     : []
-  const nearestCrossedThreshold = sortedColors
-    .filter(color => lastValue >= color.value)
-    .pop()
 
-  return nearestCrossedThreshold
+  return sortedColors.filter(color => lastValue >= color.value).pop()
 }
 
 export const generateThresholdsListHexs = ({

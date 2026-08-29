@@ -82,16 +82,15 @@ describe('convertLineSpec', () => {
     it('sorts the legend data in descending order with the correct values in fill columns when time values are sorted', () => {
       const customFillKeys = ['result', '_measurement']
       const table = newTable(8)
-        .addColumn('_time', 'dateTime:RFC3339', 'time', [
-          1622065487240,
-          1622065487240,
-          1622065487240,
-          1622065487240,
-          1622065667240,
-          1622065667240,
-          1622065667240,
-          1622065667240,
-        ])
+        .addColumn(
+          '_time',
+          'dateTime:RFC3339',
+          'time',
+          [
+            1622065487240, 1622065487240, 1622065487240, 1622065487240,
+            1622065667240, 1622065667240, 1622065667240, 1622065667240,
+          ]
+        )
         .addColumn('_value', 'double', 'number', [0, 0, 0, 0, 50, 100, 10, 15])
         .addColumn(customFillKeys[0], 'string', 'string', [
           'second',
@@ -154,16 +153,15 @@ describe('convertLineSpec', () => {
     it('sorts the legend data in descending order with the correct values in fill columns when time values are unsorted', () => {
       const customFillKeys = ['result', '_measurement']
       const table = newTable(8)
-        .addColumn('_time', 'dateTime:RFC3339', 'time', [
-          1622065487240,
-          1622065667240,
-          1622065487240,
-          1622065667240,
-          1622065487240,
-          1622065667240,
-          1622065487240,
-          1622065667240,
-        ])
+        .addColumn(
+          '_time',
+          'dateTime:RFC3339',
+          'time',
+          [
+            1622065487240, 1622065667240, 1622065487240, 1622065667240,
+            1622065487240, 1622065667240, 1622065487240, 1622065667240,
+          ]
+        )
         .addColumn('_value', 'double', 'number', [0, 50, 0, 100, 0, 10, 0, 15])
         .addColumn(customFillKeys[0], 'string', 'string', [
           'second',
@@ -291,26 +289,21 @@ describe('convertLineSpec', () => {
     it('sorts the legend data in descending order with the correct values in fill columns when the time values are sorted', () => {
       const customFillKeys = ['rank', 'place']
       const table = newTable(8)
-        .addColumn('_time', 'dateTime:RFC3339', 'time', [
-          1622065487240,
-          1622065487240,
-          1622065487240,
-          1622065487240,
-          1622065667240,
-          1622065667240,
-          1622065667240,
-          1622065667240,
-        ])
-        .addColumn('_value', 'system', 'number', [
-          10,
-          20,
-          30,
-          40,
-          10,
-          20,
-          30,
-          40,
-        ])
+        .addColumn(
+          '_time',
+          'dateTime:RFC3339',
+          'time',
+          [
+            1622065487240, 1622065487240, 1622065487240, 1622065487240,
+            1622065667240, 1622065667240, 1622065667240, 1622065667240,
+          ]
+        )
+        .addColumn(
+          '_value',
+          'system',
+          'number',
+          [10, 20, 30, 40, 10, 20, 30, 40]
+        )
         .addColumn(customFillKeys[0], 'string', 'string', [
           'fourth',
           'third',
@@ -373,26 +366,21 @@ describe('convertLineSpec', () => {
     it('sorts the legend data in descending order with the correct values in fill columns when the time values are unsorted', () => {
       const customFillKeys = ['rank', 'place']
       const table = newTable(8)
-        .addColumn('_time', 'dateTime:RFC3339', 'time', [
-          1622065487240,
-          1622065667240,
-          1622065487240,
-          1622065667240,
-          1622065487240,
-          1622065667240,
-          1622065487240,
-          1622065667240,
-        ])
-        .addColumn('_value', 'system', 'number', [
-          10,
-          10,
-          20,
-          20,
-          30,
-          30,
-          40,
-          40,
-        ])
+        .addColumn(
+          '_time',
+          'dateTime:RFC3339',
+          'time',
+          [
+            1622065487240, 1622065667240, 1622065487240, 1622065667240,
+            1622065487240, 1622065667240, 1622065487240, 1622065667240,
+          ]
+        )
+        .addColumn(
+          '_value',
+          'system',
+          'number',
+          [10, 10, 20, 20, 30, 30, 40, 40]
+        )
         .addColumn(customFillKeys[0], 'string', 'string', [
           'fourth',
           'fourth',

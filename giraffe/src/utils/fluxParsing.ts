@@ -1,5 +1,4 @@
 import Papa from 'papaparse'
-import uuid from 'uuid'
 
 import {FluxTable} from '../types'
 import {get} from './get'
@@ -11,7 +10,7 @@ export const parseResponseError = (response: string): FluxTable[] => {
 
   return [
     {
-      id: uuid.v4(),
+      id: crypto.randomUUID(),
       name: 'Error',
       result: '',
       groupKey: {},
@@ -140,7 +139,7 @@ export const parseTables = (responseChunk: string): FluxTable[] => {
       {}
     )
     return {
-      id: uuid.v4(),
+      id: crypto.randomUUID(),
       data: [[...headerRow], ...tableData],
       name,
       result,

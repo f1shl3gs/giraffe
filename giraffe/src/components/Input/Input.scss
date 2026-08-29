@@ -3,6 +3,9 @@
   ------------------------------------------------------------------------------
 */
 
+@use "sass:math";
+@use "sass:color";
+
 .cf-input {
   position: relative;
 }
@@ -25,7 +28,7 @@
 
   &:hover {
     background-color: #202028;
-    border-color: mix(#383846, #00a3ff, 50%);
+    border-color: color.mix(#383846, #00a3ff, 50%);
     color: #d4d7dd;
   }
 
@@ -120,7 +123,7 @@
 
   &:hover {
     background-color: #202028;
-    border-color: mix(#383846, #00a3ff, 50%);
+    border-color: color.mix(#383846, #00a3ff, 50%);
     cursor: pointer;
   }
 }
@@ -158,8 +161,8 @@
     width: $height - (4px + 2px);
 
     &:after {
-      height: ceil(($height - (4px + 2px)) * 0.4);
-      width: ceil(($height - (4px + 2px)) * 0.4);
+      height: math.ceil(($height - (4px + 2px)) * 0.4);
+      width: math.ceil(($height - (4px + 2px)) * 0.4);
     }
   }
 }
@@ -183,14 +186,14 @@
 */
 .cf-input__error {
   .cf-input-field {
-    border-color: mix(#383846, #ff8564, 70%);
+    border-color: color.mix(#383846, #ff8564, 70%);
   }
   .cf-input-field:hover {
-    border-color: mix(#383846, #ff8564, 70%)-hover;
+    border-color: color.mix(#383846, #ff8564, 70%)-hover;
   }
   .cf-input-field:focus {
-    border-color: mix(#383846, #ff8564, 70%)-focused;
-    box-shadow: 0 0 6px 0 mix(#383846, #ff8564, 70%)-focused;
+    border-color: color.mix(#383846, #ff8564, 70%)-focused;
+    box-shadow: 0 0 6px 0 color.mix(#383846, #ff8564, 70%)-focused;
   }
 }
 

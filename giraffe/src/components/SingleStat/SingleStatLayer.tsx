@@ -80,11 +80,11 @@ export const SingleStatLayer: FunctionComponent<Props> = props => {
           style={{...svgStyle}}
         >
           <text
-            {...{
+            {...({
               ...SINGLE_STAT_SVG_TEXT_DEFAULT_ATTRIBUTES,
               ...svgTextAttributes,
               opacity: textOpacity,
-            }}
+            } as any)}
             className="giraffe-single-stat--text"
             style={{
               ...SINGLE_STAT_SVG_TEXT_DEFAULT_STYLE,

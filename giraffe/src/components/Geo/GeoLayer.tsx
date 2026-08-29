@@ -1,16 +1,16 @@
 // Libraries
-import React, {FunctionComponent} from 'react'
-import {AutoSizer} from 'react-virtualized'
+import React, {FunctionComponent, useRef} from 'react'
 
 // Components
 import Geo from './Geo'
+import {AutoSizer} from '../AutoSizer'
 
 // Types
 import {Config, Table} from '../../types'
 import {GeoLayerConfig} from '../../types/geo'
 import {calculateVariableAssignment} from '../../utils/geo'
 
-interface OwnProps {
+interface Props {
   table: Table
   config: GeoLayerConfig
   plotConfig: Config
@@ -24,29 +24,28 @@ interface LastRenderProperties {
   heightOnLastRender?: number
 }
 
-const onViewportChange = (
-  props: OwnProps,
-  lastRenderProperties: LastRenderProperties
-) => (lat: number, lon: number, zoom: number) => {
-  const {config} = props
-  const {allowPanAndZoom, onUpdateViewport} = config
-  if (allowPanAndZoom && onUpdateViewport) {
-    onUpdateViewport(lat, lon, zoom)
+const onViewportChange =
+  (props: Props, lastRenderProperties: LastRenderProperties) =>
+  (lat: number, lon: number, zoom: number) => {
+    const {config} = props
+    const {allowPanAndZoom, onUpdateViewport} = config
+    if (allowPanAndZoom && onUpdateViewport) {
+      onUpdateViewport(lat, lon, zoom)
+    }
+    const {widthOnLastRender, heightOnLastRender} = lastRenderProperties
+    updateQuery(
+      props,
+      lastRenderProperties,
+      widthOnLastRender,
+      heightOnLastRender,
+      lat,
+      lon,
+      zoom
+    )
   }
-  const {widthOnLastRender, heightOnLastRender} = lastRenderProperties
-  updateQuery(
-    props,
-    lastRenderProperties,
-    widthOnLastRender,
-    heightOnLastRender,
-    lat,
-    lon,
-    zoom
-  )
-}
 
 const updateQuery = (
-  props: OwnProps,
+  props: Props,
   lastRenderProperties: LastRenderProperties,
   width: number,
   height: number,
@@ -88,7 +87,7 @@ const updateQuery = (
 }
 
 const onAutoResize = (
-  props: OwnProps,
+  props: Props,
   lastRenderProperties: LastRenderProperties,
   width,
   height
@@ -103,11 +102,8 @@ const onAutoResize = (
     detectCoordinateFields,
     mapStyle,
   } = config
-  const {
-    latOnLastRender,
-    lonOnLastRender,
-    zoomOnLastRender,
-  } = lastRenderProperties
+  const {latOnLastRender, lonOnLastRender, zoomOnLastRender} =
+    lastRenderProperties
 
   updateQuery(
     props,
@@ -143,17 +139,18 @@ const onAutoResize = (
   )
 }
 
-export const GeoLayer: FunctionComponent<OwnProps> = React.memo(props => {
-  if (props.config.tileServerConfiguration) {
-    return (
-      <AutoSizer>
-        {(() => {
-          const lastRenderProperties: LastRenderProperties = {}
-          return ({width, height}) =>
-            onAutoResize(props, lastRenderProperties, width, height)
-        })()}
-      </AutoSizer>
-    )
+export const GeoLayer: FunctionComponent<Props> = React.memo(props => {
+  const lastRenderProperties = useRef<LastRenderProperties>({})
+
+  if (!props.config.tileServerConfiguration) {
+    return null
   }
-  return null
+
+  return (
+    <AutoSizer>
+      {({width, height}) =>
+        onAutoResize(props, lastRenderProperties.current, width, height)
+      }
+    </AutoSizer>
+  )
 })

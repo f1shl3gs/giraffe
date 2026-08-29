@@ -93,9 +93,7 @@ export const bin = (
   const xColData = table.getColumn(xColKey, 'number')
   const xColType = table.getColumnType(xColKey) as 'number'
   const xOriginalColType = table.getOriginalColumnType(xColKey) as
-    | 'double'
-    | 'long'
-    | 'unsignedLong'
+    'double' | 'long' | 'unsignedLong'
   const groupColData = table.getColumn(FILL, 'number')
 
   if (!binCount) {

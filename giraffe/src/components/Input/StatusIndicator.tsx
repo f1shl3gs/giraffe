@@ -55,7 +55,7 @@ export const StatusIndicator = forwardRef<
       .split(' ')
       .reduce((accum, current) => styleReducer(styles, accum, current), '')
 
-    let statusElement: JSX.Element = <></>
+    let statusElement: React.JSX.Element = <></>
     const shadowElement = shadow && (
       <div className={styles['cf-status-indicator--shadow']} />
     )

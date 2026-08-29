@@ -8,12 +8,12 @@ export const sortIndicesByValueColumn = (
   if (!valuesColumn || !rowIndices?.length) {
     return []
   }
-  const numberMap = {}
+  const numberMap: any = {}
   const sortable = []
   rowIndices.forEach(rowIndex => {
-    const key = isNumber(valuesColumn[`${rowIndex}`])
-      ? valuesColumn[`${rowIndex}`]
-      : 0
+    const key = (
+      isNumber(valuesColumn[`${rowIndex}`]) ? valuesColumn[`${rowIndex}`] : 0
+    ) as string
     if (!numberMap[key]) {
       numberMap[key] = []
     }

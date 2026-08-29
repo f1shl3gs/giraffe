@@ -1,6 +1,6 @@
 // Libraries
-import {scaleUtc} from 'd3-scale'
 import {ticks} from 'd3-array'
+import {utcTicks} from 'd3-time'
 import memoizeOne from 'memoize-one'
 
 // Types
@@ -86,11 +86,8 @@ const getOptimalTimeTicks = (
   rangeLength: number,
   timeTickLength: number
 ): Date[] => {
-  const scaledTime = scaleUtc()
-    .domain([d0, d1])
-    .range([0, rangeLength])
   const maxNumTicks = Math.floor(rangeLength / timeTickLength)
-  let optimalTicks = scaledTime.ticks(maxNumTicks)
+  let optimalTicks = utcTicks(d0, d1, maxNumTicks)
 
   for (
     let counter = 1;
@@ -98,7 +95,7 @@ const getOptimalTimeTicks = (
     !hasMinimumSpacing(rangeLength, timeTickLength, optimalTicks);
     counter += 1
   ) {
-    optimalTicks = scaledTime.ticks(maxNumTicks - counter)
+    optimalTicks = utcTicks(d0, d1, maxNumTicks - counter)
   }
   return optimalTicks
 }

@@ -30,9 +30,7 @@ export const createGroupIDColumn = (
       mapping[k] = table.getColumn(k)[i]
     }
 
-    const hashedGroupValues = Object.values(mapping)
-      .sort()
-      .join('')
+    const hashedGroupValues = Object.values(mapping).sort().join('')
 
     let groupID = groupIDs[hashedGroupValues]
 
@@ -71,9 +69,7 @@ const createNominalColorScale = (
     )
   }
 
-  const scale = scaleOrdinal<number, string>()
-    .domain(domain)
-    .range(scaleRange)
+  const scale = scaleOrdinal<number, string>().domain(domain).range(scaleRange)
 
   return scale
 }

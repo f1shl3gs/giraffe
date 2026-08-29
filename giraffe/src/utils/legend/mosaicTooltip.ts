@@ -104,7 +104,7 @@ export const getMosaicTooltipData = (
   const hoveredBoxRows = hoveredRowIndices.reverse()
 
   const colors = hoveredBoxRows.map(i =>
-    fillScale((valCol[i] as unknown) as number)
+    fillScale(valCol[i] as unknown as number)
   )
 
   const xTooltipColumn: LegendColumn = {

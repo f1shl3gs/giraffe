@@ -261,12 +261,12 @@ describe('normalizeConfig', () => {
       } as Config
 
       config.fluxResponse = ''
-      let firstResult = normalizeConfig(config)
+      const firstResult = normalizeConfig(config)
       expect(firstResult).toEqual(config)
       expect(firstResult.table).toBeUndefined()
 
       config.fluxResponse = 'not valid csv'
-      let secondResult = normalizeConfig(config)
+      const secondResult = normalizeConfig(config)
       expect(secondResult).toEqual(config)
       expect(secondResult.table).toBeUndefined()
 
@@ -306,7 +306,6 @@ describe('normalizeConfig', () => {
       - HistogramLayerConfig
       - LineLayerConfig
       - MosaicLayerConfig
-      - RawFluxDataTableLayerConfig
       - ScatterLayerConfig
       - SingleStatLayerConfig
       - TableGraphLayerConfig

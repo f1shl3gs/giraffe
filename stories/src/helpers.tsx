@@ -263,7 +263,7 @@ const findTags = (table: Table, latLon: boolean = false) => {
 const findFields = (table: Table) => {
   const fieldValues = table.getColumn('_field')
   const uniqueFields = _.uniq(fieldValues, true)
-  const fields = uniqueFields.reduce(function(result, item) {
+  const fields = uniqueFields.reduce(function (result, item) {
     result[item] = {
       key: 'field',
       column: item,

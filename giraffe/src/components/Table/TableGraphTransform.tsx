@@ -1,5 +1,5 @@
 // Libraries
-import {FunctionComponent} from 'react'
+import {FunctionComponent, JSX} from 'react'
 import memoizeOne from 'memoize-one'
 
 // Utils

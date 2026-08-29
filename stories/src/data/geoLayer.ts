@@ -23,17 +23,15 @@ const createDataColumns = (numberOfRecords: number) => {
   return {TIME_COL, VALUE1_COL, VALUE2_COL, LAT_COL, LON_COL}
 }
 
-export const geoTable = memoizeOne(
-  (numberOfRecords = 200): Table => {
-    const columns = createDataColumns(numberOfRecords)
-    return newTable(numberOfRecords)
-      .addColumn('_time', 'dateTime:RFC3339', 'time', columns.TIME_COL)
-      .addColumn('magnitude', 'double', 'number', columns.VALUE1_COL)
-      .addColumn('duration', 'double', 'number', columns.VALUE2_COL)
-      .addColumn('lat', 'double', 'number', columns.LAT_COL)
-      .addColumn('lon', 'double', 'number', columns.LON_COL)
-  }
-)
+export const geoTable = memoizeOne((numberOfRecords = 200): Table => {
+  const columns = createDataColumns(numberOfRecords)
+  return newTable(numberOfRecords)
+    .addColumn('_time', 'dateTime:RFC3339', 'time', columns.TIME_COL)
+    .addColumn('magnitude', 'double', 'number', columns.VALUE1_COL)
+    .addColumn('duration', 'double', 'number', columns.VALUE2_COL)
+    .addColumn('lat', 'double', 'number', columns.LAT_COL)
+    .addColumn('lon', 'double', 'number', columns.LON_COL)
+})
 
 const addTrack = (data, startLat: number, startLon: number) => {
   const tid = Math.floor(Math.random() * 1000)

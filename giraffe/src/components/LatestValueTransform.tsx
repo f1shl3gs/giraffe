@@ -8,7 +8,7 @@ import {isString} from '../utils/isString'
 
 interface Props {
   table: Table
-  children: (latestValue: number) => JSX.Element
+  children: (latestValue: number) => React.JSX.Element
   allowString: boolean
   // If `quiet` is set and a latest value can't be found, this component will
   // display nothing instead of an empty graph error message

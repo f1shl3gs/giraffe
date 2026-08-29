@@ -1,0 +1,124 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  // Replaces the former ESLint flat config (eslint.config.mjs): legacy-parity
+  // rule set for giraffe/src. Severity mapping: eslint "error" -> oxlint
+  // "error", eslint "warn" -> oxlint "warn", eslint "off" -> oxlint "allow".
+  // Naming: bare = eslint core, typescript/* = tseslint equivalent,
+  // react/* = react plugin (oxlint has no separate react-hooks plugin; the
+  // former react-hooks/* rules live here as react/rules-of-hooks and
+  // react/exhaustive-deps).
+  "plugins": ["eslint", "typescript", "unicorn", "oxc", "react"],
+  // Only the default "correctness" category stays on; everything enforced
+  // below is spelled out explicitly, mirroring the old pinned rule set.
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/coverage/**",
+    "**/*.d.ts",
+    ".yarn/**",
+    "docs/**",
+    "stories/**"
+  ],
+  "options": {
+    // ESLint flat config reported unused disable directives as warnings;
+    // keep that behavior.
+    "reportUnusedDisableDirectives": "warn"
+  },
+  "rules": {
+    // ---- enforced parity rules (former @typescript-eslint/recommended subset + pins) ----
+    "typescript/ban-ts-comment": "error",
+    "typescript/no-array-constructor": "error",
+    "typescript/no-duplicate-enum-values": "error",
+    "typescript/no-extra-non-null-assertion": "error",
+    "typescript/no-misused-new": "error",
+    "typescript/no-non-null-asserted-optional-chain": "error",
+    "typescript/no-require-imports": "error",
+    "typescript/no-this-alias": "error",
+    "typescript/no-unnecessary-type-constraint": "error",
+    "typescript/no-unsafe-declaration-merging": "error",
+    "typescript/no-unused-expressions": [
+      "error",
+      {
+        "allowShortCircuit": false,
+        "allowTernary": false,
+        "allowTaggedTemplates": false
+      }
+    ],
+    "typescript/no-wrapper-object-types": "error",
+    "typescript/prefer-namespace-keyword": "error",
+    "typescript/triple-slash-reference": "error",
+    // ---- enforced parity rules (former eslint-core pins) ----
+    "curly": ["error", "all"],
+    "no-console": ["error", { "allow": ["warn", "error"] }],
+    "no-nested-ternary": "error",
+    "no-unused-vars": [
+      "error",
+      { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_" }
+    ],
+    "no-var": "error",
+    "prefer-const": "error",
+    "prefer-spread": "error",
+    // ---- enforced parity rules (former eslint-plugin-react recommended subset) ----
+    "react/jsx-key": "error",
+    "react/jsx-no-comment-textnodes": "error",
+    "react/jsx-no-duplicate-props": "error",
+    "react/jsx-no-undef": "error",
+    "react/no-children-prop": "error",
+    "react/no-danger-with-children": "error",
+    // react/no-deprecated: unsupported by oxlint (typescript/no-deprecated is
+    // an unrelated type-aware JSDoc rule); it fired 0x in the old baseline.
+    "react/no-direct-mutation-state": "error",
+    "react/no-find-dom-node": "error",
+    "react/no-is-mounted": "error",
+    "react/no-render-return-value": "error",
+    "react/no-string-refs": "error",
+    "react/no-unknown-property": "error",
+    "react/require-render-return": "error",
+    // ---- enforced parity rules (former react-hooks pair) ----
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "warn",
+    // ---- deliberately off (legacy .eslintrc.json offsets carried over) ----
+    "no-empty-function": "allow",
+    "typescript/no-empty-object-type": "allow",
+    "no-explicit-any": "allow",
+    "typescript/no-unsafe-function-type": "allow",
+    "typescript/no-namespace": "allow",
+    "typescript/prefer-as-const": "allow",
+    "prefer-rest-params": "allow",
+    "no-extra-boolean-cast": "allow",
+    "no-undef": "allow",
+    "react/display-name": "allow",
+    "react/jsx-no-target-blank": "allow",
+    "react/no-unescaped-entities": "allow",
+    // react/prop-types: unsupported by oxlint (only vue require-prop-types);
+    // it was off in the old stack too, so nothing is lost.
+    // react/jsx-uses-react + react/jsx-uses-vars: unsupported by oxlint; they
+    // were bookkeeping rules for the old JSX scope checks (which stayed quiet
+    // under the automatic JSX runtime), so nothing is lost.
+    // react/react-in-jsx-scope: supported but moot under the automatic JSX
+    // runtime (the old setup detected this and never fired); left off.
+    // ---- oxlint-default rules the old stack never enforced -> off ----
+    // Never part of the old enforced set (not in tseslint.recommended here);
+    // keeping it off also keeps the pre-existing `eslint-disable` directives
+    // in preventNegativeZero.ts / fixtures/randomTable.ts unused-and-reported,
+    // exactly like the old flat config did.
+    "no-compare-neg-zero": "allow",
+    // New react-hooks-compiler-era lints (ported from eslint-plugin-react-
+    // hooks v6+); the old config only used rules-of-hooks + exhaustive-deps
+    // from that plugin. They fire ~52x on pre-existing render/effect patterns.
+    "react/refs": "allow",
+    "react/set-state-in-effect": "allow",
+    "react/immutability": "allow",
+    // Fires 7x on pre-existing `new Array(n)` allocation sites across utils.
+    "unicorn/no-new-array": "allow",
+    // Fires 2x on same-side logical operands in SizedTable/SizedPlot.
+    "oxc/const-comparisons": "allow",
+    // Fires 2x on number literals inside test fixtures (formatters tests).
+    "no-loss-of-precision": "allow",
+    // Fires 2x on spreads whose removal would change object identity
+    // semantics in TableGraphTable/MultiGrid.
+    "unicorn/no-useless-spread": "allow",
+    // Fires 1x on optional-chaining arithmetic in staticLegend.ts.
+    "no-unsafe-optional-chaining": "allow"
+  }
+}

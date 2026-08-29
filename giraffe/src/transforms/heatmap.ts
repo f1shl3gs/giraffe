@@ -71,15 +71,9 @@ export const bin2d = (
   const yColData = table.getColumn(yColKey, 'number')
   const xColType = table.getColumnType(xColKey) as 'time' | 'number'
   const xOriginalColType = table.getOriginalColumnType(xColKey) as
-    | 'dateTime:RFC3339'
-    | 'long'
-    | 'double'
-    | 'unsignedLong'
+    'dateTime:RFC3339' | 'long' | 'double' | 'unsignedLong'
   const yOriginalColType = table.getOriginalColumnType(yColKey) as
-    | 'dateTime:RFC3339'
-    | 'long'
-    | 'double'
-    | 'unsignedLong'
+    'dateTime:RFC3339' | 'long' | 'double' | 'unsignedLong'
   const yColType = table.getColumnType(yColKey) as 'time' | 'number'
 
   const xBinCount = Math.max(Math.floor(width / (binSize > 0 ? binSize : 1)), 1)

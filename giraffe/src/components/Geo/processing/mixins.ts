@@ -1,8 +1,8 @@
-import {S2} from 's2-geometry'
 import {HEX_DIGIT_NUM} from '../../../utils/geo'
 import {CoordinateEncoding} from './GeoTable'
 import {Coordinates} from './GeoTable'
-export const getLatLonMixin = function(index: number): Coordinates {
+import {s2IdToLatLng} from './s2IdToLatLng'
+export const getLatLonMixin = function (index: number): Coordinates {
   if (this.coordinateEncoding === CoordinateEncoding.FIELDS) {
     return {
       lon: this.getValue(index, this.latLonColumns.lon.column),
@@ -18,7 +18,7 @@ export const getLatLonMixin = function(index: number): Coordinates {
   const fixed =
     BigInt('0x' + cellId) *
     precisionTrimmingTable[HEX_DIGIT_NUM - cellId.length]
-  const latLng = S2.idToLatLng(fixed.toString())
+  const latLng = s2IdToLatLng(fixed.toString())
   return {
     lon: latLng.lng,
     lat: latLng.lat,

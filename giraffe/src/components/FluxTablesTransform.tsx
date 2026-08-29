@@ -1,5 +1,5 @@
 // Libraries
-import {useMemo, FunctionComponent} from 'react'
+import {useMemo, FunctionComponent, JSX} from 'react'
 
 // Utils
 import {parseResponse} from '../utils/fluxParsing'

@@ -17,7 +17,6 @@
 */
 
 import {format as d3Format} from 'd3-format'
-import {createDateFormatter} from 'intl-dateformat'
 
 import {Formatter, FormatterType} from '../types'
 
@@ -96,6 +95,111 @@ const getShortTimeZoneName = (timeZone: string, date: Date) => {
   return formatted.substring(formatted.indexOf(',') + 2)
 }
 
+interface TimeParts {
+  [key: string]: string
+}
+
+type TimeTokenFormatter = (parts: TimeParts, date: Date) => string
+
+// A time format token is a maximal run of these characters (e.g. "YYYY",
+// "mm") or the two-character token "ZZ". Runs of token characters that do
+// not name a token (e.g. a lone "s") are emitted verbatim.
+const TIME_TOKEN_CHAR = /[YMDdAaHhms]/
+
+const timePartParsers = new Map<string, (date: Date) => TimeParts>()
+
+// Returns the "year", "month", "day", "hour", "minute", "second", "weekday"
+// and "dayPeriod" of a date as rendered in the given time zone, plus the
+// "l"-prefixed fields ("lmonth", "lhour") taken with an hour12-less
+// formatter so they do not depend on the locale's default hour cycle.
+const getTimePartsParser = (
+  locale?: string,
+  timezone?: string
+): ((date: Date) => TimeParts) => {
+  const key = `${locale}${timezone}`
+
+  let parser = timePartParsers.get(key)
+
+  if (!parser) {
+    const intlFormatter = new Intl.DateTimeFormat(locale, {
+      weekday: 'long',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZone: timezone,
+    })
+    const intlLongFormatter = new Intl.DateTimeFormat(locale, {
+      month: 'long',
+      hour: '2-digit',
+      hour12: false,
+      timeZone: timezone,
+    })
+
+    parser = (date: Date): TimeParts => {
+      const parts: TimeParts = {}
+
+      for (const token of intlFormatter.formatToParts(date)) {
+        if (token.type !== 'literal') {
+          parts[token.type] = token.value
+        }
+      }
+
+      for (const token of intlLongFormatter.formatToParts(date)) {
+        if (token.type !== 'literal') {
+          parts[`l${token.type}`] = token.value
+        }
+      }
+
+      parts.dayPeriod = parts.dayPeriod || parts.dayperiod || ''
+      delete parts.dayperiod
+
+      // some environments resolve midnight as hour "24"
+      parts.lhour = ('0' + (Number(parts.lhour) % 24)).slice(-2)
+
+      return parts
+    }
+
+    timePartParsers.set(key, parser)
+  }
+
+  return parser
+}
+
+const renderTimeFormat = (
+  format: string,
+  tokenFormatters: Record<string, TimeTokenFormatter>,
+  parts: TimeParts,
+  date: Date
+): string => {
+  let output = ''
+  let i = 0
+
+  while (i < format.length) {
+    if (TIME_TOKEN_CHAR.test(format[i])) {
+      // consume the whole run of token characters, e.g. "YYYY", "sss"
+      let j = i + 1
+      while (j < format.length && TIME_TOKEN_CHAR.test(format[j])) {
+        j += 1
+      }
+      const mask = format.slice(i, j)
+      const tokenFormatter = tokenFormatters[mask]
+      output += tokenFormatter ? tokenFormatter(parts, date) : mask
+      i = j
+    } else if (format[i] === 'Z' && format[i + 1] === 'Z') {
+      output += tokenFormatters.ZZ(parts, date)
+      i += 2
+    } else {
+      output += format[i]
+      i += 1
+    }
+  }
+
+  return output
+}
+
 interface TimeFormatter extends Formatter {
   (timestamp: number, options?: {domainWidth?: number}): string
 
@@ -114,13 +218,18 @@ export interface TimeFormatterFactoryOptions {
 
   // Format string, e.g. "YYYY-MM-DD HH:mm".
   //
-  // Support options are those [here][0], as well as:
+  // Supported tokens:
   //
-  // - `sss`: milliseconds
-  // - `Z`: short time zone name (e.g. "PST")
-  // - `D`: day of month without zero padding
+  // - `YYYY` / `YY`: year / last two digits of year
+  // - `MMMM` / `MMM` / `MM`: month name / short month name / 2-digit month
+  // - `DD` / `D`: day of month, with / without zero padding
+  // - `dddd` / `ddd`: weekday name / short weekday name
+  // - `HH` / `hh`: hours (24-hour / 12-hour)
+  // - `mm` / `ss` / `sss`: minutes / seconds / milliseconds
+  // - `a` / `A`: ante meridiem and post meridiem
+  // - `ZZ`: short time zone name (e.g. "PST")
   //
-  // [0]: https://github.com/zapier/intl-dateformat#formats
+  // Any other letters are output verbatim.
   format?: string
 }
 
@@ -138,19 +247,25 @@ export const timeFormatter = ({
     .toLocaleTimeString()
     .includes('15')
 
-  // createDateFormatter is very particular in terms of order of operation
-  // for example, modifying the timezone before determing the `am/pm` will
-  // output the timezone incorrectly. The same goes for determining the `HH`, etc...
-  const formatStringFormatter = createDateFormatter({
+  const tokenFormatters: Record<string, TimeTokenFormatter> = {
+    YYYY: ({year}) => year,
+    YY: ({year}) => year.slice(-2),
+    MMMM: ({lmonth}) => lmonth,
+    MMM: ({lmonth}) => lmonth.slice(0, 3),
+    MM: ({month}) => month,
+    DD: ({day}) => day,
+    dddd: ({weekday}) => weekday,
+    ddd: ({weekday}) => weekday.slice(0, 3),
+    A: ({dayPeriod}) => dayPeriod,
+    mm: ({minute}) => minute,
+    ss: ({second}) => second,
     // a deliberate space in front of single digit hours keeps the tick label length
     // and the total number of ticks consistent regardless of time frame
-    hh: options => {
-      const {hour} = options
+    hh: ({hour}) => {
       const numericalHour = Number(hour)
       return numericalHour < 10 ? ` ${numericalHour}` : `${numericalHour}`
     },
-    HH: options => {
-      const {hour, lhour} = options
+    HH: ({hour, lhour}) => {
       const hasMeridiem = / a/i
       const is24hourFormat =
         is24hourLocale || UTC_TIME_ZONE.test(timeZone) || hour12 === false
@@ -171,7 +286,7 @@ export const timeFormatter = ({
       return hour
     },
     sss: (_, date) => String(date.getMilliseconds()).padStart(3, '0'),
-    D: parts => String(Number(parts.day)),
+    D: ({day}) => String(Number(day)),
     a: ({dayPeriod, lhour}) => {
       if (format && format.includes('a') && is24hourLocale) {
         if (Number(lhour) >= 12) {
@@ -183,7 +298,15 @@ export const timeFormatter = ({
       return dayPeriod || ''
     },
     ZZ: (_, date) => getShortTimeZoneName(timeZone, date),
-  })
+  }
+
+  const formatStringFormatter = (date: Date, formatString: string): string =>
+    renderTimeFormat(
+      formatString,
+      tokenFormatters,
+      getTimePartsParser(locale, timeZone)(date),
+      date
+    )
 
   let formatter
 
@@ -195,10 +318,7 @@ export const timeFormatter = ({
   if (format) {
     // If a `format` string is passed, we simply use it
     formatter = (timestamp: number) =>
-      formatStringFormatter(getValidDate(timestamp), format, {
-        locale,
-        timezone: timeZone,
-      })
+      formatStringFormatter(getValidDate(timestamp), format)
   } else {
     // Otherwise we will return a formatter that will vary the output format
     // based on an optional `domainWidth` argument (e.g. we will show more
@@ -233,10 +353,7 @@ export const timeFormatter = ({
         timeFormat = timeFormats.local12
       }
 
-      return formatStringFormatter(getValidDate(timestamp), timeFormat, {
-        timezone: timeZone,
-        locale,
-      })
+      return formatStringFormatter(getValidDate(timestamp), timeFormat)
     }
   }
 
@@ -288,7 +405,8 @@ export const binaryPrefixFormatter = ({
     return `${prefix}${decimalFormattedNumber}${binaryPrefix}${suffix}`
   }
 
-  formatter._GIRAFFE_FORMATTER_TYPE = FormatterType.BinaryPrefix as FormatterType.BinaryPrefix
+  formatter._GIRAFFE_FORMATTER_TYPE =
+    FormatterType.BinaryPrefix as FormatterType.BinaryPrefix
 
   return formatter
 }
@@ -342,7 +460,8 @@ export const siPrefixFormatter = ({
     }
   }
 
-  formatter._GIRAFFE_FORMATTER_TYPE = FormatterType.SIPrefix as FormatterType.SIPrefix
+  formatter._GIRAFFE_FORMATTER_TYPE =
+    FormatterType.SIPrefix as FormatterType.SIPrefix
 
   return formatter
 }

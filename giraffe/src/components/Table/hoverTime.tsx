@@ -1,7 +1,7 @@
 import React, {FunctionComponent, useState} from 'react'
 
 interface Props {
-  children: JSX.Element | Element
+  children: React.ReactNode
 }
 
 export interface InjectedHoverProps {
@@ -19,10 +19,10 @@ export const HoverTimeProvider: FunctionComponent<Props> = (props: Props) => {
   return <Provider value={hoverTimeState}>{props.children}</Provider>
 }
 
-export const withHoverTime = <P extends {}>(
-  Component: React.ComponentType<P & InjectedHoverProps>
-) => (props: P) => (
-  <Consumer>
-    {hoverTimeProps => <Component {...props} {...hoverTimeProps} />}
-  </Consumer>
-)
+export const withHoverTime =
+  <P extends {}>(Component: React.ComponentType<P & InjectedHoverProps>) =>
+  (props: P) => (
+    <Consumer>
+      {hoverTimeProps => <Component {...props} {...hoverTimeProps} />}
+    </Consumer>
+  )

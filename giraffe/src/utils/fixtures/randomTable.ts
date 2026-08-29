@@ -11,7 +11,7 @@ const getRandomNumber = (
     ? Number((Math.random() * (2 * max + 1) - max).toFixed(decimalPlaces))
     : Number((Math.random() * max).toFixed(decimalPlaces))
 
-  return result === -0 ? 0 : result // eslint-disable-line no-compare-neg-zero
+  return result === -0 ? 0 : result
 }
 
 export const COLUMN_KEY = 'cpu'

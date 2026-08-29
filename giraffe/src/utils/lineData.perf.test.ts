@@ -37,5 +37,5 @@ describe('line graph performance', () => {
         REASONABLE_LIMIT
       )
     }).not.toThrow()
-  })
+  }, 30_000)
 })

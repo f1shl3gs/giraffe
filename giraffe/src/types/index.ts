@@ -248,7 +248,6 @@ export type FluxDataType =
   | 'system'
 
 export enum LayerTypes {
-  RawFluxDataTable = 'flux data table',
   Gauge = 'gauge',
   Custom = 'custom',
   Annotation = 'annotation',
@@ -274,7 +273,6 @@ export type LayerConfig =
   | HistogramLayerConfig
   | LineLayerConfig
   | MosaicLayerConfig
-  | RawFluxDataTableLayerConfig
   | ScatterLayerConfig
   | SimpleTableLayerConfig
   | SingleStatLayerConfig
@@ -311,15 +309,6 @@ export interface CustomLayerRenderProps {
   innerHeight: number
   yColumnType: ColumnType
   columnFormatter: (colKey: string) => (x: any) => string
-}
-
-export interface RawFluxDataTableLayerConfig {
-  type: 'flux data table' // do not refactor or restrict to LayerTypes.RawFluxDataTable
-  files: string[]
-  width: number
-  height: number
-  disableVerticalScrolling?: boolean
-  parseObjects?: boolean
 }
 
 export interface GaugeLayerConfig {
@@ -833,12 +822,7 @@ export type MosaicPosition = 'stacked'
 export type MosaicHoverDimension = 'x' | 'y' | 'xy'
 
 export type SymbolType =
-  | 'circle'
-  | 'triangle'
-  | 'square'
-  | 'plus'
-  | 'tritip'
-  | 'ex'
+  'circle' | 'triangle' | 'square' | 'plus' | 'tritip' | 'ex'
 
 export interface ColumnGroupMap {
   // The column keys that specify the grouping

@@ -1,40 +1,9 @@
-@import '../../style/variables.scss';
+// NOTE: font-faces are declared ONCE in src/style/fonts.scss
+// (side-effect imported by src/index.ts). Do not re-declare them here:
+// every copy is base64-inlined into the bundle separately.
 
-@font-face {
-  font-family: 'Proxima Nova';
-  font-style: normal;
-  font-weight: 300;
-  src: url('../../fonts/ProximaNova-Light.woff2') format('woff2');
-  font-display: block;
-}
-@font-face {
-  font-family: 'Proxima Nova';
-  font-style: normal;
-  font-weight: 400;
-  src: url('../../fonts/ProximaNova-Regular.woff2') format('woff2');
-  font-display: block;
-}
-@font-face {
-  font-family: 'Proxima Nova';
-  font-style: normal;
-  font-weight: 500;
-  src: url('../../fonts/ProximaNova-Medium.woff2') format('woff2');
-  font-display: block;
-}
-@font-face {
-  font-family: 'Proxima Nova';
-  font-style: normal;
-  font-weight: 700;
-  src: url('../../fonts/ProximaNova-Bold.woff2') format('woff2');
-  font-display: block;
-}
-@font-face {
-  font-family: 'Proxima Nova';
-  font-style: normal;
-  font-weight: 900;
-  src: url('../../fonts/ProximaNova-Black.woff2') format('woff2');
-  font-display: block;
-}
+@use '../../style/variables' as *;
+
 
 .giraffe-layer-single-stat {
   align-items: center;

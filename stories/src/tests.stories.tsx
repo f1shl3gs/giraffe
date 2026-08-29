@@ -134,12 +134,12 @@ storiesOf('Tests', module)
   .add('Snapshot - binary prefix formatting', () => {
     const table = newTable(4)
       .addColumn('time', 'system', 'number', [0, 1, 2, 3])
-      .addColumn('bytes', 'system', 'number', [
-        6799245312,
-        6475784192,
-        6419197952,
-        6307565568,
-      ])
+      .addColumn(
+        'bytes',
+        'system',
+        'number',
+        [6799245312, 6475784192, 6419197952, 6307565568]
+      )
 
     const config: Config = {
       width: 600,

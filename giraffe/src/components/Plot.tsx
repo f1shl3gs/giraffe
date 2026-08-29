@@ -1,8 +1,8 @@
 // Libraries
 import React, {FunctionComponent, RefObject, useRef} from 'react'
-import AutoSizer from 'react-virtualized-auto-sizer'
 
 // Components
+import {AutoSizer} from './AutoSizer'
 import {PlotResizer, TableResizer} from './PlotResizer'
 
 // Types
@@ -12,6 +12,7 @@ import {Config, SizedConfig} from '../types'
 import {hasPlotEnv} from '../utils/hasPlotEnv'
 
 interface PlotProps {
+  children?: React.ReactNode
   config: Config
   axesCanvasRef?: RefObject<HTMLCanvasElement>
   layerCanvasRef?: RefObject<HTMLCanvasElement>

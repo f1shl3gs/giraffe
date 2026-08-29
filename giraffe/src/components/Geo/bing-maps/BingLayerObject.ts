@@ -12,7 +12,7 @@ export const BingLayerObject = L.TileLayer.extend({
     style: '',
   },
 
-  initialize: function(bing_key, options) {
+  initialize: function (bing_key, options) {
     L.Util.setOptions(this, options)
 
     this._bing_key = bing_key
@@ -21,7 +21,7 @@ export const BingLayerObject = L.TileLayer.extend({
     this.metaRequested = false
   },
 
-  tile2quad: function(x, y, z) {
+  tile2quad: function (x, y, z) {
     let quad = ''
     for (let i = z; i > 0; i--) {
       let digit = 0
@@ -37,19 +37,20 @@ export const BingLayerObject = L.TileLayer.extend({
     return quad
   },
 
-  getTileUrl: function(tilePoint) {
+  getTileUrl: function (tilePoint) {
     const zoom = this._getZoomForUrl()
     const subdomains = this.options.subdomains,
-      s = this.options.subdomains[
-        Math.abs((tilePoint.x + tilePoint.y) % subdomains.length)
-      ]
+      s =
+        this.options.subdomains[
+          Math.abs((tilePoint.x + tilePoint.y) % subdomains.length)
+        ]
     return this._url
       .replace('{subdomain}', s)
       .replace('{quadkey}', this.tile2quad(tilePoint.x, tilePoint.y, zoom))
       .replace('{culture}', this.options.culture)
   },
 
-  loadMetadata: function() {
+  loadMetadata: function () {
     if (this.metaRequested) {
       return
     }
@@ -89,7 +90,7 @@ export const BingLayerObject = L.TileLayer.extend({
     document.getElementsByTagName('head')[0].appendChild(script)
   },
 
-  initMetadata: function(meta) {
+  initMetadata: function (meta) {
     const r = meta.resourceSets[0].resources[0]
     this.options.subdomains = r.imageUrlSubdomains
     this._url = r.imageUrl
@@ -116,7 +117,7 @@ export const BingLayerObject = L.TileLayer.extend({
     this._update()
   },
 
-  _update: function() {
+  _update: function () {
     if (this._url === null || !this._map) {
       return
     }
@@ -124,7 +125,7 @@ export const BingLayerObject = L.TileLayer.extend({
     L.TileLayer.prototype._update.apply(this, [])
   },
 
-  _update_attribution: function() {
+  _update_attribution: function () {
     const bounds = this._map.getBounds()
     const zoom = this._map.getZoom()
     for (let i = 0; i < this._providers.length; i++) {
@@ -147,12 +148,12 @@ export const BingLayerObject = L.TileLayer.extend({
     }
   },
 
-  onAdd: function(map) {
+  onAdd: function (map) {
     this.loadMetadata()
     L.TileLayer.prototype.onAdd.apply(this, [map])
   },
 
-  onRemove: function(map) {
+  onRemove: function (map) {
     for (let i = 0; i < this._providers.length; i++) {
       const p = this._providers[i]
       if (p.active && this._map.attributionControl) {

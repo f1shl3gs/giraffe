@@ -109,16 +109,14 @@ const subsetResult = (
 ): SubsetTable[] => {
   // only look at data within the page
   const subset = Object.values(result.table.columns)
-    .map(
-      (column: Column): ExtendedColumn => ({
-        ...column,
-        group: result.fluxGroupKeyUnion.includes(column.name),
-        data: column.data.slice(
-          paginationOffset,
-          paginationOffset + currentPageSize
-        ),
-      })
-    )
+    .map((column: Column): ExtendedColumn => ({
+      ...column,
+      group: result.fluxGroupKeyUnion.includes(column.name),
+      data: column.data.slice(
+        paginationOffset,
+        paginationOffset + currentPageSize
+      ),
+    }))
     .filter(column => !!column.data.filter(_c => _c !== undefined).length)
     .reduce((acc, curr) => {
       if (acc[curr.name]) {
@@ -256,19 +254,17 @@ const PagedTable: FC<Props> = ({result, showAll}) => {
     setTotalPages,
   } = useContext(PaginationContext)
 
-  const [availableHeightForTable, setAvailableHeightForTable] = useState<
-    number
-  >(INITIAL_HEIGHT)
+  const [availableHeightForTable, setAvailableHeightForTable] =
+    useState<number>(INITIAL_HEIGHT)
 
   const [tableHeaderHeight, setTableHeaderHeight] = useState<number>(
     INITIAL_HEADER_HEIGHT
   )
-  const [tableRowHeight, setTableRowHeight] = useState<number>(
-    INITIAL_ROW_HEIGHT
-  )
-  const ref = useRef<HTMLDivElement>()
-  const pagedTableHeaderRef = useRef<HTMLTableSectionElement>()
-  const pagedTableBodyRef = useRef<HTMLTableSectionElement>()
+  const [tableRowHeight, setTableRowHeight] =
+    useState<number>(INITIAL_ROW_HEIGHT)
+  const ref = useRef<HTMLDivElement>(null)
+  const pagedTableHeaderRef = useRef<HTMLTableSectionElement>(null)
+  const pagedTableBodyRef = useRef<HTMLTableSectionElement>(null)
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {

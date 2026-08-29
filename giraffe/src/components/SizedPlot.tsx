@@ -43,6 +43,7 @@ import {nearestTimestamp} from '../utils/nearestTimestamp'
 
 export interface SizedPlotProps {
   axesCanvasRef: RefObject<HTMLCanvasElement>
+  children?: React.ReactNode
   config: SizedConfig
   env: PlotEnv
   layerCanvasRef: RefObject<HTMLCanvasElement>
@@ -209,9 +210,9 @@ export const SizedPlot: FunctionComponent<SizedPlotProps> = ({
           right: `${margins.right}px`,
           bottom: `${margins.bottom}px`,
           left: `${margins.left}px`,
-          cursor: `${userConfig.cursor ||
-            (!legendHide && 'crosshair') ||
-            'auto'}`,
+          cursor: `${
+            userConfig.cursor || (!legendHide && 'crosshair') || 'auto'
+          }`,
         }}
         onDoubleClick={memoizedResetDomains}
         {...hoverTargetProps}

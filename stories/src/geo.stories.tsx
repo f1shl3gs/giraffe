@@ -155,13 +155,8 @@ geo.add('Map Markers Custom CSV', () => {
   // const csv = text('Paste CSV here:', '')
   let table = fromFlux(geoCSV).table
 
-  const {
-    allowPanAndZoom,
-    latitude,
-    longitude,
-    zoom,
-    useS2CellID,
-  } = genericKnobs()
+  const {allowPanAndZoom, latitude, longitude, zoom, useS2CellID} =
+    genericKnobs()
 
   let lattitudeSelection, longitudeSelection, s2GeoHash
 

@@ -11,12 +11,12 @@ import {
 import {GaugeLayer} from './Gauge'
 import {LatestValueTransform} from './LatestValueTransform'
 import {newTableFromConfig} from '../utils/newTable'
-import {RawFluxDataTable} from './RawFluxDataTable'
 import {FluxTablesTransform} from './FluxTablesTransform'
 import {TableGraphLayer} from './Table'
 import {SimpleTableLayer} from './SimpleTable'
 
 interface Props {
+  children?: React.ReactNode
   config: SizedConfig
 }
 
@@ -66,18 +66,6 @@ export const SizedTable: FunctionComponent<Props> = ({config, children}) => {
                     )}
                   </LatestValueTransform>
                 )
-              case LayerTypes.RawFluxDataTable:
-                return (
-                  <RawFluxDataTable
-                    key={layerIndex}
-                    config={{
-                      ...layerConfig,
-                      width: config.width,
-                      height: config.height,
-                    }}
-                  />
-                )
-
               case LayerTypes.SimpleTable: {
                 return (
                   <SimpleTableLayer

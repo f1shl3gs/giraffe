@@ -1,4 +1,4 @@
-@import '../../style/variables.scss';
+@use '../../style/variables' as *;
 
 $dapper-scrollbars--size: 6px;
 
@@ -83,4 +83,54 @@ $dapper-scrollbars--size: 6px;
 
 .cf-dapper-scrollbars--lg {
   @include cf-dapper-scrollbars-size-modifier(8px);
+}
+
+/*
+  Native scrollbar styling
+  ------------------------------------------------------------------------------
+  The custom-property-driven gradient replaces the custom-rendered thumbs of
+  the previous implementation. Firefox falls back to the inline
+  `scrollbar-color` set by the component.
+*/
+
+@mixin cf-dapper-scrollbars-native-size($dapper-scrollbars--size) {
+  &::-webkit-scrollbar {
+    width: $dapper-scrollbars--size;
+    height: $dapper-scrollbars--size;
+  }
+
+  &::-webkit-scrollbar-track {
+    border-radius: $dapper-scrollbars--size;
+    background-color: rgba($cf-grey-95, 0.15);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: $dapper-scrollbars--size * 0.5;
+  }
+
+  &::-webkit-scrollbar-thumb:horizontal {
+    background-image: linear-gradient(
+      to right,
+      var(--cf-dapper-thumb-start, rgba(255, 255, 255, 0.25)) 0%,
+      var(--cf-dapper-thumb-stop, rgba(255, 255, 255, 0.25)) 100%
+    );
+  }
+
+  &::-webkit-scrollbar-thumb:vertical {
+    background-image: linear-gradient(
+      to bottom,
+      var(--cf-dapper-thumb-start, rgba(255, 255, 255, 0.25)) 0%,
+      var(--cf-dapper-thumb-stop, rgba(255, 255, 255, 0.25)) 100%
+    );
+  }
+}
+
+.cf-dapper-scrollbars--xs,
+.cf-dapper-scrollbars--sm,
+.cf-dapper-scrollbars--md {
+  @include cf-dapper-scrollbars-native-size(4px);
+}
+
+.cf-dapper-scrollbars--lg {
+  @include cf-dapper-scrollbars-native-size(8px);
 }

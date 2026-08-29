@@ -26,7 +26,7 @@ L.DivIcon.SVGIcon = L.DivIcon.extend({
     popupAnchor: null,
     weight: 2,
   },
-  initialize: function(options) {
+  initialize: function (options) {
     options = L.Util.setOptions(this, options)
 
     //iconSize needs to be converted to a Point object if it is not passed as one
@@ -75,7 +75,7 @@ L.DivIcon.SVGIcon = L.DivIcon.extend({
 
     options.html = this._createSVG()
   },
-  _createCircle: function() {
+  _createCircle: function () {
     const cx = Number(this.options.circleAnchor.x)
     const cy = Number(this.options.circleAnchor.y)
     const radius =
@@ -108,7 +108,7 @@ L.DivIcon.SVGIcon = L.DivIcon.extend({
       '"/>'
     return circle
   },
-  _createPathDescription: function() {
+  _createPathDescription: function () {
     const height = Number(this.options.iconSize.y)
     const width = Number(this.options.iconSize.x)
     const weight = Number(this.options.weight)
@@ -130,7 +130,7 @@ L.DivIcon.SVGIcon = L.DivIcon.extend({
 
     return startPoint + leftLine + rightLine + arc
   },
-  _createPath: function() {
+  _createPath: function () {
     const pathDescription = this._createPathDescription()
     const strokeWidth = this.options.weight
     const stroke = this.options.color
@@ -157,7 +157,7 @@ L.DivIcon.SVGIcon = L.DivIcon.extend({
       '"/>'
     )
   },
-  _createSVG: function() {
+  _createSVG: function () {
     const path = this._createPath()
     const circle = this._createCircle()
     const text = this._createText()
@@ -180,7 +180,7 @@ L.DivIcon.SVGIcon = L.DivIcon.extend({
       '</svg>'
     )
   },
-  _createText: function() {
+  _createText: function () {
     const fontSize = this.options.fontSize + 'px'
     const fontWeight = this.options.fontWeight
     const lineHeight = Number(this.options.fontSize)
@@ -211,10 +211,10 @@ L.DivIcon.SVGIcon = L.DivIcon.extend({
   },
 })
 
-L.divIcon.svgIcon = function(options) {
+L.divIcon.svgIcon = function (options) {
   return new L.DivIcon.SVGIcon(options)
 }
 
-export const SVGIcon = function(options) {
+export const SVGIcon = function (options) {
   return new L.DivIcon.SVGIcon(options)
 }

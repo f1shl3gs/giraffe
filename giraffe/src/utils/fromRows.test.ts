@@ -84,7 +84,7 @@ describe('fromRows', () => {
   it('throws an error when encountering a mismatched schema', () => {
     const rows = [{foo: 'bar'}, {foo: 1}]
 
-    expect(() => fromRows(rows)).toThrowError(
+    expect(() => fromRows(rows)).toThrow(
       'ColumnType for column "foo" cannot be both "string" and "number"'
     )
   })
@@ -92,7 +92,7 @@ describe('fromRows', () => {
   it('throws an error when encountering a value of unknown ColumnType', () => {
     const rows = [{foo: {some: 'object'}}]
 
-    expect(() => fromRows(rows)).toThrowError(
+    expect(() => fromRows(rows)).toThrow(
       'could not infer ColumnType of value "[object Object]"'
     )
   })

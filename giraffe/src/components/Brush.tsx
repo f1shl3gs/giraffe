@@ -66,11 +66,12 @@ export const Brush: FunctionComponent<Props> = ({
     return null
   }
 
-  const {x, y, width: brushWidth, height: brushHeight} = getRectDimensions(
-    event,
-    width,
-    height
-  )
+  const {
+    x,
+    y,
+    width: brushWidth,
+    height: brushHeight,
+  } = getRectDimensions(event, width, height)
 
   const selectionStyle: CSSProperties = {
     display: event.initialX === null ? 'none' : 'inherit',

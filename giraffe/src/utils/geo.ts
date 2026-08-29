@@ -204,7 +204,7 @@ const getClusterValue = (
   }
 }
 
-export const createClusterCustomIcon = function(cluster) {
+export const createClusterCustomIcon = function (cluster) {
   let outerColor = DEFAULT_CLUSTER_COLOR,
     innerColor = 'white'
   const {value, properties} = getClusterValue(cluster)

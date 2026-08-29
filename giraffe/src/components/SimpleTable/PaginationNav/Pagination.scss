@@ -1,9 +1,11 @@
-@import '../../../style/variables.scss';
-
 /*
   pagination
   ------------------------------------------------------------------------------
 */
+
+@use "sass:math";
+
+@use '../../../style/variables' as *;
 
 .cf-pagination,
 .cf-pagination-input--container,
@@ -29,7 +31,7 @@
     z-index: 1;
     width: 100%;
     position: absolute;
-    height: floor($cf-form-md-height * 0.1);
+    height: math.floor($cf-form-md-height * 0.1);
     left: 0;
     bottom: 0;
   }

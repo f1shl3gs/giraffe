@@ -14,6 +14,7 @@ import {SizedTable} from './SizedTable'
 // those are inside config.layerConfig
 interface PlotResizerProps {
   axesCanvasRef?: RefObject<HTMLCanvasElement>
+  children?: React.ReactNode
   config: SizedConfig
   height: number
   layerCanvasRef?: RefObject<HTMLCanvasElement>
@@ -69,6 +70,7 @@ export const PlotResizer: FC<PlotResizerProps> = props => {
 }
 
 interface TableResizerProps {
+  children?: React.ReactNode
   config: SizedConfig
   height: number
   width: number

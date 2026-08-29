@@ -27,13 +27,8 @@ interface Props {
 }
 
 export const CircleMarkerLayer: FunctionComponent<Props> = props => {
-  const {
-    table,
-    radiusFieldName,
-    colorFieldName,
-    stylingConfig,
-    properties,
-  } = props
+  const {table, radiusFieldName, colorFieldName, stylingConfig, properties} =
+    props
 
   const {bounds} = properties.radiusDimension
   const radiusMinAndMax = radiusFieldName

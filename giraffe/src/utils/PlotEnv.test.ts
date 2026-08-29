@@ -1,7 +1,3 @@
-/*
-  @jest-environment jsdom
-*/
-
 import {SizedConfig, LineLayerConfig, RectLayerSpec} from '../types'
 import {PlotEnv} from './PlotEnv'
 import {newTable} from './newTable'
@@ -16,12 +12,12 @@ describe('PlotEnv', () => {
     let lineTransformSpy
 
     beforeEach(() => {
-      histogramTransformSpy = jest.spyOn(
+      histogramTransformSpy = vi.spyOn(
         histogramTransformModule,
         'histogramTransform'
       )
 
-      lineTransformSpy = jest.spyOn(lineTransformModule, 'lineTransform')
+      lineTransformSpy = vi.spyOn(lineTransformModule, 'lineTransform')
     })
 
     afterEach(() => {

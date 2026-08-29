@@ -1,14 +1,25 @@
+/*
+  DapperScrollbars
+  ------------------------------------------------------------------------------
+  Re-implementation on top of native CSS scrolling. The previous version wrapped
+  `react-scrollbars-custom`, which relies on `ReactDOM.findDOMNode`
+  (via react-draggable) and crashes under React 19. Custom scrollbar visuals now
+  come from `::-webkit-scrollbar` rules in DapperScrollbars.scss plus a
+  `scrollbar-color` fallback for Firefox.
+
+  NOTE: full visual parity with the old custom-rendered tracks/thumbs lands with
+  the Storybook phase.
+*/
 // Libraries
 import React, {
+  CSSProperties,
   FunctionComponent,
+  UIEvent,
+  useEffect,
   useRef,
   useState,
-  useEffect,
-  UIEvent,
 } from 'react'
 import classnames from 'classnames'
-import Scrollbar from 'react-scrollbars-custom'
-import {ScrollState} from 'react-scrollbars-custom/dist/types/types'
 
 import {StandardFunctionProps} from '../../types'
 import {ComponentSize} from '../../types'
@@ -18,20 +29,25 @@ import styles from './DapperScrollbars.scss'
 import {styleReducer} from '../../utils/styleReducer'
 
 // Types
-type UIEventHandler = (event: UIEvent<HTMLDivElement>) => void
-type ScrollStateEventHandler = (
-  scrollValues: ScrollState,
-  prevScrollValues?: ScrollState
-) => void
 
-type FusionScrollHandler = UIEventHandler & ScrollStateEventHandler
+/** Scroll geometry snapshot passed to `onScroll`. Replaces the ScrollState
+ * object emitted by react-scrollbars-custom (same field names, plain object). */
+interface DapperScrollValues {
+  scrollTop: number
+  scrollLeft: number
+  scrollHeight: number
+  scrollWidth: number
+  clientHeight: number
+  clientWidth: number
+}
 
 interface DapperScrollbarsProps extends StandardFunctionProps {
-  /** Toggle display of tracks when no scrolling is necessary */
+  /** No-op: kept for API compatibility. Native scrollbars disappear
+   * automatically when there is nothing to scroll. */
   removeTracksWhenNotUsed?: boolean
-  /** Toggle display of vertical track when no scrolling is necessary */
+  /** No-op: kept for API compatibility. See `removeTracksWhenNotUsed`. */
   removeTrackYWhenNotUsed?: boolean
-  /** Toggle display of horizontal track when no scrolling is necessary */
+  /** No-op: kept for API compatibility. See `removeTracksWhenNotUsed`. */
   removeTrackXWhenNotUsed?: boolean
   /** Disable scrolling horizontally */
   noScrollX?: boolean
@@ -39,9 +55,9 @@ interface DapperScrollbarsProps extends StandardFunctionProps {
   noScrollY?: boolean
   /** Disable scrolling */
   noScroll?: boolean
-  /** Gradient start color */
+  /** Gradient start color of the scrollbar thumb */
   thumbStartColor?: string | InfluxColors
-  /** Gradient end color */
+  /** Gradient end color of the scrollbar thumb */
   thumbStopColor?: string | InfluxColors
   /** Hide scrollbar when not actively scrolling */
   autoHide?: boolean
@@ -55,9 +71,13 @@ interface DapperScrollbarsProps extends StandardFunctionProps {
   scrollTop?: number
   /** Horizontal scroll position in pixels */
   scrollLeft?: number
-  /** Function to be called when called scroll event fires */
+  /** Function to be called when the native scroll event fires. Receives a
+   * plain `{scrollTop, scrollLeft, ...}` snapshot — the old
+   * react-scrollbars-custom ScrollState signature is gone, but the field names
+   * are preserved so existing callbacks keep working. */
   onScroll?: Function
-  /** Function called after component updated */
+  /** Function called once after mount (kept for API compatibility; the old
+   * per-update invocations relied on react-scrollbars-custom internals) */
   onUpdate?: Function
   /** Component Size **/
   size?: ComponentSize
@@ -82,26 +102,42 @@ export const DapperScrollbars: FunctionComponent<DapperScrollbarsProps> = ({
   thumbStopColor = 'rgba(255, 255, 255, 0.25)',
   thumbStartColor = 'rgba(255, 255, 255, 0.25)',
   testID = 'dapper-scrollbars',
-  removeTracksWhenNotUsed = true,
-  removeTrackYWhenNotUsed = true,
-  removeTrackXWhenNotUsed = true,
   size = ComponentSize.Small,
 }) => {
-  const scrollEl = useRef<any>(null)
+  const scrollEl = useRef<HTMLDivElement>(null)
   // State is used here to ensure that the scroll position does not jump when
   // a component using DapperScrollbars re-renders
   const [scrollTopPos, setScrollTopPos] = useState<number>(Number(scrollTop))
   const [scrollLeftPos, setScrollLeftPos] = useState<number>(Number(scrollLeft))
 
   useEffect(() => {
-    if (scrollTop >= 0) {
-      setScrollTopPos(Number(scrollTop))
+    const el = scrollEl.current
+    if (!el) {
+      return
     }
+    if (scrollTop >= 0 && el.scrollTop !== Number(scrollTop)) {
+      el.scrollTop = Number(scrollTop)
+    }
+    setScrollTopPos(Number(scrollTop))
   }, [scrollTop])
 
   useEffect(() => {
+    const el = scrollEl.current
+    if (!el) {
+      return
+    }
+    if (el.scrollLeft !== Number(scrollLeft)) {
+      el.scrollLeft = Number(scrollLeft)
+    }
     setScrollLeftPos(Number(scrollLeft))
   }, [scrollLeft])
+
+  useEffect(() => {
+    if (onUpdate) {
+      onUpdate()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   let dapperScrollbarsClasses = classnames('cf-dapper-scrollbars', {
     'cf-dapper-scrollbars--autohide': autoHide,
@@ -115,93 +151,63 @@ export const DapperScrollbars: FunctionComponent<DapperScrollbarsProps> = ({
       ? `${dapperScrollbarsClasses} ${className}`
       : dapperScrollbarsClasses
 
-  const thumbXStyle = {
-    background: `linear-gradient(to right,  ${thumbStartColor} 0%,${thumbStopColor} 100%)`,
-  }
+  // Thumb gradient colors are handed to CSS via custom properties so that the
+  // ::-webkit-scrollbar-thumb rules in DapperScrollbars.scss can pick them up
+  const thumbVars = {
+    '--cf-dapper-thumb-start': thumbStartColor,
+    '--cf-dapper-thumb-stop': thumbStopColor,
+  } as CSSProperties
 
-  const thumbYStyle = {
-    background: `linear-gradient(to bottom,  ${thumbStartColor} 0%,${thumbStopColor} 100%)`,
-  }
+  const handleOnScroll = (event: UIEvent<HTMLDivElement>) => {
+    const el = event.currentTarget
+    setScrollTopPos(el.scrollTop)
+    setScrollLeftPos(el.scrollLeft)
 
-  const handleOnScroll = (
-    scrollValues: ScrollState,
-    prevScrollValues: ScrollState
-  ) => {
     if (onScroll) {
+      const scrollValues: DapperScrollValues = {
+        scrollTop: el.scrollTop,
+        scrollLeft: el.scrollLeft,
+        scrollHeight: el.scrollHeight,
+        scrollWidth: el.scrollWidth,
+        clientHeight: el.clientHeight,
+        clientWidth: el.clientWidth,
+      }
+      const prevScrollValues: DapperScrollValues = {
+        scrollTop: scrollTopPos,
+        scrollLeft: scrollLeftPos,
+        scrollHeight: el.scrollHeight,
+        scrollWidth: el.scrollWidth,
+        clientHeight: el.clientHeight,
+        clientWidth: el.clientWidth,
+      }
       onScroll(scrollValues, prevScrollValues)
-    }
-
-    const {scrollTop, scrollLeft} = scrollValues
-    setScrollTopPos(scrollTop)
-    setScrollLeftPos(scrollLeft)
-  }
-
-  const handleUpdate = (scrollValues, prevScrollValues) => {
-    if (onUpdate) {
-      onUpdate(scrollValues, prevScrollValues)
     }
   }
 
   return (
-    <Scrollbar
+    <div
       ref={scrollEl}
-      onScroll={handleOnScroll as FusionScrollHandler}
-      onUpdate={handleUpdate}
       data-testid={testID}
-      translateContentSizesToHolder={autoSize}
-      translateContentSizeYToHolder={autoSizeHeight}
-      translateContentSizeXToHolder={autoSizeWidth}
-      className={dapperScrollbarsClasses}
-      style={style}
-      noDefaultStyles={false}
-      removeTracksWhenNotUsed={removeTracksWhenNotUsed}
-      removeTrackYWhenNotUsed={removeTrackYWhenNotUsed}
-      removeTrackXWhenNotUsed={removeTrackXWhenNotUsed}
-      noScrollX={noScrollX}
-      noScrollY={noScrollY}
-      noScroll={noScroll}
-      wrapperProps={{className: styles['cf-dapper-scrollbars--wrapper']}}
-      contentProps={{className: styles['cf-dapper-scrollbars--content']}}
-      trackXProps={{className: styles['cf-dapper-scrollbars--track-x']}}
-      thumbXProps={{
-        renderer: props => {
-          const {elementRef, style, ...restProps} = props
-          const thumbStyle = {...style, ...thumbXStyle}
-          return (
-            <div
-              className={styles['cf-dapper-scrollbars--thumb-x']}
-              ref={elementRef}
-              style={thumbStyle}
-              {...restProps}
-              data-testid={`${testID}--thumb-x`}
-            />
-          )
-        },
-      }}
-      trackYProps={{className: styles['cf-dapper-scrollbars--track-y']}}
-      thumbYProps={{
-        renderer: props => {
-          const {elementRef, style, ...restProps} = props
-          const thumbStyle = {...style, ...thumbYStyle}
-          return (
-            <div
-              className={styles['cf-dapper-scrollbars--thumb-y']}
-              ref={elementRef}
-              style={thumbStyle}
-              {...restProps}
-              data-testid={`${testID}--thumb-y`}
-            />
-          )
-        },
-      }}
-      scrollTop={scrollTopPos}
-      scrollLeft={scrollLeftPos}
       id={id}
-      download={null}
-      inlist={null}
+      className={dapperScrollbarsClasses}
+      onScroll={handleOnScroll}
+      style={{
+        width: '100%',
+        height: '100%',
+        overflowX: noScroll || noScrollX ? 'hidden' : 'auto',
+        overflowY: noScroll || noScrollY ? 'hidden' : 'auto',
+        ...(style as CSSProperties),
+        ...(autoSize || autoSizeWidth ? {width: 'auto'} : {}),
+        ...(autoSize || autoSizeHeight ? {height: 'auto'} : {}),
+        ...thumbVars,
+        // Firefox fallback for the webkit thumb gradient
+        ...({
+          'scrollbar-color': `${thumbStartColor} transparent`,
+        } as any as CSSProperties),
+      }}
     >
       {children}
-    </Scrollbar>
+    </div>
   )
 }
 

@@ -28,8 +28,8 @@ export const SimpleTableLayer: FunctionComponent<Props> = ({
     [fluxResponse, fromFluxResult]
   )
 
-  return useMemo(() => <SimpleTable result={result} showAll={showAll} />, [
-    result,
-    showAll,
-  ])
+  return useMemo(
+    () => <SimpleTable result={result} showAll={showAll} />,
+    [result, showAll]
+  )
 }

@@ -1,16 +1,11 @@
-@import '../../style/variables.scss';
+// NOTE: font-faces are declared ONCE in src/style/fonts.scss
+// (side-effect imported by src/index.ts). Do not re-declare them here:
+// every copy is base64-inlined into the bundle separately.
 
-@font-face {
-  font-family: 'icomoon';
-  font-style: normal;
-  font-weight: normal;
-  src: url('../../fonts/icomoon.eot') format('embedded-opentype');
-  src: url('../../fonts/icomoon.eot') format('embedded-opentype'),
-    url('../../fonts/icomoon.woff2') format('woff2'),
-    url('../../fonts/icomoon.ttf') format('truetype'),
-    url('../../fonts/icomoon.woff') format('woff'),
-    url('../../fonts/icomoon.svg') format('svg');
-}
+@use "sass:color";
+
+@use '../../style/variables' as *;
+
 
 .time-machine-tables {
   align-items: stretch;
@@ -322,7 +317,7 @@
   }
   .cf-input.time-machine-sidebar--filter:hover > input {
     background-color: #ffffff;
-    border-color: mix(#d4d7dd, #00a3ff, 50%);
+    border-color: color.mix(#d4d7dd, #00a3ff, 50%);
   }
 
   .cf-input.cf-input__focused.time-machine-sidebar--filter > .cf-input-icon {

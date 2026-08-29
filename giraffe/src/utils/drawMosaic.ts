@@ -53,12 +53,10 @@ export const drawMosaic = ({
 
     const width = xScale(xMaxCol[i]) - x - strokePadding
     const height = yScale(yValMap.size + 1)
-    let fill = fillScale((valueCol[i] as unknown) as number)
+    let fill = fillScale(valueCol[i] as unknown as number)
 
     if (hoveredRowIndices && hoveredRowIndices.includes(i)) {
-      fill = color(fill)
-        .brighter(1)
-        .hex()
+      fill = color(fill).brighter(1).hex()
     }
 
     if (strokeWidth || strokeOpacity) {

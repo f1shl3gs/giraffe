@@ -150,7 +150,7 @@ export const fromFlux = (fluxCSV: string): FromFluxResult => {
        * we want to add + 1 to the substring ending
        */
       Papa.parse(fluxCSV.substring(_start, _end + 1), {
-        step: function(results) {
+        step: function (results) {
           if (results.data[0] === '#group') {
             parsed.group = results.data.slice(1)
           } else if (results.data[0] === '#datatype') {
@@ -338,7 +338,7 @@ export const fastFromFlux = (fluxCSV: string): FromFluxResult => {
        * we want to add + 1 to the substring ending
        */
       Papa.parse(fluxCSV.substring(_start, _end + 1), {
-        step: function(results) {
+        step: function (results) {
           if (results.data[0] === '#group') {
             parsed.group = results.data.slice(1)
           } else if (results.data[0] === '#datatype') {

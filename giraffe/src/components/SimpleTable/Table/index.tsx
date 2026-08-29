@@ -25,7 +25,7 @@ export class Table extends Component<TableProps> {
   }
 }
 
-export {TableProps, TableRef} from './Table'
+export type {TableProps, TableRef} from './Table'
 export * from './TableBody'
 export * from './TableCell'
 export * from './TableHeader'

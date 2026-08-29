@@ -238,7 +238,8 @@ describe('binaryPrefixFormatter', () => {
   it('can format negative numbers with a binary unit prefix', () => {
     const f = binaryPrefixFormatter()
 
-    expect(f(0 - 2 ** 30)).toEqual('-1 G')
+    // d3-format v2+ formats negative numbers with U+2212 MINUS SIGN
+    expect(f(0 - 2 ** 30)).toEqual('\u22121 G')
   })
 
   it('formats small numbers without unit prefixes', () => {

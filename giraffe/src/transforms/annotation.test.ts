@@ -5,11 +5,12 @@ import {TIME, VALUE} from '../constants/columnKeys'
 
 describe('annotation transform', () => {
   const table = newTable(3)
-    .addColumn('_time', 'dateTime:RFC3339', 'time', [
-      1606862528103,
-      1606862628103,
-      1606862728103,
-    ])
+    .addColumn(
+      '_time',
+      'dateTime:RFC3339',
+      'time',
+      [1606862528103, 1606862628103, 1606862728103]
+    )
     .addColumn('_value', 'system', 'number', [0, 5, 10])
     .addColumn('cpu', 'string', 'string', ['cpu0', 'cpu0', 'cpu0'])
 

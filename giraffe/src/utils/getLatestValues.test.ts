@@ -21,12 +21,12 @@ describe('getLatestValues', () => {
 
   it('gives an empty array when timestamp column is missing and there are multiple rows in the table', () => {
     const yColKey = '_value'
-    const table = newTable(4).addColumn(yColKey, 'system', 'number', [
-      0,
-      1.67,
-      2.32,
-      3.99,
-    ])
+    const table = newTable(4).addColumn(
+      yColKey,
+      'system',
+      'number',
+      [0, 1.67, 2.32, 3.99]
+    )
     const result = getLatestValues(table)
 
     expect(Array.isArray(result)).toEqual(true)

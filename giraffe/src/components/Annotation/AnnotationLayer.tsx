@@ -23,18 +23,11 @@ const ANNOTATION_OVERLAY_DEFAULT_STYLE = {
   position: 'absolute',
 } as CSSProperties
 
-export const AnnotationLayer: FunctionComponent<AnnotationLayerProps> = props => {
-  const {
-    config,
-    spec,
-    width,
-    height,
-    hoverX,
-    hoverY,
-    xScale,
-    yScale,
-    onHover,
-  } = props
+export const AnnotationLayer: FunctionComponent<
+  AnnotationLayerProps
+> = props => {
+  const {config, spec, width, height, hoverX, hoverY, xScale, yScale, onHover} =
+    props
   const lineWidth = config.lineWidth || 2
   const annotationsPositions = useMemo(
     () => getAnnotationsPositions(spec.annotationData, xScale, yScale),

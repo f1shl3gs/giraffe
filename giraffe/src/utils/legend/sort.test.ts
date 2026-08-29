@@ -5,13 +5,7 @@ describe('sortIndicesByValueColumn', () => {
     let lineValues = [0, 10, 20, 30]
     let indices = [0, 1, 2, 3, 4, 5, 6]
     expect(sortIndicesByValueColumn(lineValues, indices)).toEqual([
-      3,
-      2,
-      1,
-      0,
-      4,
-      5,
-      6,
+      3, 2, 1, 0, 4, 5, 6,
     ])
 
     indices = [0, 1, 2, 3]
@@ -30,12 +24,7 @@ describe('sortIndicesByValueColumn', () => {
     lineValues = [NaN, 2, 1000, null, 0, 5]
     indices = [5, 4, 3, 2, 1, 0]
     expect(sortIndicesByValueColumn(lineValues, indices)).toEqual([
-      2,
-      5,
-      1,
-      4,
-      3,
-      0,
+      2, 5, 1, 4, 3, 0,
     ])
   })
 

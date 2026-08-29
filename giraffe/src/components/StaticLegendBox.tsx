@@ -48,17 +48,16 @@ const overrideLegendConfig = (
   return {config: configWithDefaults, staticLegend: staticLegendWithDefaults}
 }
 
-export const StaticLegendBox: FunctionComponent<StaticLegendBoxProps> = props => {
+export const StaticLegendBox: FunctionComponent<
+  StaticLegendBoxProps
+> = props => {
   const {config, columnFormatter, height, spec, top, width} = props
   const {staticLegend} = config
 
-  const {
-    config: configOverride,
-    staticLegend: staticLegendOverride,
-  } = useMemo(() => overrideLegendConfig(config, staticLegend), [
-    config,
-    staticLegend,
-  ])
+  const {config: configOverride, staticLegend: staticLegendOverride} = useMemo(
+    () => overrideLegendConfig(config, staticLegend),
+    [config, staticLegend]
+  )
 
   const {style = {}} = staticLegendOverride
 
