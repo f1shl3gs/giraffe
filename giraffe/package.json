@@ -76,8 +76,8 @@
     "react-leaflet-control": "^2.1.2",
     "react-leaflet-markercluster": "^2.0.0",
     "rolldown": "^1.2.5",
-    "sass": "^1.62.0",
-    "typescript": "6.0.3",
+    "sass": "^1.103.1",
+    "typescript": "7.0.2",
     "vitest": "^4.1.11"
   },
   "peerDependencies": {
