@@ -214,10 +214,7 @@ export const fromFlux = (fluxCSV: string): FromFluxResult => {
             }
 
             if (columns[parsed.columnKey[index]] !== undefined) {
-              if (
-                columns[parsed.columnKey[index]].name === RESULT &&
-                result
-              ) {
+              if (columns[parsed.columnKey[index]].name === RESULT && result) {
                 resultColumnNames.add(result)
               }
               columns[parsed.columnKey[index]].data[tableLength] = result

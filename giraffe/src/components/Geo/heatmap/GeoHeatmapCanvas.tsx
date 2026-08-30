@@ -73,7 +73,7 @@ const GeoHeatmapCanvas: FunctionComponent<Props> = ({
       canvas.height = size.y
       Leaflet.DomUtil.setPosition(
         canvas,
-        map.containerPointToLayerPoint([0, 0])
+        map.containerPointToLayerPoint([0, 0]) as any
       )
       const projectedPoints = points.map(p => {
         const point = map.latLngToContainerPoint([p.lat, p.lon])

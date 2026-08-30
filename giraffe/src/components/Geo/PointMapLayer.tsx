@@ -1,14 +1,15 @@
 // Libraries
-import React, {useEffect, useState} from 'react'
-import {FunctionComponent} from 'react'
-import {Marker} from 'react-leaflet'
-import MarkerClusterGroup from 'react-leaflet-markercluster'
-import 'react-leaflet-markercluster/dist/styles.min.css'
+import React, {FunctionComponent, useEffect, useMemo} from 'react'
+import L from 'leaflet'
+import 'leaflet.markercluster'
+import 'leaflet.markercluster/dist/MarkerCluster.css'
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 
 // Utils
 import {getColor} from './dimensionCalculations'
 import {SVGIcon} from './SVGIcon'
 import {GeoTooltip} from './GeoTooltip'
+import {useGeoMap} from './GeoMapContext'
 
 import {
   formatPointLayerRowInfo,
@@ -31,67 +32,70 @@ interface Props {
 
 export const PointMapLayer: FunctionComponent<Props> = props => {
   const {table, colorFieldName, properties, stylingConfig, isClustered} = props
-  const rowCount = table.getRowCount()
-  const result = [],
-    tooltips = []
-  for (let i = 0; i < rowCount; i++) {
-    const latLon = table.getLatLon(i)
-    if (!latLon) {
-      continue
-    }
-    const {lat, lon} = latLon
-    const colorValue = table.getValue(i, colorFieldName)
-    const color = getColor(properties.colors, colorValue, false)
-    const icon = SVGIcon({color: color, iconSize: MARKER_ICON_SIZE})
-    const markerRef = {current: null}
-    result.push(
-      <Marker
-        ref={ref => {
-          markerRef.current = ref
-          if (ref) {
-            const leafletElement = ref.leafletElement
-            leafletElement.clusterRenderingProperties = properties
-            leafletElement.value = table.getValue(i, properties.colorField)
-          }
-        }}
-        key={i}
-        position={[lat, lon]}
-        icon={icon}
-      />
-    )
-    const rowInfo = formatPointLayerRowInfo(properties, table, i)
-    tooltips.push({markerRef, rowInfo})
-  }
+  const map = useGeoMap()
 
-  const tooltip = (
+  const {markers, tooltips} = useMemo(() => {
+    const rowCount = table.getRowCount()
+    const markers = []
+    const tooltips = []
+    for (let i = 0; i < rowCount; i++) {
+      const latLon = table.getLatLon(i)
+      if (!latLon) {
+        continue
+      }
+      const {lat, lon} = latLon
+      const colorValue = table.getValue(i, colorFieldName)
+      const color = getColor(properties.colors, colorValue, false)
+      const icon = SVGIcon({color: color, iconSize: MARKER_ICON_SIZE})
+      const marker: any = L.marker([lat, lon], {icon})
+      marker.clusterRenderingProperties = properties
+      marker.value = table.getValue(i, properties.colorField)
+      markers.push(marker)
+      tooltips.push({
+        markerRef: {current: marker},
+        rowInfo: formatPointLayerRowInfo(properties, table, i),
+      })
+    }
+    return {markers, tooltips}
+  }, [table, colorFieldName, properties])
+
+  useEffect(() => {
+    if (!map || markers.length === 0) {
+      return
+    }
+    const clusterGroup =
+      isClustered === true
+        ? (L as any).markerClusterGroup({
+            iconCreateFunction: createClusterCustomIcon,
+            maxClusterRadius: properties.maxClusterRadius || 40,
+          })
+        : null
+    if (clusterGroup) {
+      clusterGroup.addLayers(markers)
+      clusterGroup.addTo(map)
+    } else {
+      markers.forEach(m => {
+        m.addTo(map)
+      })
+    }
+    return () => {
+      if (clusterGroup) {
+        clusterGroup.remove()
+      } else {
+        markers.forEach(m => {
+          m.remove()
+        })
+      }
+    }
+  }, [map, isClustered, markers, properties])
+
+  return (
     <GeoTooltip
       stylingConfig={stylingConfig}
       properties={properties}
       table={table}
       tooltips={tooltips}
     />
-  )
-  const [visible, setVisible] = useState(true)
-  useEffect(() => {
-    setVisible(false)
-    setTimeout(() => {
-      setVisible(true)
-    }, 0)
-  }, [properties.areClustersColored, properties.maxClusterRadius])
-  return (
-    <>
-      {isClustered === true && visible ? (
-        <MarkerClusterGroup
-          iconCreateFunction={createClusterCustomIcon}
-          maxClusterRadius={properties.maxClusterRadius || 40}
-        >
-          {result}
-        </MarkerClusterGroup>
-      ) : (
-        result
-      )}
-      {tooltip}
-    </>
   )
 }
 

@@ -1,10 +1,12 @@
 // Libraries
-import React from 'react'
-import {FunctionComponent} from 'react'
-import {CircleMarker} from 'react-leaflet'
+import React, {FunctionComponent, useEffect, useMemo} from 'react'
+import L from 'leaflet'
 
 // Components
 import {AnimatedPath} from './AnimatedPath'
+
+// Utils
+import {useGeoMap} from './GeoMapContext'
 
 // Types
 import {GeoTable} from './processing/GeoTable'
@@ -31,71 +33,84 @@ const DEFAULT_END_MARKER_RADIUS = 4
 
 export const TrackMapLayer: FunctionComponent<Props> = props => {
   const {table, properties} = props
-  let colors = properties.colors || DEFAULT_TRACK_COLOR
-  if (!properties.colors && properties.randomColors) {
-    colors = DEFAULT_TRACK_PALETTE
-  }
+  const map = useGeoMap()
   const endStopMarkers =
     properties.endStopMarkers === undefined || properties.endStopMarkers
   const endStopMarkerRadius =
     properties.endStopMarkerRadius || DEFAULT_END_MARKER_RADIUS
-  const options = {
-    weight: properties.trackWidth || 3,
-    delay: 50 + (properties.speed || 500),
-    hardwareAccelerated: true,
-  }
-  return (
-    <>
-      {table.mapTracks((track, options, index) => {
-        let startColor, endColor
-        if (properties.randomColors) {
-          startColor = colors[index % DEFAULT_TRACK_PALETTE.length].hex
-          endColor = 'white'
-        } else {
-          startColor = colors[0].hex
-          endColor = colors[colors.length - 1].hex
-        }
 
-        const optionsWithColor = {
-          ...options,
+  const {paths, endStopMarkerSpecs} = useMemo(() => {
+    const options = {
+      weight: properties.trackWidth || 3,
+      delay: 50 + (properties.speed || 500),
+      hardwareAccelerated: true,
+    }
+    const endStopMarkerSpecs = []
+    const colors = properties.colors || DEFAULT_TRACK_COLOR
+    const palette = !properties.colors && properties.randomColors
+      ? DEFAULT_TRACK_PALETTE
+      : colors
+    const paths = table.mapTracks((track, trackOptions, index) => {
+      let startColor, endColor
+      if (properties.randomColors) {
+        startColor = palette[index % DEFAULT_TRACK_PALETTE.length].hex
+        endColor = 'white'
+      } else {
+        startColor = colors[0].hex
+        endColor = colors[colors.length - 1].hex
+      }
+
+      if (endStopMarkers) {
+        endStopMarkerSpecs.push({
+          lat: track[0][0],
+          lon: track[0][1],
           color: startColor,
-          pulseColor: startColor === endColor ? 'white' : endColor,
-        }
-        return (
-          <>
-            {endStopMarkers && (
-              <CircleMarker
-                key={'start'}
-                center={{lat: track[0][0], lon: track[0][1]}}
-                fill={true}
-                color={startColor}
-                fillOpacity={1}
-                radius={endStopMarkerRadius}
-              />
-            )}
-            {endStopMarkers && (
-              <CircleMarker
-                key={'end'}
-                center={{
-                  lat: track[track.length - 1][0],
-                  lon: track[track.length - 1][1],
-                }}
-                fill={true}
-                color={startColor}
-                fillOpacity={1}
-                radius={endStopMarkerRadius}
-              />
-            )}
-            <AnimatedPath
-              key={index}
-              positions={track}
-              options={optionsWithColor}
-            />
-          </>
-        )
-      }, options)}
-    </>
-  )
+        })
+        endStopMarkerSpecs.push({
+          lat: track[track.length - 1][0],
+          lon: track[track.length - 1][1],
+          color: startColor,
+        })
+      }
+
+      const optionsWithColor = {
+        ...trackOptions,
+        ...options,
+        color: startColor,
+        pulseColor: startColor === endColor ? 'white' : endColor,
+      }
+      return (
+        <AnimatedPath
+          key={index}
+          positions={track}
+          options={optionsWithColor}
+        />
+      )
+    }, options)
+    return {paths, endStopMarkerSpecs}
+  }, [table, properties, endStopMarkers])
+
+  useEffect(() => {
+    if (!map) {
+      return
+    }
+    const markers = endStopMarkerSpecs.map(spec => {
+      return L.circleMarker([spec.lat, spec.lon], {
+        radius: endStopMarkerRadius,
+        fill: true,
+        color: spec.color,
+        fillColor: spec.color,
+        fillOpacity: 1,
+      })
+    })
+    const layer = L.layerGroup(markers)
+    layer.addTo(map)
+    return () => {
+      layer.remove()
+    }
+  }, [map, endStopMarkerSpecs, endStopMarkers, endStopMarkerRadius])
+
+  return <>{paths}</>
 }
 
 export default TrackMapLayer

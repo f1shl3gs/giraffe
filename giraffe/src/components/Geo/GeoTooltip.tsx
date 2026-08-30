@@ -17,12 +17,9 @@ interface Props {
 }
 
 export const GeoTooltip: FunctionComponent<Props> = props => {
-  const {stylingConfig, properties, table, tooltips} = props
+  const {stylingConfig, tooltips} = props
   const [tooltipData, setTooltipData] = useState(null)
-  useLayoutEffect(defineToolTipEffect(tooltips, setTooltipData), [
-    properties,
-    table,
-  ])
+  useLayoutEffect(defineToolTipEffect(tooltips, setTooltipData), [tooltips])
 
   return (
     <>

@@ -21,20 +21,30 @@ export const formatValue = (
 
 export const defineToolTipEffect = (markerRefs, setToolTip) => {
   return () => {
+    const boundHandlers = []
     for (let i = 0; i < markerRefs.length; i++) {
       const {markerRef, rowInfo} = markerRefs[i]
-      const marker = markerRef.current.leafletElement
+      const marker = markerRef.current
       let mouseEntered = false
-      marker.on('mouseover', () => {
+      const onMouseOver = () => {
         if (!mouseEntered) {
           setToolTip(rowInfo)
           mouseEntered = true
         }
-      })
-      marker.on('mouseout', () => {
+      }
+      const onMouseOut = () => {
         mouseEntered = false
         setToolTip(null)
-      })
+      }
+      marker.on('mouseover', onMouseOver)
+      marker.on('mouseout', onMouseOut)
+      boundHandlers.push({marker, onMouseOver, onMouseOut})
+    }
+    return () => {
+      for (const {marker, onMouseOver, onMouseOut} of boundHandlers) {
+        marker.off('mouseover', onMouseOver)
+        marker.off('mouseout', onMouseOut)
+      }
     }
   }
 }

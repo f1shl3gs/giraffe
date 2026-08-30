@@ -1,6 +1,7 @@
-import React, {FunctionComponent} from 'react'
-import BingLayer from './Bing'
-import {LayersControl} from 'react-leaflet'
+import {FunctionComponent, useEffect} from 'react'
+import L from 'leaflet'
+import {BingLayerObject} from './BingLayerObject'
+import {useGeoMap} from '../GeoMapContext'
 
 interface Props {
   bingKey: string
@@ -8,33 +9,47 @@ interface Props {
 }
 
 export const BingMap: FunctionComponent<Props> = ({bingKey, mapStyle}) => {
-  return (
-    <LayersControl position="topright">
-      <LayersControl.BaseLayer
-        checked={!mapStyle || mapStyle === 'Roads'}
-        name="Roads"
-      >
-        <BingLayer minNativeZoom={3} bingkey={bingKey} type="Road" />
-      </LayersControl.BaseLayer>
-      <LayersControl.BaseLayer
-        checked={mapStyle === 'Satellite (plain)'}
-        name="Satellite (Plain)"
-      >
-        <BingLayer minNativeZoom={3} bingkey={bingKey} />
-      </LayersControl.BaseLayer>
-      <LayersControl.BaseLayer
-        checked={mapStyle === 'Satellite'}
-        name="Satellite (Labels)"
-      >
-        <BingLayer
-          minNativeZoom={3}
-          bingkey={bingKey}
-          type="AerialWithLabels"
-        />
-      </LayersControl.BaseLayer>
-      <LayersControl.BaseLayer checked={mapStyle === 'Dark'} name="Dark mode">
-        <BingLayer minNativeZoom={3} bingkey={bingKey} type="CanvasDark" />
-      </LayersControl.BaseLayer>
-    </LayersControl>
-  )
+  const map = useGeoMap()
+  useEffect(() => {
+    if (!map) {
+      return
+    }
+    const makeLayer = (type?: string) =>
+      new (BingLayerObject as any)(bingKey, {minNativeZoom: 3, type})
+    const roads = makeLayer('Road')
+    const satellitePlain = makeLayer(undefined)
+    const satelliteLabels = makeLayer('AerialWithLabels')
+    const dark = makeLayer('CanvasDark')
+    const baseLayers = {
+      Roads: roads,
+      'Satellite (Plain)': satellitePlain,
+      'Satellite (Labels)': satelliteLabels,
+      'Dark mode': dark,
+    }
+    let defaultLayer = roads
+    if (mapStyle === 'Satellite (plain)') {
+      defaultLayer = satellitePlain
+    } else if (mapStyle === 'Satellite') {
+      defaultLayer = satelliteLabels
+    } else if (mapStyle === 'Dark') {
+      defaultLayer = dark
+    }
+
+    const control = L.control.layers(baseLayers, {}, {position: 'topright'})
+    control.addTo(map)
+    let activeLayer = defaultLayer
+    const onBaseLayerChange = event => {
+      activeLayer = event.layer
+    }
+    map.on('baselayerchange', onBaseLayerChange)
+    map.addLayer(defaultLayer)
+
+    return () => {
+      map.off('baselayerchange', onBaseLayerChange)
+      map.removeLayer(activeLayer)
+      control.remove()
+    }
+  }, [bingKey, map, mapStyle])
+
+  return null
 }

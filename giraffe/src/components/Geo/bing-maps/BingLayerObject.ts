@@ -122,7 +122,8 @@ export const BingLayerObject = L.TileLayer.extend({
       return
     }
     this._update_attribution()
-    L.TileLayer.prototype._update.apply(this, [])
+    const tileLayerProto = L.TileLayer.prototype as any
+    tileLayerProto._update.apply(this, [])
   },
 
   _update_attribution: function () {

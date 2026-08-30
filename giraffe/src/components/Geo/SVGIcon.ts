@@ -2,7 +2,9 @@
 // See https://github.com/iatkin/leaflet-svgicon
 import L from 'leaflet'
 
-L.DivIcon.SVGIcon = L.DivIcon.extend({
+const DivIcon = L.DivIcon as any
+
+DivIcon.SVGIcon = DivIcon.extend({
   options: {
     circleText: '',
     className: 'svg-icon',
@@ -211,10 +213,12 @@ L.DivIcon.SVGIcon = L.DivIcon.extend({
   },
 })
 
-L.divIcon.svgIcon = function (options) {
-  return new L.DivIcon.SVGIcon(options)
+const svgIcon = L.divIcon as any
+
+svgIcon.svgIcon = function (options) {
+  return new DivIcon.SVGIcon(options)
 }
 
 export const SVGIcon = function (options) {
-  return new L.DivIcon.SVGIcon(options)
+  return new DivIcon.SVGIcon(options)
 }

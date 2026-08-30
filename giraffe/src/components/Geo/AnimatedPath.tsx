@@ -1,6 +1,10 @@
 // Libraries
-import React, {FunctionComponent, useEffect, useRef} from 'react'
-import {Polyline} from 'react-leaflet'
+import {FunctionComponent, useEffect} from 'react'
+import L from 'leaflet'
+import type {LatLngExpression} from 'leaflet'
+
+// Utils
+import {useGeoMap} from './GeoMapContext'
 
 // Types
 import {Track} from './processing/GeoTable'
@@ -48,56 +52,67 @@ export const AnimatedPath: FunctionComponent<Props> = ({
   positions,
   options,
 }) => {
-  const pulseRef = useRef<any>(null)
+  const map = useGeoMap()
   const merged = {...DEFAULT_OPTIONS, ...options}
+  const coordinates = positions as LatLngExpression[]
   const {color, pulseColor, weight, delay, opacity, dashArray} = merged
   const hardwareAccelerated = !!options.hardwareAccelerated
 
   useEffect(() => {
-    const leafletElement = pulseRef.current && pulseRef.current.leafletElement
-    const path = leafletElement && leafletElement.getElement()
-    if (!path) {
+    if (!map) {
       return
     }
+    const pathOptions = {color, weight, opacity}
+    const main = L.polyline(coordinates, pathOptions)
+    const pulse = L.polyline(coordinates, {
+      ...pathOptions,
+      color: pulseColor,
+      dashArray,
+      fill: false,
+      className: 'giraffe-ant-path',
+    })
+    main.addTo(map)
+    pulse.addTo(map)
 
-    if (hardwareAccelerated) {
+    const pulseElement = pulse.getElement()
+    if (pulseElement && hardwareAccelerated) {
       // Leaflet applies its own transform to the renderer container, not to
       // this path element, so an inline transform here is safe.
-      path.style.transform = 'translateZ(0)'
+      (pulseElement as HTMLElement).style.transform = 'translateZ(0)'
     }
 
     // Fixed speed: 1 + delay/30 seconds, independent of map zoom.
-    const animation = path.animate(
-      [{strokeDashoffset: '100%'}, {strokeDashoffset: '0%'}],
-      {
-        duration: (1 + delay / 30) * 1000,
-        iterations: Infinity,
-        easing: 'linear',
-      }
-    )
+    const animation =
+      pulseElement &&
+      pulseElement.animate(
+        [{strokeDashoffset: '100%'}, {strokeDashoffset: '0%'}],
+        {
+          duration: (1 + delay / 30) * 1000,
+          iterations: Infinity,
+          easing: 'linear',
+        }
+      )
 
     return () => {
-      animation.cancel()
+      if (animation) {
+        animation.cancel()
+      }
+      main.remove()
+      pulse.remove()
     }
-  }, [delay, hardwareAccelerated])
+  }, [
+    map,
+    coordinates,
+    color,
+    pulseColor,
+    weight,
+    opacity,
+    dashArray,
+    delay,
+    hardwareAccelerated,
+  ])
 
-  return (
-    <>
-      <Polyline positions={positions} pathOptions={{color, weight, opacity}} />
-      <Polyline
-        ref={pulseRef}
-        positions={positions}
-        pathOptions={{
-          color: pulseColor,
-          weight,
-          opacity,
-          dashArray,
-          fill: false,
-          className: 'giraffe-ant-path',
-        }}
-      />
-    </>
-  )
+  return null
 }
 
 export default AnimatedPath
