@@ -1,12 +1,11 @@
-import Papa from 'papaparse'
-
 import {FluxTable} from '../types'
 import {get} from './get'
 import {groupBy} from './groupBy'
 import {escapeCSVFieldWithSpecialCharacters} from './escapeCSVFieldWithSpecialCharacters'
+import parseCSV from './csv'
 
-export const parseResponseError = (response: string): FluxTable[] => {
-  const data = Papa.parse(response.trim()).data as string[][]
+export const parseResponseError = (resp: string): FluxTable[] => {
+  const [columns, rows] = parseCSV(resp.trim())
 
   return [
     {
@@ -15,7 +14,7 @@ export const parseResponseError = (response: string): FluxTable[] => {
       result: '',
       groupKey: {},
       dataTypes: {},
-      data,
+      data: [columns, ...rows],
     },
   ]
 }
@@ -26,14 +25,13 @@ export const parseResponseError = (response: string): FluxTable[] => {
 
   See https://github.com/influxdata/flux/blob/master/docs/SPEC.md#multiple-tables.
 */
-export const parseChunks = (response: string): string[] => {
-  const trimmedResponse = response.trim()
-
-  if (trimmedResponse === '') {
+export const parseChunks = (resp: string): string[] => {
+  const trimmed = resp.trim()
+  if (trimmed === '') {
     return []
   }
 
-  // Split the response into separate chunks whenever we encounter:
+  // Split the resp into separate chunks whenever we encounter:
   //
   // 1. A newline
   // 2. Followed by any amount of whitespace
@@ -46,25 +44,23 @@ export const parseChunks = (response: string): string[] => {
   // [0]: https://github.com/influxdata/influxdb/issues/15017
 
   // use regex lookahead
-  const chunks = trimmedResponse
+  // Add back the `#` characters that were removed by splitting
+  return trimmed
     .split(/\n\s*\n#(?=datatype|group|default)/)
-    .map((chunk, chunkNumber) => (chunkNumber === 0 ? chunk : `#${chunk}`)) // Add back the `#` characters that were removed by splitting
-
-  return chunks
+    .map((chunk, chunkNumber) => (chunkNumber === 0 ? chunk : `#${chunk}`))
 }
 
-export const parseResponse = (response: string): FluxTable[] => {
-  const chunks = parseChunks(response)
-  const tables = chunks.reduce((acc, chunk) => {
+export const parseResponse = (resp: string): FluxTable[] => {
+  const chunks = parseChunks(resp)
+
+  return chunks.reduce((acc, chunk) => {
     return [...acc, ...parseTables(chunk)]
   }, [])
-
-  return tables
 }
 
-export const parseTables = (responseChunk: string): FluxTable[] => {
-  const linesData = Papa.parse(responseChunk).data
-  const lines: string[] = linesData.map(line =>
+export const parseTables = (input: string): FluxTable[] => {
+  const [columns, linesData] = parseCSV(input)
+  const lines: string[] = [columns, ...linesData].map(line =>
     line.map(escapeCSVFieldWithSpecialCharacters).join(',')
   )
   const annotationLines: string = lines
@@ -87,8 +83,10 @@ export const parseTables = (responseChunk: string): FluxTable[] => {
     return []
   }
 
-  const nonAnnotationData = Papa.parse(nonAnnotationLines).data
-  const annotationData = Papa.parse(annotationLines).data
+  const [nonAnnotationColumns, nonAnnotationRows] = parseCSV(nonAnnotationLines)
+  const nonAnnotationData = [nonAnnotationColumns, ...nonAnnotationRows]
+  const [annotationColumns, annotationRows] = parseCSV(annotationLines)
+  const annotationData = [annotationColumns, ...annotationRows]
   const headerRow = nonAnnotationData[0]
   const tableColIndex = headerRow.findIndex(h => h === 'table')
   const resultColIndex = headerRow.findIndex(h => h === 'result')
@@ -116,7 +114,7 @@ export const parseTables = (responseChunk: string): FluxTable[] => {
     return acc
   }, [])
 
-  const tables = tablesData.map(tableData => {
+  return tablesData.map(tableData => {
     const dataRow = get(tableData, '0', defaultsRow)
 
     const result: string =
@@ -147,6 +145,4 @@ export const parseTables = (responseChunk: string): FluxTable[] => {
       dataTypes,
     } as FluxTable
   })
-
-  return tables
 }
