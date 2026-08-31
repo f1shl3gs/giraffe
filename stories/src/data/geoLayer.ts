@@ -1,4 +1,4 @@
-import {newTable, Table} from '../../../giraffe/src'
+import {newTable, Table} from '../../../giraffe'
 import memoizeOne from 'memoize-one'
 
 const now = Date.now()

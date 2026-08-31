@@ -47,9 +47,10 @@ export const TrackMapLayer: FunctionComponent<Props> = props => {
     }
     const endStopMarkerSpecs = []
     const colors = properties.colors || DEFAULT_TRACK_COLOR
-    const palette = !properties.colors && properties.randomColors
-      ? DEFAULT_TRACK_PALETTE
-      : colors
+    const palette =
+      !properties.colors && properties.randomColors
+        ? DEFAULT_TRACK_PALETTE
+        : colors
     const paths = table.mapTracks((track, trackOptions, index) => {
       let startColor, endColor
       if (properties.randomColors) {

@@ -19,8 +19,7 @@ import {
 
 // Types
 import {GeoTable} from './processing/GeoTable'
-import {GeoPointMapViewLayer} from '../../types/geo'
-import {Config} from '../../types'
+import {GeoPointMapViewLayer, Config} from '../../types'
 
 interface Props {
   table: GeoTable
