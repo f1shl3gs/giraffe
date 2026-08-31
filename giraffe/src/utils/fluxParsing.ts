@@ -115,7 +115,8 @@ export const parseTables = (input: string): FluxTable[] => {
 
   return tablesData.map(tableData => {
     const dataRow = tableData[0] ?? defaultsRow
-    const result = dataRow[resultColIndex] ?? ''
+    const result =
+      dataRow[resultColIndex] || defaultsRow?.[resultColIndex] || ''
 
     const groupKey = groupKeyIndices.reduce((acc, i) => {
       return {...acc, [headerRow[i]]: dataRow[i] ?? ''}
