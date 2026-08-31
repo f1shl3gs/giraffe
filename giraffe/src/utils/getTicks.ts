@@ -36,15 +36,10 @@ const hasMinimumSpacing = (
   const totalLength = ticks.length * timeTickLength
   if (ticks.length < 4) {
     const padding = totalLength * fractionalSpaceAsPadding
-    if (totalLength < rangeLength - padding) {
-      return true
-    }
-    return false
+    return totalLength < rangeLength - padding;
   } else if (ticks.length <= 10) {
-    if (totalLength < rangeLength - timeTickLength) {
-      return true
-    }
-    return false
+    return totalLength < rangeLength - timeTickLength;
+
   } else if (
     totalLength <
     rangeLength - Math.ceil(ticks.length / 10) * timeTickLength
