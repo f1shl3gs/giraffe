@@ -5,9 +5,6 @@ import React, {FunctionComponent, useState} from 'react'
 import {TableGraph} from './TableGraph'
 import {TableSidebar} from './TableSidebar'
 
-// Utils
-import {get} from '../../utils/get'
-
 // Types
 import {FluxTable, TableGraphLayerConfig} from '../../types'
 
@@ -25,14 +22,10 @@ const getNameOfSelectedTable = (
   const isNameInTables = tables.find(t => t.name === selectedTableName)
 
   if (!isNameInTables) {
-    return getDefaultTableName(tables)
+    return tables[0]?.name ?? null
   }
 
   return selectedTableName
-}
-
-const getDefaultTableName = (tables: FluxTable[]): string => {
-  return get(tables, '0.name', null)
 }
 
 const showSidebar = (tables: FluxTable[]): boolean => {
@@ -65,7 +58,7 @@ export const TableGraphLayer: FunctionComponent<Props> = (props: Props) => {
   } = props
 
   const [selectedTableName, setSelectedTableName] = useState<string>(
-    get(tables, '0.name', null)
+    tables[0]?.name
   )
 
   return (

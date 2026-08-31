@@ -1,5 +1,4 @@
 import {FluxTable} from '../types'
-import {get} from './get'
 import {groupBy} from './groupBy'
 import {escapeCSVFieldWithSpecialCharacters} from './escapeCSVFieldWithSpecialCharacters'
 import parseCSV from './csv'
@@ -92,7 +91,7 @@ export const parseTables = (input: string): FluxTable[] => {
   const resultColIndex = headerRow.findIndex(h => h === 'result')
 
   interface TableGroup {
-    [tableId: string]: string[]
+    [tableId: string]: string[][]
   }
 
   const tableGroup: TableGroup = groupBy(
@@ -115,13 +114,11 @@ export const parseTables = (input: string): FluxTable[] => {
   }, [])
 
   return tablesData.map(tableData => {
-    const dataRow = get(tableData, '0', defaultsRow)
-
-    const result: string =
-      get(dataRow, resultColIndex, '') || get(defaultsRow, resultColIndex, '')
+    const dataRow = tableData[0] ?? defaultsRow
+    const result = dataRow[resultColIndex] ?? ''
 
     const groupKey = groupKeyIndices.reduce((acc, i) => {
-      return {...acc, [headerRow[i]]: get(dataRow, i, '')}
+      return {...acc, [headerRow[i]]: dataRow[i] ?? ''}
     }, {})
 
     const name = Object.entries(groupKey)

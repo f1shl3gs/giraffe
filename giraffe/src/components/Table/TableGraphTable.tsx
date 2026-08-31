@@ -11,7 +11,6 @@ import {MultiGrid, MultiGridInputHandles, PropsMultiGrid} from './MultiGrid'
 // Utils
 import {withHoverTime, InjectedHoverProps} from './hoverTime'
 import {findHoverTimeIndex, resolveTimeFormat} from '../../utils/tableGraph'
-import {get} from '../../utils/get'
 
 // Constants
 import {
@@ -67,11 +66,10 @@ interface State {
   multiGrid?: typeof MultiGrid
 }
 
-const getColumnCount = (props: Props): number => {
-  const {
-    transformedDataBundle: {transformedData},
-  } = props
-  return get(transformedData, ['0', 'length'], 0)
+const getColumnCount = ({transformedDataBundle}: Props): number => {
+  const {transformedData} = transformedDataBundle
+
+  return transformedData[0] ? transformedData[0].length : 0
 }
 
 const getFixFirstColumn = (props: Props): boolean => {
@@ -111,21 +109,20 @@ const getComputedColumnCount = (props: Props): number => {
   return getColumnCount(props)
 }
 
-const getTimeField = (props: Props) => {
-  const {transformedDataBundle} = props
-  let {resolvedRenamableFields} = transformedDataBundle
+const isTimeVisible = (props: Props): boolean => {
+  let {
+    transformedDataBundle: {resolvedRenamableFields},
+  } = props
 
   if (!Array.isArray(resolvedRenamableFields)) {
-    resolvedRenamableFields = []
+    return false
   }
 
-  return resolvedRenamableFields.find(
-    f => f.internalName === DEFAULT_TIME_FIELD.internalName
+  return (
+    resolvedRenamableFields.find(
+      field => field.internalName === DEFAULT_TIME_FIELD.internalName
+    )?.visible ?? false
   )
-}
-
-const isTimeVisible = (props: Props): boolean => {
-  return get(getTimeField(props), 'visible', false)
 }
 
 const isVerticalTimeAxis = (props: Props): boolean => {
@@ -238,7 +235,7 @@ const getDataType = (
 
   const columnName = transformedData[0][columnIndex]
 
-  return get(dataTypes, columnName, 'n/a')
+  return dataTypes[columnName] ?? 'n/a'
 }
 
 const getTimeFormatter = (props: Props) => {

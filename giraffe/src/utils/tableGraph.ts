@@ -1,24 +1,23 @@
-import {get} from './get'
 import {replace} from './replace'
 import {orderBy} from './orderBy'
 import {unzip} from './unzip'
-import {fastMap, fastReduce, fastFilter} from './fast'
+import {fastFilter, fastMap, fastReduce} from './fast'
 
 import {
   CELL_HORIZONTAL_PADDING,
   DEFAULT_TIME_FIELD,
-  FORMAT_OPTIONS,
   DEFAULT_TIME_FORMAT,
   DEFAULT_VERTICAL_TIME_AXIS,
+  FORMAT_OPTIONS,
 } from '../constants/tableGraph'
 
 import {
-  FluxTable,
-  SortOptions,
-  RenamableField,
-  TableViewProperties,
-  DecimalPlaces,
   ColumnWidths,
+  DecimalPlaces,
+  FluxTable,
+  RenamableField,
+  SortOptions,
+  TableViewProperties,
 } from '../types'
 
 type TableOptions = TableViewProperties['tableOptions']
@@ -73,7 +72,7 @@ const updateMaxWidths = (
   verticalTimeAxis: boolean,
   decimalPlaces: DecimalPlaces
 ): ColumnWidths => {
-  const maxWidths = fastReduce<string>(
+  return fastReduce<string>(
     row,
     (acc: ColumnWidths, col: string, c: number) => {
       const foundField = RenamableFields.find(
@@ -100,8 +99,8 @@ const updateMaxWidths = (
         ? timeFormatWidth
         : calculateSize(colValue.toString().trim()) + CELL_HORIZONTAL_PADDING
 
-      const {widths: Widths} = maxColumnWidths
-      const maxWidth = get(Widths, `${columnLabel}`, 0)
+      const {widths} = maxColumnWidths
+      const maxWidth = widths[columnLabel] ?? 0
 
       if (isTopRow || currentWidth > maxWidth) {
         acc.widths[columnLabel] = currentWidth
@@ -112,8 +111,6 @@ const updateMaxWidths = (
     },
     {...maxColumnWidths}
   )
-
-  return maxWidths
 }
 
 export const resolveRenamableFields = (
@@ -354,9 +351,8 @@ export const getUnixISODiff = (unixMs: number, isoTime: string | number) => {
 }
 
 export const findTableNameHeaders = (tables: FluxTable[], name: string) => {
-  const foundTable = tables.find(t => t.name === name)
-
-  return get(foundTable, 'data.0', [])
+  const table = tables.find(table => table.name === name)
+  return table.data[0] ?? []
 }
 
 export const resolveTimeFormat = (timeFormat: string) => {
