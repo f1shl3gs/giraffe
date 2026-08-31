@@ -1,5 +1,4 @@
 import {replace} from './replace'
-import {orderBy} from './orderBy'
 import {unzip} from './unzip'
 import {fastFilter, fastMap, fastReduce} from './fast'
 
@@ -225,20 +224,22 @@ export const sortTableData = (
   }
 
   const dataValues = Array.isArray(data) ? data.slice(1) : [[]]
-  const sortedData = [
-    dataHeader,
-    ...orderBy<string[][]>(
-      dataValues,
-      row => {
-        const sortedValue = row[sortIndex]
-        if (isNaN(Number(sortedValue))) {
-          return sortedValue
-        }
-        return Number(sortedValue)
-      },
-      [sort.direction]
-    ),
-  ] as string[][]
+  const sortValue = (row: string[]): string | number => {
+    const value = row[sortIndex]
+    return isNaN(Number(value)) ? value : Number(value)
+  }
+  const sortedDataValues = dataValues
+    .map((row, index) => ({row, index, value: sortValue(row)}))
+    .sort((a, b) => {
+      const cmp =
+        typeof a.value === 'string' && typeof b.value === 'string'
+          ? a.value.localeCompare(b.value)
+          : (a.value as number) - (b.value as number)
+      const direction = sort.direction === 'desc' ? -1 : 1
+      return (cmp * direction) || (a.index - b.index)
+    })
+    .map(({row}) => row)
+  const sortedData = [dataHeader, ...sortedDataValues] as string[][]
 
   const sortedTimeVals = fastMap<string[], string>(
     sortedData,
