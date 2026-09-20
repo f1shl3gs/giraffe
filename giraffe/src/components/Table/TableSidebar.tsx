@@ -1,5 +1,6 @@
 // Libraries
 import React, {FunctionComponent, ChangeEvent, useState} from 'react'
+import classnames from 'classnames'
 
 // Components
 import {DapperScrollbars} from '../DapperScrollbars'
@@ -10,7 +11,7 @@ import {TableSidebarItem} from './TableSidebarItem'
 import {IconFont, FluxTable, Theme} from '../../types'
 
 // Styles
-import styles from './TableGraphs.scss'
+import './TableGraphs.scss'
 
 interface Props {
   data: FluxTable[]
@@ -36,14 +37,14 @@ export const TableSidebar: FunctionComponent<Props> = (props: Props) => {
 
   const [searchTerm, setSearchTerm] = useState<string>('')
 
+  const className = classnames('time-machine-sidebar', {
+    'time-machine-sidebar__light': theme === 'light',
+  })
+
   return (
-    <div
-      className={`${styles['time-machine-sidebar']} ${
-        theme === 'light' ? styles['time-machine-sidebar__light'] : ''
-      }`}
-    >
+    <div className={className}>
       {data.length > 0 && (
-        <div className={styles['time-machine-sidebar--heading']}>
+        <div className={'time-machine-sidebar--heading'}>
           <Input
             icon={IconFont.Search_New}
             onChange={(event: ChangeEvent<HTMLInputElement>) =>
@@ -51,15 +52,15 @@ export const TableSidebar: FunctionComponent<Props> = (props: Props) => {
             }
             placeholder="Filter tables..."
             value={searchTerm}
-            className={styles['time-machine-sidebar--filter']}
+            className={'time-machine-sidebar--filter'}
           />
         </div>
       )}
       <DapperScrollbars
         autoHide={true}
-        className={`${styles['time-machine-sidebar--scroll']}`}
+        className={'time-machine-sidebar--scroll'}
       >
-        <div className={styles['time-machine-sidebar--items']}>
+        <div className={'time-machine-sidebar--items'}>
           {getFilteredData(data, searchTerm).map(({groupKey, id, name}) => {
             return (
               <TableSidebarItem

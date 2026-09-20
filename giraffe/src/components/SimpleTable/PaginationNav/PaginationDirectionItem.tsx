@@ -14,8 +14,7 @@ import {
 } from '../../../types'
 
 // Styles
-import styles from './Pagination.scss'
-import {styleReducer} from '../../../utils/styleReducer'
+import './Pagination.scss'
 
 export interface PaginationDirectionItemProps extends StandardFunctionProps {
   /** Caret Left or Caret Right on button */
@@ -43,11 +42,10 @@ export const PaginationDirectionItem = forwardRef<
     },
     ref
   ) => {
-    const paginationClassName = classnames('cf-pagination--item--container', {
-      [`${className}`]: className,
-    })
-      .split(' ')
-      .reduce((accum, current) => styleReducer(styles, accum, current), '')
+    const paginationClassName = classnames(
+      'cf-pagination--item--container',
+      className
+    )
 
     const iconFont =
       direction === Direction.Left
@@ -74,5 +72,3 @@ export const PaginationDirectionItem = forwardRef<
     )
   }
 )
-
-PaginationDirectionItem.displayName = 'PaginationDirectionItem'

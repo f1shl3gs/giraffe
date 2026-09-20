@@ -9,7 +9,7 @@ import {TableSidebar} from './TableSidebar'
 import {FluxTable, TableGraphLayerConfig} from '../../types'
 
 // Styles
-import styles from './TableGraphs.scss'
+import './TableGraphs.scss'
 
 interface Props {
   config: TableGraphLayerConfig
@@ -62,7 +62,7 @@ export const TableGraphLayer: FunctionComponent<Props> = (props: Props) => {
   )
 
   return (
-    <div className={styles['time-machine-tables']}>
+    <div className={'time-machine-tables'}>
       {showSidebar(tables) && (
         <TableSidebar
           data={tables}

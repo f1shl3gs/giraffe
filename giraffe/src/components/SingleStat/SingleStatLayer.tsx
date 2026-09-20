@@ -1,5 +1,13 @@
+// Libraries
 import React, {FunctionComponent} from 'react'
-import classnames from 'classnames'
+
+// Types
+import {SingleStatLayerConfig} from '../../types'
+
+// Utils
+import {formatStatValue} from '../../utils/formatStatValue'
+
+// Constants
 import {
   SINGLE_STAT_DEFAULT_TEST_ID,
   SINGLE_STAT_RESIZER_DEFAULT_STYLE,
@@ -7,12 +15,9 @@ import {
   SINGLE_STAT_SVG_TEXT_DEFAULT_ATTRIBUTES,
   SINGLE_STAT_SVG_TEXT_DEFAULT_STYLE,
 } from '../../style/singleStatStyles'
-import {SingleStatLayerConfig} from '../../types'
-import {formatStatValue} from '../../utils/formatStatValue'
 
-import styles from './SingleStatLayer.scss'
-
-import {styleReducer} from '../../utils/styleReducer'
+// Styles
+import './SingleStatLayer.scss'
 
 interface Props {
   stat: number
@@ -40,12 +45,6 @@ export const SingleStatLayer: FunctionComponent<Props> = props => {
     textOpacity = 1,
   } = config
 
-  const singleStatLayerClasses = styleReducer(
-    styles,
-    'giraffe-layer giraffe-layer-single-stat',
-    classnames('giraffe-layer-single-stat')
-  )
-
   const formattedValue = formatStatValue(stat, {decimalPlaces, prefix, suffix})
 
   let viewBox = getDefaultViewBox(formattedValue)
@@ -59,7 +58,7 @@ export const SingleStatLayer: FunctionComponent<Props> = props => {
 
   return (
     <div
-      className={singleStatLayerClasses}
+      className={'giraffe-layer giraffe-layer-single-stat'}
       data-testid={testID}
       style={{
         ...style,

@@ -8,7 +8,7 @@ import {Icon} from '../../../Icon'
 import {IconFont} from '../../../../types'
 
 // Styles
-import styles from './Button.scss'
+import './Button.scss'
 
 export interface IconAndTextProps {
   text?: string
@@ -21,12 +21,8 @@ export const IconAndText: FunctionComponent<IconAndTextProps> = ({
   icon,
   placeIconAfterText = false,
 }) => {
-  const iconEl = !!icon && (
-    <Icon glyph={icon} className={`${styles['cf-button-icon']}`} />
-  )
-  const textEl = !!text && (
-    <span className={`${styles['cf-button--label']}`}>{text}</span>
-  )
+  const iconEl = icon && <Icon glyph={icon} className={'cf-button-icon'} />
+  const textEl = text && <span className={'cf-button--label'}>{text}</span>
 
   if (!icon && !text) {
     return null
@@ -48,5 +44,3 @@ export const IconAndText: FunctionComponent<IconAndTextProps> = ({
     </>
   )
 }
-
-IconAndText.displayName = 'IconAndText'

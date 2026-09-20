@@ -131,8 +131,6 @@ const LegendColumn: FunctionComponent<LegendColumnProps> = ({
   )
 }
 
-LegendColumn.displayName = 'LegendColumn'
-
 interface LegendPillColumnProps {
   type: LegendType
   styles: LegendPillsStyles
@@ -161,5 +159,3 @@ const LegendPillColumn: FunctionComponent<LegendPillColumnProps> = ({
     </div>
   )
 }
-
-LegendPillColumn.displayName = 'LegendPillColumn'

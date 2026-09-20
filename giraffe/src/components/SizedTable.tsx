@@ -103,5 +103,3 @@ export const SizedTable: FunctionComponent<Props> = ({config, children}) => {
     </div>
   )
 }
-
-SizedTable.displayName = 'SizedTable'

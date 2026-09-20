@@ -5,7 +5,7 @@ import React, {forwardRef} from 'react'
 import {StandardFunctionProps} from '../../../types'
 
 // Styles
-import styles from './Table.scss'
+import './Table.scss'
 
 export interface TableHeaderProps extends StandardFunctionProps {}
 
@@ -18,12 +18,10 @@ export const TableHeader = forwardRef<TableHeaderRef, TableHeaderProps>(
         id={id}
         data-testid={testID}
         ref={ref}
-        className={`${styles['cf-table--header']}`}
+        className={'cf-table--header'}
       >
         {children}
       </thead>
     )
   }
 )
-
-TableHeader.displayName = 'TableHeader'

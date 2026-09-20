@@ -78,7 +78,7 @@ export const AnimatedPath: FunctionComponent<Props> = ({
     if (pulseElement && hardwareAccelerated) {
       // Leaflet applies its own transform to the renderer container, not to
       // this path element, so an inline transform here is safe.
-      (pulseElement as HTMLElement).style.transform = 'translateZ(0)'
+      ;(pulseElement as HTMLElement).style.transform = 'translateZ(0)'
     }
 
     // Fixed speed: 1 + delay/30 seconds, independent of map zoom.

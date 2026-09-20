@@ -15,8 +15,7 @@ import {PaginationItem} from './PaginationItem'
 import {PaginationTruncationItem} from './PaginationTruncationItem'
 
 // Styles
-import styles from './Pagination.scss'
-import {styleReducer} from '../../../utils/styleReducer'
+import './Pagination.scss'
 
 // Types
 import {ComponentSize, Direction, StandardFunctionProps} from '../../../types'
@@ -61,11 +60,7 @@ export const Pagination = forwardRef<PaginationNavRef, PaginationNavProps>(
     ref
   ) => {
     const innerRef = React.useRef<HTMLUListElement>(null)
-    const paginationNavClassName = classnames('cf-pagination', {
-      [`${className}`]: className,
-    })
-      .split(' ')
-      .reduce((accum, current) => styleReducer(styles, accum, current), '')
+    const paginationNavClassName = classnames('cf-pagination', className)
 
     const [activePage, setActivePage] = useState(currentPage)
     const [inputPage, setInputPage] = useState(currentPage)
@@ -237,7 +232,7 @@ export const Pagination = forwardRef<PaginationNavRef, PaginationNavProps>(
         style={style}
         ref={ref}
       >
-        <ul className={`${styles['cf-pagination--container']}`} ref={innerRef}>
+        <ul className={'cf-pagination--container'} ref={innerRef}>
           {!hideDirectionIcon && (
             <PaginationDirectionItem
               direction={Direction.Left}

@@ -250,5 +250,3 @@ export const Axes: FunctionComponent<Props> = ({canvasRef, env, style}) => {
     />
   )
 }
-
-Axes.displayName = 'Axes'

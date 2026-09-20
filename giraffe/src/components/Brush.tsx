@@ -86,5 +86,3 @@ export const Brush: FunctionComponent<Props> = ({
 
   return <div className="giraffe-brush-selection" style={selectionStyle} />
 }
-
-Brush.displayName = 'Brush'

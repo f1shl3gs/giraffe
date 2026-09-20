@@ -6,7 +6,7 @@ import {Input} from '../../Input'
 import {Button} from './Button/Button'
 
 // Styles
-import styles from './Pagination.scss'
+import './Pagination.scss'
 
 // Types
 import {
@@ -33,9 +33,11 @@ export const PaginationInput = forwardRef<
   const inputStyles = {width: currentPage.toString().length + 6 + 'ch'}
 
   return (
-    <div className={styles['cf-pagination-input--container']}>
+    <div className={'cf-pagination-input--container'}>
       <div
-        className={`${styles['cf-pagination-input--item']} ${styles['cf-pagination-input--item--padding']}`}
+        className={
+          'cf-pagination-input--item cf-pagination-input--item--padding'
+        }
       >
         Go to Page
       </div>
@@ -46,7 +48,7 @@ export const PaginationInput = forwardRef<
         size={size}
         style={inputStyles}
         ref={ref}
-        className={styles['cf-pagination-input__width']}
+        className={'cf-pagination-input__width'}
       />
       <Button
         size={size}
@@ -59,5 +61,3 @@ export const PaginationInput = forwardRef<
     </div>
   )
 })
-
-PaginationInput.displayName = 'PaginationInput'

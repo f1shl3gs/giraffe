@@ -1,6 +1,6 @@
 // Libraries
 import React, {FunctionComponent, useState, useEffect, useRef} from 'react'
-import {timeFormatter} from '../../utils/formatters'
+import classnames from 'classnames'
 
 // Components
 import {AutoSizer} from '../AutoSizer'
@@ -8,9 +8,18 @@ import {ColumnSizer, SizedColumns} from '../ColumnSizer'
 import {TableCell} from './TableCell'
 import {MultiGrid, MultiGridInputHandles, PropsMultiGrid} from './MultiGrid'
 
+// Types
+import {
+  TableViewProperties,
+  TimeZone,
+  Theme,
+  TransformTableDataReturnType,
+} from '../../types'
+
 // Utils
 import {withHoverTime, InjectedHoverProps} from './hoverTime'
 import {findHoverTimeIndex, resolveTimeFormat} from '../../utils/tableGraph'
+import {timeFormatter} from '../../utils/formatters'
 
 // Constants
 import {
@@ -22,16 +31,8 @@ import {
 const COLUMN_MIN_WIDTH = 100
 const ROW_HEIGHT = 30
 
-// Types
-import {
-  TableViewProperties,
-  TimeZone,
-  Theme,
-  TransformTableDataReturnType,
-} from '../../types'
-
 // Styles
-import styles from './TableGraphs.scss'
+import './TableGraphs.scss'
 
 export interface ColumnWidths {
   totalWidths: number
@@ -110,7 +111,7 @@ const getComputedColumnCount = (props: Props): number => {
 }
 
 const isTimeVisible = (props: Props): boolean => {
-  let {
+  const {
     transformedDataBundle: {resolvedRenamableFields},
   } = props
 
@@ -373,11 +374,13 @@ const TableGraphTableComponent: FunctionComponent<Props> = (props: Props) => {
   const cellRendererCallback = cellProps =>
     cellRenderer(state, setState, props, cellProps)
 
+  const className = classnames('time-machine-table', {
+    'time-machine-table__light-mode': theme === 'light',
+  })
+
   return (
     <div
-      className={`${styles['time-machine-table']} ${
-        theme === 'light' ? styles['time-machine-table__light-mode'] : ''
-      }`}
+      className={className}
       ref={el => setGridContainer(el)}
       onMouseLeave={handleMouseLeaveCallback}
     >

@@ -100,5 +100,3 @@ export const RectLayer: FunctionComponent<Props> = ({
     </>
   )
 }
-
-RectLayer.displayName = 'RectLayer'

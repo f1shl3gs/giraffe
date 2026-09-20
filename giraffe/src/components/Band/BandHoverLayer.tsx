@@ -125,5 +125,3 @@ export const BandHoverLayer: FunctionComponent<Props> = ({
     </>
   )
 }
-
-BandHoverLayer.displayName = 'BandHoverLayer'

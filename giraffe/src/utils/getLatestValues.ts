@@ -1,4 +1,4 @@
-import {range} from './range'
+import {range} from 'd3-array'
 import {isString} from './isString'
 import {flatMap} from './flatMap'
 import {Table, NumericColumnData} from '../types'

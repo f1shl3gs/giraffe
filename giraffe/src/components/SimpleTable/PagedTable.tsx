@@ -13,7 +13,8 @@ import {FluxResult, Column} from './flows'
 import {PaginationContext} from './pagination'
 import InnerTable from './InnerTable'
 
-import styles from './SimpleTableGraph.scss'
+// Styles
+import './SimpleTableGraph.scss'
 
 interface ExtendedColumn {
   name: string
@@ -412,14 +413,8 @@ const PagedTable: FC<Props> = ({result, showAll}) => {
   }, [numberOfRowsOnCurrentPage, tables])
 
   return (
-    <div
-      className={`${styles['visualization--simple-table--results']}`}
-      ref={ref}
-    >
-      <DapperScrollbars
-        className={`${styles['cf-dapper-scrollbars']}`}
-        noScrollY
-      >
+    <div className={'visualization--simple-table--results'} ref={ref}>
+      <DapperScrollbars className={'cf-dapper-scrollbars'} noScrollY>
         {inner}
       </DapperScrollbars>
     </div>

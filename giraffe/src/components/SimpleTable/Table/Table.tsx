@@ -2,12 +2,11 @@
 import React, {forwardRef} from 'react'
 import classnames from 'classnames'
 
-// Styles
-import styles from './Table.scss'
-import {styleReducer} from '../../../utils/styleReducer'
-
 // Types
 import {BorderType, ComponentSize, StandardFunctionProps} from '../../../types'
+
+// Styles
+import './Table.scss'
 
 export interface TableProps extends StandardFunctionProps {
   /** Padding inside every cell in the table */
@@ -40,16 +39,13 @@ export const TableRoot = forwardRef<TableRef, TableProps>(
     },
     ref
   ) => {
-    const tableClass = classnames('cf-table', {
+    const tableClass = classnames('cf-table', className, {
       [`cf-table__padding-${cellPadding}`]: cellPadding,
       [`cf-table__borders-${borders}`]: borders,
       [`cf-table__font-${fontSize}`]: fontSize,
       'cf-table__striped': striped,
       'cf-table__highlight': highlight,
-      [`${className}`]: className,
     })
-      .split(' ')
-      .reduce((accum, current) => styleReducer(styles, accum, current), '')
 
     return (
       <table

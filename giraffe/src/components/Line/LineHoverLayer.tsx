@@ -128,5 +128,3 @@ export const LineHoverLayer: FunctionComponent<Props> = ({
     </>
   )
 }
-
-LineHoverLayer.displayName = 'LineHoverLayer'

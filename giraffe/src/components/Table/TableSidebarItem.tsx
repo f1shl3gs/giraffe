@@ -1,5 +1,9 @@
+// Libraries
 import React, {Fragment, FunctionComponent} from 'react'
-import styles from './TableGraphs.scss'
+import classnames from 'classnames'
+
+// Styles
+import './TableGraphs.scss'
 
 interface GroupKey {
   [x: string]: string
@@ -32,13 +36,12 @@ export const TableSidebarItem: FunctionComponent<Props> = (props: Props) => {
   const {name, isSelected, groupKey, onSelect} = props
   const handleClick = () => onSelect(name)
 
+  const className = classnames('time-machine-sidebar-item', {
+    active: isSelected,
+  })
+
   return (
-    <div
-      className={`${styles['time-machine-sidebar-item']} ${
-        isSelected ? styles['active'] : ''
-      }`}
-      onClick={handleClick}
-    >
+    <div className={className} onClick={handleClick}>
       {getName(groupKey)}
     </div>
   )

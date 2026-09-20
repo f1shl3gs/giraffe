@@ -1,8 +1,15 @@
+// Libraries
 import React, {FC, Ref} from 'react'
+
+// Components
 import {Table} from './Table'
 import {SubsetTable} from './SimpleTableGraph'
+
+// Types
 import {ComponentSize, VerticalAlignment} from '../../types'
-import styles from './SimpleTableGraph.scss'
+
+// Styles
+import './SimpleTableGraph.scss'
 
 interface InnerProps {
   table: SubsetTable
@@ -21,7 +28,7 @@ const InnerTable: FC<InnerProps> = ({
       return (
         <Table.HeaderCell
           key="htable"
-          className={`${styles['cf-table--header-cell']}`}
+          className={'cf-table--header-cell'}
           verticalAlignment={VerticalAlignment.Top}
           style={{textTransform: 'none'}}
         >
@@ -32,7 +39,7 @@ const InnerTable: FC<InnerProps> = ({
     }
     return (
       <Table.HeaderCell
-        className={`${styles['cf-table--header-cell']}`}
+        className={'cf-table--header-cell'}
         key={`h${c.name}`}
         style={{textTransform: 'none'}}
       >
@@ -57,7 +64,7 @@ const InnerTable: FC<InnerProps> = ({
 
         return (
           <Table.Cell
-            className={`${styles['cf-table--cell']}`}
+            className={'cf-table--cell'}
             key={`h${c.name}:r${idx}`}
             testID={`table-cell ${c.data[idx]}`}
           >
@@ -71,7 +78,7 @@ const InnerTable: FC<InnerProps> = ({
 
   return (
     <Table
-      className={`${styles['cf-table']}`}
+      className={'cf-table'}
       fontSize={ComponentSize.Small}
       striped
       highlight

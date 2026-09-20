@@ -15,8 +15,7 @@ import {
 } from '../../../types'
 
 // Styles
-import styles from './Pagination.scss'
-import {styleReducer} from '../../../utils/styleReducer'
+import './Pagination.scss'
 
 export interface PaginationTruncationItemProps extends StandardFunctionProps {
   onClick?: (event?: MouseEvent<HTMLElement>) => void
@@ -39,11 +38,10 @@ export const PaginationTruncationItem = forwardRef<
     },
     ref
   ) => {
-    const paginationClassName = classnames('cf-pagination--item--container', {
-      [`${className}`]: className,
-    })
-      .split(' ')
-      .reduce((accum, current) => styleReducer(styles, accum, current), '')
+    const paginationClassName = classnames(
+      'cf-pagination--item--container',
+      className
+    )
 
     return (
       <li
@@ -66,5 +64,3 @@ export const PaginationTruncationItem = forwardRef<
     )
   }
 )
-
-PaginationTruncationItem.displayName = 'PaginationTruncationItem'

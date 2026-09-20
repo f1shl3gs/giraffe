@@ -15,10 +15,7 @@ import {
 } from '../../types'
 
 // Styles
-import styles from './StatusIndicator.scss'
-
-// Utils
-import {styleReducer} from '../../utils/styleReducer'
+import './StatusIndicator.scss'
 
 export interface StatusIndicatorProps extends StandardFunctionProps {
   /** The status to indicate */
@@ -47,23 +44,24 @@ export const StatusIndicator = forwardRef<
     },
     ref
   ) => {
-    const statusIndicatorClasses = classnames('cf-status-indicator', {
-      [`cf-status-indicator__${status}`]: status,
-      [`cf-status-indicator__${size}`]: size,
-      [`${className}`]: className,
-    })
-      .split(' ')
-      .reduce((accum, current) => styleReducer(styles, accum, current), '')
+    const statusIndicatorClasses = classnames(
+      'cf-status-indicator',
+      className,
+      {
+        [`cf-status-indicator__${status}`]: status,
+        [`cf-status-indicator__${size}`]: size,
+      }
+    )
 
     let statusElement: React.JSX.Element = <></>
     const shadowElement = shadow && (
-      <div className={styles['cf-status-indicator--shadow']} />
+      <div className={'cf-status-indicator--shadow'} />
     )
 
     if (status === ComponentStatus.Loading) {
       statusElement = (
-        <span className={styles['cf-status-indicator--child']}>
-          <div className={styles['cf-status-indicator--spinner']} />
+        <span className={'cf-status-indicator--child'}>
+          <div className={'cf-status-indicator--spinner'} />
         </span>
       )
     }
@@ -72,7 +70,7 @@ export const StatusIndicator = forwardRef<
       statusElement = (
         <Icon
           glyph={IconFont.AlertTriangle}
-          className={styles['cf-status-indicator--child']}
+          className={'cf-status-indicator--child'}
         />
       )
     }
@@ -81,7 +79,7 @@ export const StatusIndicator = forwardRef<
       statusElement = (
         <Icon
           glyph={IconFont.CheckMark_New}
-          className={styles['cf-status-indicator--child']}
+          className={'cf-status-indicator--child'}
         />
       )
     }

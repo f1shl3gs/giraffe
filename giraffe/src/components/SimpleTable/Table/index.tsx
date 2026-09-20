@@ -11,8 +11,6 @@ import {TableRow} from './TableRow'
 
 // Originally taken from Clockface and reduced
 export class Table extends Component<TableProps> {
-  public static readonly displayName = 'Table'
-
   public static Table = TableRoot
   public static Body = TableBody
   public static Cell = TableCell

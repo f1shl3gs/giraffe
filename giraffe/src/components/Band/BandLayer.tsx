@@ -148,5 +148,3 @@ export const BandLayer: FunctionComponent<Props> = props => {
     </>
   )
 }
-
-BandLayer.displayName = 'BandLayer'

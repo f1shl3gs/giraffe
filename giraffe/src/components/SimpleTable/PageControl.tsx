@@ -1,12 +1,9 @@
 // Libraries
 import React, {FC, useContext} from 'react'
-import {PaginationContext} from './pagination'
 
 // Components
 import {PaginationNav} from './PaginationNav'
-
-// Styles
-import styles from './SimpleTableGraph.scss'
+import {PaginationContext} from './pagination'
 
 const PageControl: FC = () => {
   const {
@@ -17,7 +14,7 @@ const PageControl: FC = () => {
     setCurrentPage,
   } = useContext(PaginationContext)
   return (
-    <div className={`${styles['visualization--simple-table--paging']}`}>
+    <div className={'visualization--simple-table--paging'}>
       {totalNumberOfRows && numberOfRowsOnCurrentPage > 0 && (
         <PaginationNav.PaginationNav
           totalPages={totalPages}

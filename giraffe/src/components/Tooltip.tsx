@@ -65,5 +65,3 @@ export const Tooltip: FunctionComponent<Props> = ({data, config}) => {
     tooltipElement
   )
 }
-
-Tooltip.displayName = 'Tooltip'

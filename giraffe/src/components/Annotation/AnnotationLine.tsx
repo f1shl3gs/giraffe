@@ -1,7 +1,11 @@
+// Libraries
 import React, {FunctionComponent, createElement} from 'react'
+
+// Types
 import {AnnotationDimension, AnnotationPinType} from '../../types'
 
-import styles from './AnnotationLine.scss'
+// Styles
+import './AnnotationLine.scss'
 
 interface AnnotationLineProps {
   dimension: AnnotationDimension
@@ -86,7 +90,7 @@ export const AnnotationLine: FunctionComponent<AnnotationLineProps> = props => {
           stroke={color}
           strokeWidth={strokeWidth}
           id={props.id}
-          className={`${styles['giraffe-annotation-hover']} giraffe-annotation-line`}
+          className={'giraffe-annotation-hover giraffe-annotation-line'}
         />
         {pin === 'circle' &&
           createElement('circle', {
@@ -210,7 +214,7 @@ export const AnnotationLine: FunctionComponent<AnnotationLineProps> = props => {
     stroke: color,
     strokeWidth,
     id: props.id,
-    className: `${styles['giraffe-annotation-hover']} giraffe-annotation-line`,
+    className: `giraffe-annotation-hover giraffe-annotation-line`,
   }
 
   if (clampedStart === clampedEnd) {

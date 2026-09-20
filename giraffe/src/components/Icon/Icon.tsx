@@ -6,10 +6,7 @@ import classnames from 'classnames'
 import {IconFont, StandardFunctionProps} from '../../types'
 
 // Styles
-import styles from './Icon.scss'
-
-// Utils
-import {styleReducer} from '../../utils/styleReducer'
+import './Icon.scss'
 
 export interface IconProps extends StandardFunctionProps {
   /** Icon to display */
@@ -20,12 +17,7 @@ export type IconRef = HTMLSpanElement
 
 export const Icon = forwardRef<IconRef, IconProps>(
   ({id, glyph, style, testID = 'icon', className}, ref) => {
-    const iconClassNames = classnames('cf-icon', {
-      [`${glyph}`]: glyph,
-      [`${className}`]: className,
-    })
-      .split(' ')
-      .reduce((accum, current) => styleReducer(styles, accum, current), '')
+    const iconClassNames = classnames('cf-icon', glyph, className)
 
     return (
       <span

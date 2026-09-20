@@ -92,5 +92,3 @@ export const Button = forwardRef<ButtonRef, ButtonProps>(
     )
   }
 )
-
-Button.displayName = 'Button'

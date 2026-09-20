@@ -1,6 +1,6 @@
 // Libraries
 import React, {FunctionComponent, useRef, useEffect} from 'react'
-import {range} from '../../utils/range'
+import {range} from 'd3-array'
 
 // Utils
 import {formatStatValue, MAX_DECIMAL_PLACES} from '../../utils/formatStatValue'

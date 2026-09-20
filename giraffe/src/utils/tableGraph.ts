@@ -236,7 +236,7 @@ export const sortTableData = (
           ? a.value.localeCompare(b.value)
           : (a.value as number) - (b.value as number)
       const direction = sort.direction === 'desc' ? -1 : 1
-      return (cmp * direction) || (a.index - b.index)
+      return cmp * direction || a.index - b.index
     })
     .map(({row}) => row)
   const sortedData = [dataHeader, ...sortedDataValues] as string[][]

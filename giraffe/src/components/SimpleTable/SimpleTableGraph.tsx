@@ -6,7 +6,7 @@ import PagedTable from './PagedTable'
 import {FluxResult} from './flows'
 import {PaginationProvider} from './pagination'
 
-import styles from './SimpleTableGraph.scss'
+import './SimpleTableGraph.scss'
 
 interface SubsetTableColumn {
   name: string
@@ -32,7 +32,7 @@ interface Props {
 
 export const SimpleTable: FC<Props> = ({result, showAll}) => {
   return (
-    <div className={`${styles['visualization--simple-table']}`}>
+    <div className={'visualization--simple-table'}>
       <PaginationProvider totalNumberOfRows={result?.table?.length || 0}>
         <PagedTable showAll={showAll} result={result} />
         <PageControl />

@@ -95,5 +95,3 @@ export const MosaicLayer: FunctionComponent<Props> = ({
     </>
   )
 }
-
-MosaicLayer.displayName = 'MosaicLayer'

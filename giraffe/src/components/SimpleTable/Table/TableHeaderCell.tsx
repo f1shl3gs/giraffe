@@ -10,8 +10,7 @@ import {
 } from '../../../types'
 
 // Styles
-import styles from './Table.scss'
-import {styleReducer} from '../../../utils/styleReducer'
+import './Table.scss'
 
 export interface TableHeaderCellProps extends StandardFunctionProps {
   /** How many columns this cell should take up */
@@ -41,11 +40,7 @@ export const TableHeaderCell = forwardRef<
     },
     ref
   ) => {
-    const tableHeaderCellClass = classnames('cf-table--header-cell', {
-      [`${className}`]: className,
-    })
-      .split(' ')
-      .reduce((accum, current) => styleReducer(styles, accum, current), '')
+    const tableHeaderCellClass = classnames('cf-table--header-cell', className)
 
     const tableHeaderCellStyle = {
       textAlign: horizontalAlignment,
@@ -67,5 +62,3 @@ export const TableHeaderCell = forwardRef<
     )
   }
 )
-
-TableHeaderCell.displayName = 'TableHeaderCell'

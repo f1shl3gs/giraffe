@@ -4,9 +4,9 @@ import classnames from 'classnames'
 
 // Types
 import {StandardFunctionProps} from '../../../types'
-import {styleReducer} from '../../../utils/styleReducer'
 
-import styles from './Table.scss'
+// Styles
+import './Table.scss'
 
 export interface TableCellProps extends StandardFunctionProps {}
 
@@ -14,11 +14,7 @@ export type TableCellRef = HTMLTableDataCellElement
 
 export const TableCell = forwardRef<TableCellRef, TableCellProps>(
   ({testID = 'table-cell', className, children}, ref) => {
-    const tableCellClass = classnames('cf-table--cell', {
-      [`${className}`]: className,
-    })
-      .split(' ')
-      .reduce((accum, current) => styleReducer(styles, accum, current), '')
+    const tableCellClass = classnames('cf-table--cell', className)
 
     return (
       <td
@@ -33,5 +29,3 @@ export const TableCell = forwardRef<TableCellRef, TableCellProps>(
     )
   }
 )
-
-TableCell.displayName = 'TableCell'

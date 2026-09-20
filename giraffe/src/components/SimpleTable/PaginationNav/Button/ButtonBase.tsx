@@ -2,9 +2,6 @@
 import React, {forwardRef, MouseEvent} from 'react'
 import classnames from 'classnames'
 
-// Styles
-import styles from './Button.scss'
-
 // Types
 import {
   ButtonShape,
@@ -15,8 +12,8 @@ import {
   StandardFunctionProps,
 } from '../../../../types'
 
-// Utils
-import {styleReducer} from '../../../../utils/styleReducer'
+// Styles
+import './Button.scss'
 
 export interface ButtonBaseProps extends StandardFunctionProps {
   /** Function to be called on button click */
@@ -81,17 +78,15 @@ export const ButtonBase = forwardRef<ButtonBaseRef, ButtonBaseProps>(
 
     const buttonBaseClass = classnames(
       `cf-button cf-button-${size} cf-button-${color}`,
+      className,
       {
         'cf-button-square': shape === ButtonShape.Square,
         'cf-button-stretch': shape === ButtonShape.StretchToFit,
         'cf-button--loading': status === ComponentStatus.Loading,
         'cf-button--disabled': status === ComponentStatus.Disabled,
         active,
-        [`${className}`]: className,
       }
     )
-      .split(' ')
-      .reduce((accum, current) => styleReducer(styles, accum, current), '')
 
     const titleTextToBeUsed =
       status === ComponentStatus.Disabled && disabledTitleText
@@ -120,5 +115,3 @@ export const ButtonBase = forwardRef<ButtonBaseRef, ButtonBaseProps>(
     )
   }
 )
-
-ButtonBase.displayName = 'ButtonBase'

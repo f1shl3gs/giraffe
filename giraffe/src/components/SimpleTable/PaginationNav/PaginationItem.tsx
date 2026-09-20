@@ -13,8 +13,7 @@ import {
 } from '../../../types'
 
 // Styles
-import styles from './Pagination.scss'
-import {styleReducer} from '../../../utils/styleReducer'
+import './Pagination.scss'
 
 export interface PaginationItemProps extends StandardFunctionProps {
   page?: string
@@ -43,13 +42,11 @@ export const PaginationItem = forwardRef<
   ) => {
     const paginationItemContainerClassName = classnames(
       'cf-pagination--item--container',
+      className,
       {
         'cf-pagination--item--container__active': isActive && page,
-        [`${className}`]: className,
       }
     )
-      .split(' ')
-      .reduce((accum, current) => styleReducer(styles, accum, current), '')
 
     return (
       <li
@@ -70,5 +67,3 @@ export const PaginationItem = forwardRef<
     )
   }
 )
-
-PaginationItem.displayName = 'PaginationItem'

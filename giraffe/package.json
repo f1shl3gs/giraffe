@@ -1,28 +1,33 @@
 {
   "name": "@influxdata/giraffe",
   "version": "2.38.1",
-  "main": "dist/index.js",
-  "module": "dist/index.esm.js",
+  "type": "module",
+  "module": "dist/index.js",
   "types": "./dist/index.d.ts",
   "license": "MIT",
+  "sideEffects": [
+    "*.scss",
+    "*.css"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/influxdata/giraffe.git",
     "directory": "giraffe"
   },
   "scripts": {
-    "build": "rm -rf dist && rolldown -c rolldown.config.ts && tsc --emitDeclarationOnly --declaration --outDir dist",
+    "build": "tsdown && tsc --emitDeclarationOnly --declaration --outDir dist",
     "lint": "oxlint src",
     "prettier": "prettier --config ../.prettierrc.json --check '{src,../stories/src}/**/*.{ts,tsx}'",
     "prettier:fix": "prettier --config ../.prettierrc.json --write '{src,../stories/src}/**/*.{ts,tsx}'",
     "prettier:all": "prettier --config ../.prettierrc.json --check '{src,../stories/src}/**/*.{ts,tsx}'",
     "prettier:all:fix": "prettier --config ../.prettierrc.json --write '{src,../stories/src}/**/*.{ts,tsx}'",
     "publish": "echo 'To publish giraffe, run ./publish $version'",
-    "start": "rolldown -c rolldown.config.ts --watch",
+    "start": "tsdown --watch",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit --pretty"
+    "typecheck": "tsc --noEmit --pretty",
+    "prepack": "tsdown && tsc --emitDeclarationOnly --declaration --outDir dist"
   },
   "keywords": [
     "band",
@@ -72,8 +77,8 @@
     "prettier": "^3.9.6",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "rolldown": "^1.2.5",
     "sass": "^1.103.1",
+    "tsdown": "^0.23.0",
     "typescript": "7.0.2",
     "vitest": "^4.1.11"
   },

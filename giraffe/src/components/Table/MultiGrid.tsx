@@ -1,3 +1,4 @@
+// Libraries
 import React, {
   useState,
   useEffect,
@@ -5,11 +6,14 @@ import React, {
   forwardRef,
   useImperativeHandle,
 } from 'react'
+
+// Components
 import {DapperScrollbars} from '../DapperScrollbars'
 import {getItemOffset, getItemSize} from './gridGeometry'
 import {WindowGrid, WindowGridHandle} from './WindowGrid'
 
-import styles from './TableGraphs.scss'
+// Styles
+import './TableGraphs.scss'
 
 const SCROLLBAR_SIZE_BUFFER = 20
 type HeightWidthFunction = (arg: {index: number}) => number
@@ -210,7 +214,7 @@ const renderTopLeftGrid = (
   return (
     <WindowGrid
       cellRenderer={props.cellRenderer}
-      className={styles[props.classNameTopLeftGrid]}
+      className={props.classNameTopLeftGrid}
       columnCount={fixedColumnCount}
       columnWidth={props.columnWidth ?? 0}
       height={state.topGridHeight ?? 0}
@@ -250,7 +254,7 @@ const renderTopRightGrid = (
   return (
     <WindowGrid
       cellRenderer={cellRendererTopRightGridCallback}
-      className={styles[props.classNameTopRightGrid]}
+      className={props.classNameTopRightGrid}
       columnCount={Math.max(0, columnCount - fixedColumnCount)}
       columnWidth={columnWidthRightGridCallback}
       height={height}
@@ -289,7 +293,7 @@ const renderBottomLeftGrid = (
   return (
     <WindowGrid
       cellRenderer={cellRendererBottomLeftGridCallback}
-      className={styles[props.classNameBottomLeftGrid]}
+      className={props.classNameBottomLeftGrid}
       columnCount={fixedColumnCount}
       columnWidth={props.columnWidth ?? 0}
       height={height}
@@ -345,7 +349,7 @@ const renderBottomRightGrid = (
     >
       <WindowGrid
         cellRenderer={cellRendererBottomRightGridCallback}
-        className={styles[props.classNameBottomRightGrid]}
+        className={props.classNameBottomRightGrid}
         columnCount={Math.max(0, columnCount - fixedColumnCount)}
         columnWidth={columnWidthRightGridCallback}
         height={height}

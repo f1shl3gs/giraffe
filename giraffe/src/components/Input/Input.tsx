@@ -13,12 +13,6 @@ import classnames from 'classnames'
 import {Icon} from '../Icon'
 import {StatusIndicator} from './StatusIndicator'
 
-// Styles
-import styles from './Input.scss'
-
-// Utils
-import {styleReducer} from '../../utils/styleReducer'
-
 // Types
 import {
   AutoComplete,
@@ -28,6 +22,9 @@ import {
   InputType,
   StandardFunctionProps,
 } from '../../types'
+
+// Styles
+import './Input.scss'
 
 export interface InputProps extends StandardFunctionProps {
   /** Minimum value for number & range types */
@@ -133,7 +130,7 @@ export const Input = forwardRef<InputRef, InputProps>(
     const [isFocused, setFocus] = useState<boolean>(autoFocus)
     const correctStatus = value === value ? status : ComponentStatus.Error
 
-    const inputClasses = classnames('cf-input', {
+    const inputClasses = classnames('cf-input', className, {
       [`cf-input-${size}`]: size,
       'cf-input__focused': isFocused,
       'cf-input__has-checkbox': type === InputType.Checkbox,
@@ -142,10 +139,7 @@ export const Input = forwardRef<InputRef, InputProps>(
       'cf-input__error': correctStatus === ComponentStatus.Error,
       'cf-input__loading': correctStatus === ComponentStatus.Loading,
       'cf-input__disabled': correctStatus === ComponentStatus.Disabled,
-      [`${className}`]: className,
     })
-      .split(' ')
-      .reduce((accum, current) => styleReducer(styles, accum, current), '')
 
     const handleInputFocus = (e: ChangeEvent<HTMLInputElement>): void => {
       setFocus(true)
@@ -164,8 +158,6 @@ export const Input = forwardRef<InputRef, InputProps>(
     }
 
     const inputCheckboxClasses = classnames('cf-input--checkbox', {checked})
-      .split(' ')
-      .reduce((accum, current) => styleReducer(styles, accum, current), '')
 
     const correctlyTypedValue: string | number = value === value ? value : ''
     const correctType: string = value === value ? type : 'text'
@@ -175,7 +167,7 @@ export const Input = forwardRef<InputRef, InputProps>(
       max === max ? max : ''
 
     const iconElement = icon && (
-      <Icon glyph={icon} className={styles['cf-input-icon']} />
+      <Icon glyph={icon} className={'cf-input-icon'} />
     )
 
     const title =
@@ -212,7 +204,7 @@ export const Input = forwardRef<InputRef, InputProps>(
           onKeyPress={onKeyPress}
           onKeyUp={onKeyUp}
           onKeyDown={onKeyDown}
-          className={styles['cf-input-field']}
+          className={'cf-input-field'}
           disabled={status === ComponentStatus.Disabled}
           maxLength={maxLength}
           tabIndex={tabIndex}

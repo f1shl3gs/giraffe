@@ -10,6 +10,7 @@
   NOTE: full visual parity with the old custom-rendered tracks/thumbs lands with
   the Storybook phase.
 */
+
 // Libraries
 import React, {
   CSSProperties,
@@ -21,14 +22,14 @@ import React, {
 } from 'react'
 import classnames from 'classnames'
 
-import {StandardFunctionProps} from '../../types'
-import {ComponentSize} from '../../types'
-import {InfluxColors} from '../../constants/colorSchemes'
-import styles from './DapperScrollbars.scss'
-
-import {styleReducer} from '../../utils/styleReducer'
-
 // Types
+import {ComponentSize, StandardFunctionProps} from '../../types'
+
+// Constants
+import {InfluxColors} from '../../constants/colorSchemes'
+
+// Styles
+import './DapperScrollbars.scss'
 
 /** Scroll geometry snapshot passed to `onScroll`. Replaces the ScrollState
  * object emitted by react-scrollbars-custom (same field names, plain object). */
@@ -139,17 +140,14 @@ export const DapperScrollbars: FunctionComponent<DapperScrollbarsProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  let dapperScrollbarsClasses = classnames('cf-dapper-scrollbars', {
-    'cf-dapper-scrollbars--autohide': autoHide,
-    [`cf-dapper-scrollbars--${size}`]: size,
-  })
-    .split(' ')
-    .reduce((accum, current) => styleReducer(styles, accum, current), '')
-
-  dapperScrollbarsClasses =
-    typeof className === 'string'
-      ? `${dapperScrollbarsClasses} ${className}`
-      : dapperScrollbarsClasses
+  const dapperScrollbarsClasses = classnames(
+    'cf-dapper-scrollbars',
+    className,
+    {
+      'cf-dapper-scrollbars--autohide': autoHide,
+      [`cf-dapper-scrollbars--${size}`]: size,
+    }
+  )
 
   // Thumb gradient colors are handed to CSS via custom properties so that the
   // ::-webkit-scrollbar-thumb rules in DapperScrollbars.scss can pick them up
