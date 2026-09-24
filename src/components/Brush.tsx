@@ -1,6 +1,7 @@
 // Libraries
-import {useLayoutEffect, FunctionComponent, CSSProperties} from 'react'
+import {useLayoutEffect, FunctionComponent, CSSProperties, MouseEvent} from 'react'
 
+// Utils
 import {DragEvent} from 'utils/useDragEvent'
 import {getRectDimensions} from 'utils/brush'
 

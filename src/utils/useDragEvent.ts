@@ -70,7 +70,7 @@ export interface DragEvent {
 }
 
 interface UseDragEventProps {
-  onMouseDown: (e: MouseEvent<Element, MouseEvent>) => any
+  onMouseDown: (e: MouseEvent<Element>) => any
 }
 
 export const useDragEvent = (): [DragEvent | null, UseDragEventProps] => {
@@ -78,7 +78,7 @@ export const useDragEvent = (): [DragEvent | null, UseDragEventProps] => {
   const forceUpdate = useForceUpdate()
 
   const onMouseDown = useCallback(
-    (mouseDownEvent: MouseEvent<Element, MouseEvent>) => {
+    (mouseDownEvent: MouseEvent<Element>) => {
       mouseDownEvent.stopPropagation()
 
       const el = mouseDownEvent.currentTarget

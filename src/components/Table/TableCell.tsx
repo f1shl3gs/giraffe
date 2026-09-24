@@ -1,5 +1,5 @@
 // Libraries
-import {FunctionComponent} from 'react'
+import {FunctionComponent, MouseEvent} from 'react'
 import classnames from 'classnames'
 
 // Types
