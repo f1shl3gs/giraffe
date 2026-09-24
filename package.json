@@ -1,26 +1,92 @@
 {
-  "private": true,
-  "packageManager": "yarn@4.18.0",
-  "workspaces": [
-    "giraffe",
-    "stories"
+  "name": "@influxdata/giraffe",
+  "version": "2.38.1",
+  "type": "module",
+  "module": "dist/index.js",
+  "types": "./dist/index.d.ts",
+  "license": "MIT",
+  "sideEffects": [
+    "*.scss",
+    "*.css"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/influxdata/giraffe.git",
+    "directory": "giraffe"
+  },
   "scripts": {
-    "lint": "oxlint giraffe/src",
-    "prettier": "prettier --config .prettierrc.json --check '{giraffe,stories}/**/*.{ts,tsx}'",
-    "prettier:fix": "prettier --config .prettierrc.json --write '{giraffe,stories}/**/*.{ts,tsx}'",
-    "publish": "echo 'To publish giraffe, run ./giraffe/publish $version'"
+    "build": "tsdown && tsc --emitDeclarationOnly --declaration --outDir dist",
+    "fmt": "biome format --write .",
+    "publish": "echo 'To publish giraffe, run ./publish $version'",
+    "start": "tsdown --watch",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit --pretty",
+    "prepack": "tsdown && tsc --emitDeclarationOnly --declaration --outDir dist"
   },
-  "resolutions": {
-    "immer": "^9.0.6",
-    "jsprim": "^1.4.2",
-    "minimatch": "^3.0.5",
-    "shell-quote": "^1.7.3"
-  },
+  "keywords": [
+    "band",
+    "data",
+    "gauge",
+    "giraffe",
+    "graph",
+    "heatmap",
+    "histogram",
+    "mosaic",
+    "influxdb",
+    "layer",
+    "line",
+    "plot",
+    "scatter",
+    "stat",
+    "table",
+    "time series",
+    "timescale",
+    "visualization"
+  ],
   "devDependencies": {
-    "@tsdown/css": "0.23.0",
-    "oxlint": "^1.80.0",
-    "postcss-import": "^17.0.0",
-    "prettier": "^3.9.6"
+    "@biomejs/biome": "^2.5.14",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.2",
+    "@tsdown/css": "^0.23.0",
+    "@types/d3-array": "^3.2.2",
+    "@types/jest": "^30.0.0",
+    "@types/jsdom": "^30",
+    "@types/leaflet": "^1.9.20",
+    "@types/loader-utils": "^3",
+    "@types/mocha": "^10.0.10",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
+    "@vitest/coverage-v8": "^4.1.11",
+    "classnames": "^2.2.3",
+    "jsdom": "^30.0.1",
+    "leaflet": "^1.9.4",
+    "leaflet.markercluster": "^1.4.1",
+    "loader-utils": "^2.0.4",
+    "memoize-one": "^6.0.0",
+    "postcss": "^8.5.26",
+    "postcss-modules": "^9.0.1",
+    "prettier": "^3.9.6",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "sass": "^1.103.1",
+    "tsdown": "^0.23.0",
+    "typescript": "7.0.2",
+    "vitest": "^4.1.11"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "dependencies": {
+    "d3-array": "^3.2.4",
+    "d3-color": "^3.1.0",
+    "d3-format": "^3.1.2",
+    "d3-interpolate": "^3.0.1",
+    "d3-scale": "^4.0.2",
+    "d3-shape": "^3.2.0",
+    "d3-time": "^3.1.0",
+    "merge-images": "^2.0.0"
   }
 }

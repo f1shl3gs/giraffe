@@ -1,4 +1,4 @@
-import React, {CSSProperties, FC, ReactNode} from 'react'
+import {CSSProperties, FunctionComponent, ReactNode} from 'react'
 
 import {Table} from '../../giraffe/src'
 import {CPU} from './data/cpu'
@@ -10,7 +10,7 @@ export interface PlotContainerProps {
   children?: ReactNode
 }
 
-export const PlotContainer: FC<PlotContainerProps> = props => {
+export const PlotContainer: FunctionComponent<PlotContainerProps> = props => {
   const {style = {}, children} = props
 
   const defaultPlotStyle = {

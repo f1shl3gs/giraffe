@@ -1,0 +1,51 @@
+import {FILL, SYMBOL} from 'constants/columnKeys'
+import {ScatterLayerSpec, Table} from 'types'
+import {createGroupIDColumn, getNominalColorScale, getSymbolScale} from './'
+
+export const scatterTransform = (
+  inputTable: Table,
+  xColumnKey: string,
+  yColumnKey: string,
+  fillColKeys: string[],
+  symbolColKeys: string[],
+  colors: string[],
+): ScatterLayerSpec => {
+  const [fillColumn, fillColumnMap] = createGroupIDColumn(
+    inputTable,
+    fillColKeys,
+  )
+
+  const [symbolColumn, symbolColumnMap] = createGroupIDColumn(
+    inputTable,
+    symbolColKeys,
+  )
+
+  const table = inputTable
+    .addColumn(FILL, 'system', 'number', fillColumn)
+    .addColumn(SYMBOL, 'system', 'number', symbolColumn)
+
+  const xCol = table.getColumn(xColumnKey, 'number') || []
+  const yCol = table.getColumn(yColumnKey, 'number') || []
+  const fillScale = getNominalColorScale(fillColumnMap, colors)
+  const symbolScale = getSymbolScale(symbolColumnMap)
+
+  return {
+    type: 'scatter',
+    inputTable,
+    table,
+    xDomain: ([...xCol] as number[]).reduce<[number, number]>(
+      ([min, max], v) => [Math.min(min, v), Math.max(max, v)],
+      [0, 0],
+    ),
+    yDomain: ([...yCol] as number[]).reduce<[number, number]>(
+      ([min, max], v) => [Math.min(min, v), Math.max(max, v)],
+      [Infinity, -Infinity],
+    ),
+    xColumnKey,
+    yColumnKey,
+    xColumnType: inputTable.getColumnType(xColumnKey),
+    yColumnType: inputTable.getColumnType(yColumnKey),
+    scales: {fill: fillScale, symbol: symbolScale},
+    columnGroupMaps: {fill: fillColumnMap, symbol: symbolColumnMap},
+  }
+}

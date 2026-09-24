@@ -1,0 +1,363 @@
+import {fastFilter, fastMap, fastReduce} from './fast'
+
+import {
+  CELL_HORIZONTAL_PADDING,
+  DEFAULT_TIME_FIELD,
+  DEFAULT_TIME_FORMAT,
+  DEFAULT_VERTICAL_TIME_AXIS,
+  FORMAT_OPTIONS,
+} from 'constants/tableGraph'
+
+import {
+  ColumnWidths,
+  DecimalPlaces,
+  FluxTable,
+  RenamableField,
+  SortOptions,
+  TableViewProperties,
+} from 'types'
+
+type TableOptions = TableViewProperties['tableOptions']
+
+const calculateSize = (message: string): number => {
+  return message.length * 7
+}
+
+export interface TransformTableDataReturnType {
+  transformedData: string[][]
+  sortedTimeVals: string[]
+  columnWidths: ColumnWidths
+  resolvedRenamableFields: RenamableField[]
+  sortOptions: SortOptions
+}
+
+export enum ErrorTypes {
+  MetaQueryCombo = 'MetaQueryCombo',
+  GeneralError = 'Error',
+}
+
+export const getInvalidDataMessage = (errorType: ErrorTypes): string => {
+  switch (errorType) {
+    case ErrorTypes.MetaQueryCombo:
+      return 'Cannot display data for meta queries mixed with data queries'
+    default:
+      return null
+  }
+}
+
+const calculateTimeColumnWidth = (timeFormat: string): number => {
+  // Force usage of longest format names for ideal measurement
+  const replaced = timeFormat
+    .replace('MMMM', 'September')
+    .replace('dddd', 'Wednesday')
+    .replace('A', 'AM')
+    .replace('h', '00')
+    .replace('X', '1522286058')
+    .replace('x', '1536106867461')
+
+  return calculateSize(replaced) + CELL_HORIZONTAL_PADDING
+}
+
+const updateMaxWidths = (
+  row: string[],
+  maxColumnWidths: ColumnWidths,
+  topRow: string[],
+  isTopRow: boolean,
+  RenamableFields: RenamableField[],
+  timeFormatWidth: number,
+  verticalTimeAxis: boolean,
+  decimalPlaces: DecimalPlaces,
+): ColumnWidths => {
+  return fastReduce<string>(
+    row,
+    (acc: ColumnWidths, col: string, c: number) => {
+      const foundField = RenamableFields.find(
+        field => field.internalName === col,
+      )
+
+      let colValue: string | number = `${col}`
+      if (foundField && foundField.displayName) {
+        colValue = foundField.displayName
+      } else if (!isNaN(+col) && decimalPlaces.isEnforced) {
+        colValue = (+col).toFixed(decimalPlaces.digits)
+      }
+
+      const columnLabel = topRow[c]
+      const isTimeColumn = columnLabel === DEFAULT_TIME_FIELD.internalName
+
+      const isTimeRow = topRow[0] === DEFAULT_TIME_FIELD.internalName
+
+      const useTimeWidth =
+        (isTimeColumn && verticalTimeAxis && !isTopRow) ||
+        (!verticalTimeAxis && isTopRow && isTimeRow && c !== 0)
+
+      const currentWidth = useTimeWidth
+        ? timeFormatWidth
+        : calculateSize(colValue.toString().trim()) + CELL_HORIZONTAL_PADDING
+
+      const {widths} = maxColumnWidths
+      const maxWidth = widths[columnLabel] ?? 0
+
+      if (isTopRow || currentWidth > maxWidth) {
+        acc.widths[columnLabel] = currentWidth
+        acc.totalWidths += currentWidth - maxWidth
+      }
+
+      return acc
+    },
+    {...maxColumnWidths},
+  )
+}
+
+export const resolveRenamableFields = (
+  existingRenamableFields: RenamableField[],
+  labels: string[],
+): RenamableField[] => {
+  let astNames = []
+
+  labels.forEach(label => {
+    const field: RenamableField = {
+      internalName: label,
+      displayName: '',
+      visible: true,
+    }
+    astNames = [...astNames, field]
+  })
+
+  const intersection = existingRenamableFields.filter(f => {
+    return astNames.find(a => a.internalName === f.internalName)
+  })
+
+  const newFields = astNames.filter(a => {
+    return !existingRenamableFields.find(f => f.internalName === a.internalName)
+  })
+
+  return [...intersection, ...newFields]
+}
+
+export const calculateColumnWidths = (
+  data: string[][],
+  RenamableFields: RenamableField[],
+  timeFormat: string,
+  verticalTimeAxis: boolean,
+  decimalPlaces: DecimalPlaces,
+): ColumnWidths => {
+  const timeFormatWidth = calculateTimeColumnWidth(
+    timeFormat === '' ? DEFAULT_TIME_FORMAT : timeFormat,
+  )
+
+  return fastReduce<string[], ColumnWidths>(
+    data,
+    (acc: ColumnWidths, row: string[], r: number) => {
+      return updateMaxWidths(
+        row,
+        acc,
+        data[0],
+        r === 0,
+        RenamableFields,
+        timeFormatWidth,
+        verticalTimeAxis,
+        decimalPlaces,
+      )
+    },
+    {widths: {}, totalWidths: 0},
+  )
+}
+
+export const filterTableColumns = (
+  data: string[][],
+  RenamableFields: RenamableField[],
+): string[][] => {
+  const visibility = {}
+  const filteredData = fastMap<string[], string[]>(data, (row, i) => {
+    return fastFilter<string>(row, (col, j) => {
+      if (i === 0) {
+        const foundField = RenamableFields.find(
+          field => field.internalName === col,
+        )
+        visibility[j] = foundField ? foundField.visible : true
+      }
+      return visibility[j]
+    })
+  })
+  return filteredData[0].length ? filteredData : [[]]
+}
+
+export const orderTableColumns = (
+  data: string[][],
+  RenamableFields: RenamableField[],
+): string[][] => {
+  const fieldsSortOrder = RenamableFields.map(RenamableField => {
+    const dataHeader =
+      Array.isArray(data) && Array.isArray(data[0]) ? data[0] : []
+    return dataHeader.findIndex(dataLabel => {
+      return dataLabel === RenamableField.internalName
+    })
+  })
+
+  const filteredFieldSortOrder = fieldsSortOrder.filter(f => f !== -1)
+
+  const orderedData = fastMap<string[], string[]>(
+    data,
+    (row: string[]): string[] => {
+      return row.map((__, j, arr) => arr[filteredFieldSortOrder[j]])
+    },
+  )
+  return orderedData[0].length ? orderedData : [[]]
+}
+
+export const sortTableData = (
+  data: string[][],
+  sort: SortOptions,
+): {sortedData: string[][]; sortedTimeVals: string[]} => {
+  const dataHeader =
+    Array.isArray(data) && Array.isArray(data[0]) ? data[0] : []
+  const headerSet = new Set(dataHeader)
+
+  let sortIndex = 0
+
+  if (headerSet.has(sort.field)) {
+    sortIndex = dataHeader.indexOf(sort.field)
+  }
+
+  const dataValues = Array.isArray(data) ? data.slice(1) : [[]]
+  const sortValue = (row: string[]): string | number => {
+    const value = row[sortIndex]
+    return isNaN(Number(value)) ? value : Number(value)
+  }
+  const sortedDataValues = dataValues
+    .map((row, index) => ({row, index, value: sortValue(row)}))
+    .sort((a, b) => {
+      const cmp =
+        typeof a.value === 'string' && typeof b.value === 'string'
+          ? a.value.localeCompare(b.value)
+          : (a.value as number) - (b.value as number)
+      const direction = sort.direction === 'desc' ? -1 : 1
+      return cmp * direction || a.index - b.index
+    })
+    .map(({row}) => row)
+  const sortedData = [dataHeader, ...sortedDataValues] as string[][]
+
+  const sortedTimeVals = fastMap<string[], string>(
+    sortedData,
+    (r: string[]): string => r[sortIndex],
+  )
+
+  return {sortedData, sortedTimeVals}
+}
+
+export const excludeNoisyColumns = (data: string[][]): string[][] => {
+  const IGNORED_COLUMNS = ['', 'result', 'table']
+
+  const header = data[0]
+  const ignoredIndices = IGNORED_COLUMNS.map(name => header.indexOf(name))
+
+  return data.map(row => {
+    return row.filter((__, i) => !ignoredIndices.includes(i))
+  })
+}
+
+export const transformTableData = (
+  data: string[][],
+  sortOptions: SortOptions,
+  renamableFields: RenamableField[],
+  tableOptions: TableOptions,
+  timeFormat: string,
+  decimalPlaces: DecimalPlaces,
+): TransformTableDataReturnType => {
+  const {verticalTimeAxis = DEFAULT_VERTICAL_TIME_AXIS} = tableOptions
+
+  const excludedData = excludeNoisyColumns(data)
+
+  const resolvedRenamableFields = resolveRenamableFields(
+    renamableFields,
+    excludedData[0],
+  )
+
+  const {sortedData, sortedTimeVals} = sortTableData(excludedData, sortOptions)
+
+  const filteredData = filterTableColumns(sortedData, resolvedRenamableFields)
+
+  const orderedData = orderTableColumns(filteredData, resolvedRenamableFields)
+
+  const transformedData = verticalTimeAxis
+    ? orderedData
+    : (orderedData[0] ?? []).map((_, i) => orderedData.map(row => row[i]))
+
+  const columnWidths = calculateColumnWidths(
+    transformedData,
+    resolvedRenamableFields,
+    timeFormat,
+    verticalTimeAxis,
+    decimalPlaces,
+  )
+
+  return {
+    transformedData,
+    sortedTimeVals,
+    columnWidths,
+    resolvedRenamableFields,
+    sortOptions,
+  }
+}
+
+/*
+  Checks whether an input value of arbitrary type can be parsed into a
+  number. Note that there are two different `isNaN` checks, since
+
+  - `Number('')` is 0
+  - `Number('02abc')` is NaN
+  - `parseFloat('')` is NaN
+  - `parseFloat('02abc')` is 2
+
+*/
+export const isNumerical = (x: any): boolean =>
+  !isNaN(Number(x)) && !isNaN(parseFloat(x))
+
+export const findHoverTimeIndex = (
+  sortedTimeVals: string[],
+  hoverTime: number,
+) => {
+  if (sortedTimeVals.length < 2) {
+    // first value is "_time" header
+    return -1
+  }
+
+  const firstDiff = getUnixISODiff(hoverTime, sortedTimeVals[1]) // sortedTimeVals[0] is "_time"
+  const hoverTimeFound = fastReduce<string, {index: number; diff: number}>(
+    sortedTimeVals,
+    (acc, currentTime, index) => {
+      const thisDiff = getUnixISODiff(hoverTime, currentTime)
+      if (thisDiff < acc.diff) {
+        return {index, diff: thisDiff}
+      }
+      return acc
+    },
+    {index: 1, diff: firstDiff},
+  )
+
+  return hoverTimeFound.index
+}
+
+/**
+ * Get absolute mili seconds between a unix ms time number and iso utc string
+ *
+ * @param unixMs
+ * @param isoTime
+ */
+export const getUnixISODiff = (unixMs: number, isoTime: string | number) => {
+  return Math.abs(unixMs - new Date(isoTime).valueOf())
+}
+
+export const findTableNameHeaders = (tables: FluxTable[], name: string) => {
+  const table = tables.find(table => table.name === name)
+  return table.data[0] ?? []
+}
+
+export const resolveTimeFormat = (timeFormat: string) => {
+  if (FORMAT_OPTIONS.find(d => d.text === timeFormat)) {
+    return timeFormat
+  }
+
+  return DEFAULT_TIME_FORMAT
+}
