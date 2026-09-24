@@ -37,7 +37,12 @@ const fakeMap = () => {
       y: (90 - lat) * 2,
     }),
     on: (events: string, handler: Listener) => {
-      events.split(' ').forEach(ev => (listeners[ev] ||= []).push(handler))
+      events.split(' ').forEach(ev => {
+        if (!listeners[ev]) {
+          listeners[ev] = []
+        }
+        listeners[ev].push(handler)
+      })
     },
     off: (events: string, handler: Listener) => {
       events.split(' ').forEach(ev => {
