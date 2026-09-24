@@ -1,4 +1,3 @@
-import * as React from 'react'
 import type {ArgTypes, Meta, StoryObj} from '@storybook/react'
 
 import {Config, Plot} from '../../giraffe/src'

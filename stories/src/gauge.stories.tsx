@@ -1,4 +1,3 @@
-import * as React from 'react'
 import type {Meta, StoryObj} from '@storybook/react'
 import {Config, Plot, GaugeTheme} from '../../giraffe/src'
 import {DEFAULT_GAUGE_COLORS} from '../../giraffe/src'

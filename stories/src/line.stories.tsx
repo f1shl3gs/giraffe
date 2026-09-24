@@ -1,4 +1,3 @@
-import * as React from 'react'
 import type {ArgTypes, Meta, StoryObj} from '@storybook/react'
 import {Config, Plot, fromFlux, timeFormatter} from '../../giraffe/src'
 import type {LineInterpolation, LinePosition} from '../../giraffe/src'

@@ -1,4 +1,3 @@
-import * as React from 'react'
 import type {Meta, StoryObj} from '@storybook/react'
 import {PlotContainer} from './helpers'
 import {Config, Plot, fromFlux} from '../../giraffe/src'
