@@ -6,6 +6,7 @@ import React, {
   useEffect,
   useLayoutEffect,
   FunctionComponent,
+  useRef,
 } from 'react'
 import classnames from 'classnames'
 
@@ -56,7 +57,7 @@ export const Pagination: FunctionComponent<PaginationNavProps> = ({
   enablePageInput = false,
   ref,
 }) => {
-  const innerRef = React.useRef<HTMLUListElement>(null)
+  const innerRef = useRef<HTMLUListElement>(null)
   const paginationNavClassName = classnames('cf-pagination', className)
 
   const [activePage, setActivePage] = useState(currentPage)

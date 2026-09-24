@@ -1,6 +1,6 @@
 import {DomainLabel} from 'types'
 import {getDomainDataFromLines} from './lineData'
-import {lineTransform} from '../transforms/line'
+import {lineTransform} from 'transforms/line'
 
 import {dataSize, largeTable, lineData, FILL_COL} from './fixtures/line'
 

@@ -9,10 +9,11 @@ import {
   NumericColumnData,
   Table,
 } from 'types'
-import {FILL, TIME, VALUE} from 'constants/columnKeys'
+import {isDefined} from 'utils/isDefined'
+import {getDomainDataFromLines} from 'utils/lineData'
 import {createGroupIDColumn, getNominalColorScale} from './'
-import {getDomainDataFromLines} from '../utils/lineData'
-import {isDefined} from '../utils/isDefined'
+
+import {FILL, TIME, VALUE} from 'constants/columnKeys'
 
 export const mapCumulativeValuesToTimeRange = (
   timesCol: NumericColumnData,

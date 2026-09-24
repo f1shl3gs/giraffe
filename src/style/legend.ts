@@ -147,7 +147,7 @@ const legendColumnStyle = (
 const legendColumnHeaderStyle = (
   switchToVertical: boolean,
   fontColor: string,
-): React.CSSProperties => {
+): CSSProperties => {
   if (switchToVertical) {
     return {
       color: fontColor,
@@ -170,7 +170,7 @@ const tooltipColumnValueStyle = (
   colorizeRows: boolean,
   fontBrightColor: string,
   switchToVertical: boolean,
-): React.CSSProperties => {
+): CSSProperties => {
   let color = fontBrightColor
 
   if (colorizeRows && colors) {
@@ -203,7 +203,7 @@ const staticLegendColumnValueStyle = (
   colorizeRows: boolean,
   fontBrightColor: string,
   switchToVertical: boolean,
-): React.CSSProperties => {
+): CSSProperties => {
   let color = fontBrightColor
 
   if (colorizeRows && colors) {

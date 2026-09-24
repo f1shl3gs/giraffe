@@ -1,5 +1,5 @@
 // Libraries
-import {FunctionComponent, useRef, useEffect} from 'react'
+import {FunctionComponent, useRef, useEffect, RefObject} from 'react'
 import {range} from 'd3-array'
 
 // Utils
@@ -32,7 +32,7 @@ interface Props {
 }
 
 const resetCanvas = (
-  canvasRef: React.RefObject<HTMLCanvasElement>,
+  canvasRef: RefObject<HTMLCanvasElement>,
   width: number,
   height: number,
 ): void => {
@@ -52,7 +52,7 @@ const resetCanvas = (
 }
 
 const updateCanvas = (
-  canvasRef: React.RefObject<HTMLCanvasElement>,
+  canvasRef: RefObject<HTMLCanvasElement>,
   props: Props,
 ): void => {
   const {width, height, colors, theme, gaugeSize} = props

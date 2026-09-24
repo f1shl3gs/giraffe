@@ -1,4 +1,4 @@
-import {useRef, DependencyList} from 'react'
+import {DependencyList, useRef} from 'react'
 
 /*
   A hook that works like `useMemo`, but takes an additional boolean argument.

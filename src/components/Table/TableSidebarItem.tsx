@@ -1,5 +1,5 @@
 // Libraries
-import {Fragment, FunctionComponent} from 'react'
+import {Fragment, FunctionComponent, ReactElement} from 'react'
 import classnames from 'classnames'
 
 // Styles
@@ -17,7 +17,7 @@ interface Props {
   onSelect: (name: string) => void
 }
 
-const getName = (groupKey: GroupKey): React.JSX.Element[] => {
+const getName = (groupKey: GroupKey): ReactElement[] => {
   const noNameKeys = ['_start', '_stop']
   return Object.entries(groupKey)
     .filter(([k]) => !noNameKeys.includes(k))

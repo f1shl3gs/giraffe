@@ -1,6 +1,10 @@
+// Libraries
 import {useRef, useEffect} from 'react'
 
+// Types
 import {AnnotationTooltipOptions} from 'types'
+
+// Utils
 import {useTooltipStyle, useAnnotationStyle} from './useTooltipStyle'
 
 /*

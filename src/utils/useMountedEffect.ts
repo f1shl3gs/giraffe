@@ -1,4 +1,4 @@
-import {useEffect, useRef, EffectCallback, DependencyList} from 'react'
+import {DependencyList, EffectCallback, useEffect, useRef} from 'react'
 
 /*
   Behaves like `useEffect`, but won't fire after the initial render of a

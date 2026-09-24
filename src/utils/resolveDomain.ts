@@ -1,5 +1,7 @@
+// Libraries
 import {extent} from 'd3-array'
 
+// Types
 import {NumericColumnData} from 'types'
 
 export const resolveDomain = (

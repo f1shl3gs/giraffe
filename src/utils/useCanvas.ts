@@ -1,4 +1,7 @@
+// Libraries
 import {DependencyList, RefObject, useLayoutEffect} from 'react'
+
+// Utils
 import {clearCanvas} from './clearCanvas'
 
 export const useCanvas = (

@@ -12,7 +12,7 @@ interface Props {
   height: number
   onXBrushEnd: (xRange: number[], onShiftDown?: boolean) => void
   onYBrushEnd: (yRange: number[]) => void
-  onShiftClick?: (mouseEvent: React.MouseEvent) => void
+  onShiftClick?: (mouseEvent: MouseEvent) => void
 }
 
 export const Brush: FunctionComponent<Props> = ({

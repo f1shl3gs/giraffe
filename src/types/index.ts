@@ -1,7 +1,8 @@
-import {CSSProperties, ReactNode, ReactElement} from 'react'
-import {TimeZone} from './timeZones'
-import {GeoLayerConfig} from './geo'
+import {CSSProperties, ReactElement, ReactNode } from 'react'
+
 import {FromFluxResult} from 'utils/fromFlux'
+import {GeoLayerConfig} from './geo'
+import {TimeZone} from './timeZones'
 
 export * from './component'
 export * from './geo'

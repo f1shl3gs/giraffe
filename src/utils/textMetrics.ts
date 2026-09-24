@@ -1,4 +1,7 @@
+// Types
 import {TextMetrics} from 'types'
+
+// Constants
 import {STATIC_LEGEND_COLUMN_CLASSNAME} from 'constants'
 
 const addPaddingToSampleText = (text: string): string => {

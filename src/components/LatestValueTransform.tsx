@@ -1,5 +1,5 @@
 // Libraries
-import {useMemo, FunctionComponent} from 'react'
+import {useMemo, FunctionComponent, ReactElement} from 'react'
 import {Table} from 'types'
 
 // Utils
@@ -8,7 +8,7 @@ import {isString} from 'utils/isString'
 
 interface Props {
   table: Table
-  children: (latestValue: number) => React.JSX.Element
+  children: (latestValue: number) => ReactElement
   allowString: boolean
   // If `quiet` is set and a latest value can't be found, this component will
   // display nothing instead of an empty graph error message

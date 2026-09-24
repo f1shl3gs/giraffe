@@ -1,5 +1,5 @@
-import * as React from 'react'
-import {useRef, useCallback} from 'react'
+import {useCallback, useRef, MouseEvent} from 'react'
+
 import {useForceUpdate} from './useForceUpdate'
 
 // Minimum number of pixels a user must drag before we decide whether the
@@ -65,12 +65,12 @@ export interface DragEvent {
   x: number
   y: number
   mouseActionState: 'mouseUpHappened' | 'mouseDownHappened' | null
-  mouseEvent?: React.MouseEvent
+  mouseEvent?: MouseEvent
   isShiftDown?: boolean
 }
 
 interface UseDragEventProps {
-  onMouseDown: (e: React.MouseEvent<Element, MouseEvent>) => any
+  onMouseDown: (e: MouseEvent<Element, MouseEvent>) => any
 }
 
 export const useDragEvent = (): [DragEvent | null, UseDragEventProps] => {
@@ -78,7 +78,7 @@ export const useDragEvent = (): [DragEvent | null, UseDragEventProps] => {
   const forceUpdate = useForceUpdate()
 
   const onMouseDown = useCallback(
-    (mouseDownEvent: React.MouseEvent<Element, MouseEvent>) => {
+    (mouseDownEvent: MouseEvent<Element, MouseEvent>) => {
       mouseDownEvent.stopPropagation()
 
       const el = mouseDownEvent.currentTarget

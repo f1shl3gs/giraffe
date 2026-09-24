@@ -1,3 +1,5 @@
+import {createRef, RefObject} from 'react'
+
 import type {ArgTypes, Meta, StoryObj} from '@storybook/react'
 
 import {
@@ -223,8 +225,8 @@ const baseArgTypes: Partial<ArgTypes<UtilitiesArgs>> = {
 }
 
 const renderScreenshot = (config: Config) => {
-  const axesCanvasRef: React.RefObject<HTMLCanvasElement> = React.createRef()
-  const layerCanvasRef: React.RefObject<HTMLCanvasElement> = React.createRef()
+  const axesCanvasRef: RefObject<HTMLCanvasElement> = createRef()
+  const layerCanvasRef: RefObject<HTMLCanvasElement> = createRef()
 
   const plotEnv = new PlotEnv()
   plotEnv.config = config as any

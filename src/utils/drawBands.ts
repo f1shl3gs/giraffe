@@ -6,7 +6,7 @@ import {CURVES} from 'constants'
 import {LOWER, UPPER} from 'constants/columnKeys'
 import {isDefined} from '../utils/isDefined'
 
-import {getBands} from '../transforms/band'
+import {getBands} from 'transforms/band'
 
 interface DrawBandsOptions {
   bandLineMap: BandLineMap

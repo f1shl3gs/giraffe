@@ -1,13 +1,6 @@
 import {fastFilter, fastMap, fastReduce} from './fast'
 
-import {
-  CELL_HORIZONTAL_PADDING,
-  DEFAULT_TIME_FIELD,
-  DEFAULT_TIME_FORMAT,
-  DEFAULT_VERTICAL_TIME_AXIS,
-  FORMAT_OPTIONS,
-} from 'constants/tableGraph'
-
+// Types
 import {
   ColumnWidths,
   DecimalPlaces,
@@ -16,6 +9,15 @@ import {
   SortOptions,
   TableViewProperties,
 } from 'types'
+
+// Constants
+import {
+  CELL_HORIZONTAL_PADDING,
+  DEFAULT_TIME_FIELD,
+  DEFAULT_TIME_FORMAT,
+  DEFAULT_VERTICAL_TIME_AXIS,
+  FORMAT_OPTIONS,
+} from 'constants/tableGraph'
 
 type TableOptions = TableViewProperties['tableOptions']
 

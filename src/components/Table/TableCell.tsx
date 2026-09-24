@@ -29,7 +29,7 @@ interface Props extends CellRendererProps {
   isVerticalTimeAxis: boolean
   isFirstColumnFixed: boolean
   onClickFieldName: (data: string) => void
-  onHover: (e: React.MouseEvent<HTMLElement>) => void
+  onHover: (e: MouseEvent<HTMLElement>) => void
   resolvedRenamableFields: RenamableField[]
   timeFormatter: (time: string) => string
 }

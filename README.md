@@ -43,7 +43,7 @@ In this quickstart, we're going to build a simple line graph using Giraffe in a 
       <main id="root"></main>
       <script type="text/javascript">
         ReactDOM.render(
-          React.createElement('h1', null, 'Hello World'),
+          createElement('h1', null, 'Hello World'),
           document.getElementById('root')
         );
       </script>
@@ -56,14 +56,14 @@ In this quickstart, we're going to build a simple line graph using Giraffe in a 
     ```html
     <main id="root"></main>
       <script type="text/javascript">
-        class PlotRenderer extends React.Component {
+        class PlotRenderer extends Component {
           render() {
             const style = {
               width: "calc(70vw - 20px)",
               height: "calc(70vh - 20px)",
               margin: "40px",
             };
-            return React.createElement('div', {style}, 'Giraffe Plot Goes Here');
+            return createElement('div', {style}, 'Giraffe Plot Goes Here');
           }
         }
       <script>
@@ -72,7 +72,7 @@ In this quickstart, we're going to build a simple line graph using Giraffe in a 
 1. And have React render that element. Change the `ReactDOM.render` call to:
     ```js
     ReactDOM.render(
-      React.createElement(PlotRenderer, null, null),
+      createElement(PlotRenderer, null, null),
       document.getElementById('root')
     );
     ```
@@ -104,8 +104,8 @@ In this quickstart, we're going to build a simple line graph using Giraffe in a 
 
 1. Finally, let's create a `Plot` with this configuration and render it. Below the line that creates `config` in the `render` method, add the following code:
     ```js
-    const SimplePlot = React.createElement(Giraffe.Plot, {config}, null);
-    return React.createElement('div', {style}, SimplePlot);
+    const SimplePlot = createElement(Giraffe.Plot, {config}, null);
+    return createElement('div', {style}, SimplePlot);
     ```
     And there you have it.
 
@@ -124,7 +124,7 @@ In this quickstart, we're going to build a simple line graph using Giraffe in a 
     <body id="home">
       <main id="root"></main>
       <script type="text/javascript">
-        class PlotRenderer extends React.Component {
+        class PlotRenderer extends Component {
           render() {
             const style = {
               width: "calc(70vw - 20px)",
@@ -147,13 +147,13 @@ In this quickstart, we're going to build a simple line graph using Giraffe in a 
               layers: [lineLayer]
             };
 
-            const SimplePlot = React.createElement(Giraffe.Plot, {config}, null);
-            return React.createElement('div', {style}, SimplePlot);
+            const SimplePlot = createElement(Giraffe.Plot, {config}, null);
+            return createElement('div', {style}, SimplePlot);
           }
         }
 
         ReactDOM.render(
-          React.createElement(PlotRenderer),
+          createElement(PlotRenderer),
           document.getElementById('root')
         );
       </script>

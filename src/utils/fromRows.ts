@@ -1,4 +1,4 @@
-import {Table, ColumnType, ErrorName} from 'types'
+import {ColumnType, ErrorName, Table} from 'types'
 import {newTable} from './newTable'
 
 export const fromRows = <T extends object>(
@@ -47,13 +47,11 @@ export const fromRows = <T extends object>(
     column.length = rows.length
   }
 
-  const table = Object.entries(columns).reduce(
+  return Object.entries(columns).reduce(
     (table, [key, values]) =>
       table.addColumn(key, 'system', resolvedSchema[key], values),
     newTable(rows.length),
   )
-
-  return table
 }
 
 const parseValue = (value: any, to: ColumnType) => {

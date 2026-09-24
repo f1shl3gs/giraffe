@@ -1,6 +1,14 @@
 // Libraries
 import classnames from 'classnames'
-import {FunctionComponent, MouseEvent, useEffect, useRef, useState} from 'react'
+import {
+  Component,
+  CSSProperties,
+  FunctionComponent,
+  MouseEvent,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 
 // Components
 import {AutoSizer} from 'components/AutoSizer'
@@ -44,8 +52,8 @@ export interface CellRendererProps {
   columnIndex: number
   rowIndex: number
   key: string
-  parent: React.Component<PropsMultiGrid>
-  style: React.CSSProperties
+  parent: Component<PropsMultiGrid>
+  style: CSSProperties
 }
 
 interface OwnProps {
@@ -267,7 +275,7 @@ const cellRenderer = (
   } = tgtProps
   const {scrollToRow} = getScrollToColRow(hoverTime, tgtProps, state)
   const hoverIndex = scrollToRow >= 0 ? scrollToRow : state.hoveredRowIndex
-  const handleHoverCallback = (e: React.MouseEvent<HTMLElement>) =>
+  const handleHoverCallback = (e: MouseEvent<HTMLElement>) =>
     handleHover(e, tgtProps, setHoverTime, setState)
 
   return (

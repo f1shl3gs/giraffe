@@ -1,3 +1,4 @@
+// Libraries
 import {
   createContext,
   FunctionComponent,
@@ -5,6 +6,8 @@ import {
   useCallback,
   useState,
 } from 'react'
+
+// Utils
 import {
   calcNextPageOffset,
   calcOffset,

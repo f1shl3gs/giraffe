@@ -1,4 +1,5 @@
 import React, {
+  ComponentType,
   createContext,
   FunctionComponent,
   ReactElement,
@@ -31,7 +32,7 @@ export const HoverTimeProvider: FunctionComponent<Props> = (props: Props) => {
 }
 
 export const withHoverTime1 =
-  <P extends {}>(Component: React.ComponentType<P & InjectedHoverProps>) =>
+  <P extends {}>(Component: ComponentType<P & InjectedHoverProps>) =>
   (props: P) => {
     return (
       <InjectedHoverContext.Consumer>

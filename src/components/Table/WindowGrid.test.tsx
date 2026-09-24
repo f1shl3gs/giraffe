@@ -1,4 +1,4 @@
-import {useRef} from 'react'
+import {CSSProperties, RefObject, useRef} from 'react'
 import {render} from '@testing-library/react'
 import {describe, expect, it, vi} from 'vitest'
 
@@ -9,7 +9,7 @@ const Probe = vi.fn(
     columnIndex: number
     rowIndex: number
     key: string
-    style: React.CSSProperties
+    style: CSSProperties
   }) => <div data-testid='cell' />,
 )
 
@@ -17,7 +17,7 @@ const Harness = ({
   gridRef,
   ...props
 }: {
-  gridRef?: React.RefObject<WindowGridHandle>
+  gridRef?: RefObject<WindowGridHandle>
   [key: string]: unknown
 }) => {
   const fallbackRef = useRef<WindowGridHandle>(null)
