@@ -1,10 +1,6 @@
 // Libraries
 import classnames from 'classnames'
 import {FunctionComponent, ReactElement, RefObject} from 'react'
-
-// Components
-import {Icon} from '../Icon'
-
 // Types
 import {
   ComponentSize,
@@ -12,6 +8,8 @@ import {
   IconFont,
   StandardFunctionProps,
 } from 'types'
+// Components
+import {Icon} from '../Icon'
 
 // Styles
 import './StatusIndicator.scss'

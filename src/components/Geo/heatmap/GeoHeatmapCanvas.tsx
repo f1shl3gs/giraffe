@@ -3,9 +3,9 @@
 // renderer in ./drawHeatmap. Visual parity QA against the previous rendering
 // lands with the Storybook phase.
 
+import Leaflet from 'leaflet'
 // Libraries
 import {FunctionComponent, useEffect, useRef} from 'react'
-import Leaflet from 'leaflet'
 
 // Utils
 import {drawHeatmap} from './drawHeatmap'

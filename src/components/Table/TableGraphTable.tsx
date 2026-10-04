@@ -1,5 +1,15 @@
 // Libraries
 import classnames from 'classnames'
+// Components
+import {AutoSizer} from 'components/AutoSizer'
+import {ColumnSizer, SizedColumns} from 'components/ColumnSizer'
+// Constants
+import {
+  DEFAULT_FIX_FIRST_COLUMN,
+  DEFAULT_TIME_FIELD,
+  DEFAULT_VERTICAL_TIME_AXIS,
+  NULL_ARRAY_INDEX,
+} from 'constants/tableGraph'
 import {
   Component,
   CSSProperties,
@@ -9,21 +19,6 @@ import {
   useRef,
   useState,
 } from 'react'
-
-// Components
-import {AutoSizer} from 'components/AutoSizer'
-import {ColumnSizer, SizedColumns} from 'components/ColumnSizer'
-import {MultiGrid, MultiGridInputHandles, PropsMultiGrid} from './MultiGrid'
-import {TableCell} from './TableCell'
-
-// Constants
-import {
-  DEFAULT_FIX_FIRST_COLUMN,
-  DEFAULT_TIME_FIELD,
-  DEFAULT_VERTICAL_TIME_AXIS,
-  NULL_ARRAY_INDEX,
-} from 'constants/tableGraph'
-
 // Types
 import {
   TableViewProperties,
@@ -31,11 +26,12 @@ import {
   TimeZone,
   TransformTableDataReturnType,
 } from 'types'
-
 // Utils
 import {timeFormatter} from 'utils/formatters'
 import {findHoverTimeIndex, resolveTimeFormat} from 'utils/tableGraph'
 import {useHoverTime} from './hoverTime'
+import {MultiGrid, MultiGridInputHandles, PropsMultiGrid} from './MultiGrid'
+import {TableCell} from './TableCell'
 
 const COLUMN_MIN_WIDTH = 100
 const ROW_HEIGHT = 30
@@ -52,7 +48,7 @@ export interface CellRendererProps {
   columnIndex: number
   rowIndex: number
   key: string
-  parent: Component<PropsMultiGrid>
+  parent: {current: Component<PropsMultiGrid> | null} | null
   style: CSSProperties
 }
 
@@ -342,12 +338,9 @@ const calculateColumnWidth =
   }
 
 const TableGraphTableComponent: FunctionComponent<Props> = props => {
+  const {theme, transformedDataBundle} = props
+  const {transformedData} = transformedDataBundle
   const {hoverTime, setHoverTime} = useHoverTime()
-  const {
-    transformedDataBundle: {transformedData},
-    theme,
-  } = props
-
   const multiGridRef = useRef<MultiGridInputHandles>(null)
 
   const [state, setState] = useState<State>({
@@ -405,44 +398,38 @@ const TableGraphTableComponent: FunctionComponent<Props> = props => {
     >
       {rowCount > 0 && (
         <AutoSizer>
-          {({width, height}) => {
-            return (
-              <ColumnSizer
-                columnCount={getComputedColumnCount(props)}
-                columnMinWidth={COLUMN_MIN_WIDTH}
-                width={width}
-              >
-                {({
-                  adjustedWidth,
-                  columnWidth,
-                  registerChild,
-                }: SizedColumns) => {
-                  return (
-                    <MultiGrid
-                      height={height}
-                      ref={registerChild}
-                      rowCount={rowCount}
-                      width={adjustedWidth}
-                      rowHeight={ROW_HEIGHT}
-                      scrollToRow={scrollToRow}
-                      columnCount={columnCount}
-                      scrollToColumn={scrollToColumn}
-                      fixedColumnCount={fixedColumnCount}
-                      cellRenderer={cellRendererCallback}
-                      onMount={handleMultiGridMount}
-                      classNameBottomRightGrid='table-graph--scroll-window'
-                      columnWidth={calculateColumnWidth(
-                        state,
-                        props,
-                        gridContainer,
-                        columnWidth,
-                      )}
-                    />
-                  )
-                }}
-              </ColumnSizer>
-            )
-          }}
+          {(width, height) => (
+            <ColumnSizer
+              columnCount={getComputedColumnCount(props)}
+              columnMinWidth={COLUMN_MIN_WIDTH}
+              width={width}
+            >
+              {({adjustedWidth, columnWidth, registerChild}: SizedColumns) => {
+                return (
+                  <MultiGrid
+                    height={height}
+                    ref={registerChild}
+                    rowCount={rowCount}
+                    width={adjustedWidth}
+                    rowHeight={ROW_HEIGHT}
+                    scrollToRow={scrollToRow}
+                    columnCount={columnCount}
+                    scrollToColumn={scrollToColumn}
+                    fixedColumnCount={fixedColumnCount}
+                    cellRenderer={cellRendererCallback}
+                    onMount={handleMultiGridMount}
+                    classNameBottomRightGrid='table-graph--scroll-window'
+                    columnWidth={calculateColumnWidth(
+                      state,
+                      props,
+                      gridContainer,
+                      columnWidth,
+                    )}
+                  />
+                )
+              }}
+            </ColumnSizer>
+          )}
         </AutoSizer>
       )}
     </div>

@@ -1,10 +1,8 @@
+import {fromFlux} from 'utils/fromFlux'
+import {geoCSV} from './data/geo'
 import {NativeGeoTable} from './NativeGeoTable'
 import {PivotedGeoTable} from './PivotedGeoTable'
 import {preprocessData} from './tableProcessing'
-
-import {fromFlux} from 'utils/fromFlux'
-
-import {geoCSV} from './data/geo'
 
 describe('preprocessData', () => {
   it('can return NativeGeoTable when s2 is present', () => {

@@ -1,10 +1,12 @@
+// Types
+import {Color} from 'types'
+
+// Constants
 import {
-  THRESHOLD_COLORS,
   BASE_THRESHOLD_ID,
+  THRESHOLD_COLORS,
   THRESHOLD_TYPE_TEXT,
 } from 'constants/thresholds'
-
-import {Color} from 'types'
 
 // Parses '#rgb' / '#rrggbb' hex colors (the only format used by thresholds).
 const parseHexRgb = (input: string): [number, number, number] | null => {

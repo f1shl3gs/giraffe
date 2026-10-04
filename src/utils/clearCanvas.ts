@@ -3,7 +3,7 @@ export const clearCanvas = (
   width: number,
   height: number,
 ) => {
-  const context = canvas.getContext('2d')
+  const ctx = canvas.getContext('2d')
   const dpRatio = window.devicePixelRatio || 1
 
   // Configure canvas to draw on retina displays correctly
@@ -11,7 +11,7 @@ export const clearCanvas = (
   canvas.height = height * dpRatio
   canvas.style.width = `${width}px`
   canvas.style.height = `${height}px`
-  context.scale(dpRatio, dpRatio)
 
-  context.clearRect(0, 0, width, height)
+  ctx.scale(dpRatio, dpRatio)
+  ctx.clearRect(0, 0, width, height)
 }

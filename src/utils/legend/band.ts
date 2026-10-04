@@ -1,14 +1,17 @@
+// Types
 import {
-  Table,
-  LegendColumn,
-  LineData,
   BandLineMap,
   DomainLabel,
   LatestIndexMap,
+  LegendColumn,
+  LineData,
+  Table,
 } from 'types'
+
+// Constants
 import {RESULT} from 'constants/columnKeys'
+
 import {isVoid} from '../isVoid'
-import {isNumber} from '../isNumber'
 
 export const getTooltipBandGroupColumns = (
   table: Table,
@@ -17,7 +20,7 @@ export const getTooltipBandGroupColumns = (
   getValueFormatter: (colKey: string) => (x: any) => string,
   rowColors: string[] | null,
 ): LegendColumn[] => {
-  return groupColKeys.reduce((accum, key) => {
+  return groupColKeys.reduce((accum: LegendColumn[], key: string) => {
     if (key === RESULT) {
       return accum
     }
@@ -47,14 +50,19 @@ export const createLatestBandIndices = (
   const lineDataLastIndices: LatestIndexMap = {}
 
   let counter = -1
-  Object.keys(lineData).forEach(lineNumber => {
-    counter += lineData[lineNumber][bandDimension].length
+  for (const [lineNumber, series] of lineData) {
+    counter += series[bandDimension].length
     lineDataLastIndices[lineNumber] = counter
-  })
+  }
   const {upperLines, rowLines, lowerLines} = bandLineMap
 
   rowLines.forEach((line, position) => {
-    const targetValues = lineData[line][bandDimension]
+    /*
+      The ids come from bandLineMap, which is built from the same lineData, so
+      every lookup below was already assumed present before this became a Map.
+      `!` records that assumption instead of silently skipping a band.
+    */
+    const targetValues = lineData.get(line)![bandDimension]
 
     let lastIndex = lineDataLastIndices[line]
     let targetBandValue = targetValues[targetValues.length - 1]
@@ -66,27 +74,23 @@ export const createLatestBandIndices = (
     latestIndices[line] = lastIndex
 
     const upperLine = upperLines[position]
-    if (isNumber(upperLine)) {
-      const matchingUpperIndex = lineData[upperLine][bandDimension].findIndex(
-        value => value === targetBandValue,
-      )
-      if (matchingUpperIndex > -1) {
-        const offset =
-          upperLine === 0 ? 0 : lineDataLastIndices[upperLine - 1] + 1
-        latestIndices[upperLine] = matchingUpperIndex + offset
-      }
+    const matchingUpperIndex = lineData
+      .get(upperLine)![bandDimension]
+      .findIndex(value => value === targetBandValue)
+    if (matchingUpperIndex > -1) {
+      const offset =
+        upperLine === 0 ? 0 : lineDataLastIndices[upperLine - 1] + 1
+      latestIndices[upperLine] = matchingUpperIndex + offset
     }
 
     const lowerLine = lowerLines[position]
-    if (isNumber(lowerLine)) {
-      const matchingLowerIndex = lineData[lowerLine][bandDimension].findIndex(
-        value => value === targetBandValue,
-      )
-      if (matchingLowerIndex > -1) {
-        const offset =
-          lowerLine === 0 ? 0 : lineDataLastIndices[lowerLine - 1] + 1
-        latestIndices[lowerLine] = matchingLowerIndex + offset
-      }
+    const matchingLowerIndex = lineData
+      .get(lowerLine)![bandDimension]
+      .findIndex(value => value === targetBandValue)
+    if (matchingLowerIndex > -1) {
+      const offset =
+        lowerLine === 0 ? 0 : lineDataLastIndices[lowerLine - 1] + 1
+      latestIndices[lowerLine] = matchingLowerIndex + offset
     }
   })
   return latestIndices

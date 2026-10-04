@@ -1,5 +1,5 @@
-import {CSSProperties, RefObject, useRef} from 'react'
 import {render} from '@testing-library/react'
+import {CSSProperties, RefObject, useRef} from 'react'
 import {describe, expect, it, vi} from 'vitest'
 
 import {WindowGrid, WindowGridHandle} from './WindowGrid'

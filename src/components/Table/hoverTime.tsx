@@ -1,5 +1,4 @@
-import React, {
-  ComponentType,
+import {
   createContext,
   FunctionComponent,
   ReactElement,
@@ -18,27 +17,18 @@ export interface InjectedHoverProps {
 
 const InjectedHoverContext = createContext<InjectedHoverProps>(null)
 
-export const HoverTimeProvider: FunctionComponent<Props> = (props: Props) => {
+export const HoverTimeProvider: FunctionComponent<Props> = ({children}) => {
   const [hoverTime, setHoverTime] = useState(null)
   const [hoverTimeState] = useState({
     hoverTime,
     setHoverTime: (ht: number | null) => setHoverTime(ht),
   })
+
   return (
     <InjectedHoverContext value={hoverTimeState}>
-      {props.children}
+      {children}
     </InjectedHoverContext>
   )
 }
-
-export const withHoverTime1 =
-  <P extends {}>(Component: ComponentType<P & InjectedHoverProps>) =>
-  (props: P) => {
-    return (
-      <InjectedHoverContext.Consumer>
-        {hoverTimeProps => <Component {...props} {...hoverTimeProps} />}
-      </InjectedHoverContext.Consumer>
-    )
-  }
 
 export const useHoverTime = () => useContext(InjectedHoverContext)

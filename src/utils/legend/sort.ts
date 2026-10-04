@@ -1,5 +1,5 @@
+// Types
 import {BandLineMap, ColumnData, LatestIndexMap} from 'types'
-import {isNumber} from '../isNumber'
 
 export const sortIndicesByValueColumn = (
   valuesColumn: ColumnData,
@@ -8,21 +8,20 @@ export const sortIndicesByValueColumn = (
   if (!valuesColumn || !rowIndices?.length) {
     return []
   }
-  const numberMap: any = {}
-  const sortable = []
+
+  const rows: Array<{key: number; rowIndex: number}> = []
   rowIndices.forEach(rowIndex => {
-    const key = (
-      isNumber(valuesColumn[`${rowIndex}`]) ? valuesColumn[`${rowIndex}`] : 0
-    ) as string
-    if (!numberMap[key]) {
-      numberMap[key] = []
-    }
-    numberMap[key].push(rowIndex)
-    sortable.push(key)
+    const colValue = valuesColumn[`${rowIndex}`]
+
+    rows.push({
+      key: typeof colValue === 'number' ? colValue : 0,
+      rowIndex,
+    })
   })
 
-  sortable.sort((first, second) => second - first)
-  return sortable.map(numericalValue => numberMap[numericalValue].shift())
+  rows.sort((first, second) => second.key - first.key)
+
+  return rows.map(({rowIndex}) => rowIndex)
 }
 
 export const isSortable = (values): boolean => {

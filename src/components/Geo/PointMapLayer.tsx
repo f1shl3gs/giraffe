@@ -1,36 +1,46 @@
 // Libraries
-import {FunctionComponent, useEffect, useMemo} from 'react'
 import L from 'leaflet'
+import {FunctionComponent, useEffect, useMemo} from 'react'
 import 'leaflet.markercluster'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 
 // Utils
-import {getColor} from './dimensionCalculations'
-import {SVGIcon} from './SVGIcon'
-import {GeoTooltip} from './GeoTooltip'
-import {useGeoMap} from './GeoMapContext'
-
 import {
-  formatPointLayerRowInfo,
   createClusterCustomIcon,
+  formatPointLayerRowInfo,
   MARKER_ICON_SIZE,
 } from 'utils/geo'
 
+import {getColor} from './dimensionCalculations'
+import {useGeoMap} from './GeoMapContext'
+import type {GeoTooltipConfig} from './GeoTooltip'
+import {GeoTooltip} from './GeoTooltip'
+import type {GeoPointMapViewLayer} from './geoTypes'
+
 // Types
 import {GeoTable} from './processing/GeoTable'
-import {GeoPointMapViewLayer, Config} from 'types'
+import {SVGIcon} from './SVGIcon'
 
 interface Props {
   table: GeoTable
   colorFieldName: string
   properties: GeoPointMapViewLayer
-  stylingConfig: Partial<Config>
+  tooltipConfig: GeoTooltipConfig
+  width: number
+  height: number
   isClustered: boolean
 }
 
-export const PointMapLayer: FunctionComponent<Props> = props => {
-  const {table, colorFieldName, properties, stylingConfig, isClustered} = props
+export const PointMapLayer: FunctionComponent<Props> = ({
+  table,
+  colorFieldName,
+  properties,
+  isClustered,
+  tooltipConfig,
+  width,
+  height,
+}) => {
   const map = useGeoMap()
 
   const {markers, tooltips} = useMemo(() => {
@@ -90,9 +100,9 @@ export const PointMapLayer: FunctionComponent<Props> = props => {
 
   return (
     <GeoTooltip
-      stylingConfig={stylingConfig}
-      properties={properties}
-      table={table}
+      config={tooltipConfig}
+      width={width}
+      height={height}
       tooltips={tooltips}
     />
   )

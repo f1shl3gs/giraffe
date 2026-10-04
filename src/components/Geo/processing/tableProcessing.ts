@@ -1,9 +1,10 @@
 // Types
-import {GeoTable} from './GeoTable'
-import {PivotedGeoTable} from './PivotedGeoTable'
-import {NativeGeoTable} from './NativeGeoTable'
+
 import {Table} from 'types'
-import {LatLonColumns} from 'types/geo'
+import type {LatLonColumns} from '../geoTypes'
+import {GeoTable} from './GeoTable'
+import {NativeGeoTable} from './NativeGeoTable'
+import {PivotedGeoTable} from './PivotedGeoTable'
 
 // Constants
 export const FIELD_COLUMN = '_field'

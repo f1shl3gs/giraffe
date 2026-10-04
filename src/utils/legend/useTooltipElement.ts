@@ -1,11 +1,11 @@
 // Libraries
-import {useRef, useEffect} from 'react'
+import {useEffect, useRef} from 'react'
 
 // Types
 import {AnnotationTooltipOptions} from 'types'
 
 // Utils
-import {useTooltipStyle, useAnnotationStyle} from './useTooltipStyle'
+import {useAnnotationStyle, useTooltipStyle} from './useTooltipStyle'
 
 /*
   Returns a DOM node that a tooltip can be rendered inside.

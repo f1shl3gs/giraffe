@@ -37,7 +37,9 @@ interface WindowGridProps {
   scrollToRow?: number
   style?: CSSProperties
   width: number
-  ref?: RefObject<WindowGridHandle>
+  /* React 19's useRef<T>(null) yields RefObject<T | null>, so the narrower
+     RefObject<T> rejected every real ref passed to it. */
+  ref?: RefObject<WindowGridHandle | null>
 }
 
 export interface WindowGridHandle {

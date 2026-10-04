@@ -1,5 +1,5 @@
-import {fromRows} from './fromRows'
 import {ColumnType} from 'types'
+import {fromRows} from './fromRows'
 
 describe('fromRows', () => {
   it('it can infer column types', () => {

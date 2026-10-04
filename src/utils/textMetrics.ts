@@ -1,8 +1,8 @@
 // Types
-import {TextMetrics} from 'types'
 
 // Constants
-import {STATIC_LEGEND_COLUMN_CLASSNAME} from 'constants'
+import {STATIC_LEGEND_COLUMN_CLASSNAME} from 'constants/index'
+import {TextMetrics} from 'types'
 
 const addPaddingToSampleText = (text: string): string => {
   if (typeof text !== 'string') {

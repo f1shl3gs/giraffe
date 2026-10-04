@@ -1,7 +1,7 @@
 import {color} from 'd3-color'
 
-import {Table, Scale} from 'types'
-import {FILL, X_MIN, X_MAX, Y_MIN, Y_MAX, COUNT} from 'constants/columnKeys'
+import {Scale, Table} from 'types'
+import {COUNT, FILL, X_MAX, X_MIN, Y_MAX, Y_MIN} from 'constants/columnKeys'
 
 interface DrawRectsOptions {
   context: CanvasRenderingContext2D

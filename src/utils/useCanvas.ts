@@ -1,27 +1,30 @@
 // Libraries
-import {DependencyList, RefObject, useLayoutEffect} from 'react'
+import {DependencyList, RefObject, useLayoutEffect, useRef} from 'react'
 
 // Utils
 import {clearCanvas} from './clearCanvas'
 
 export const useCanvas = (
-  canvasRef: RefObject<HTMLCanvasElement>,
   width: number,
   height: number,
-  renderFunction: (context: CanvasRenderingContext2D) => void,
-  renderFunctionDeps?: DependencyList,
-): void => {
-  const deps = renderFunctionDeps
-    ? [canvasRef.current, width, height, ...renderFunctionDeps]
-    : undefined
+  render: (ctx: CanvasRenderingContext2D) => void,
+  deps: DependencyList = [],
+): RefObject<HTMLCanvasElement | null> => {
+  const ref = useRef<HTMLCanvasElement>(null)
 
-  // TODO: Resize canvas immediately on width/height change but debounce drawing
   useLayoutEffect(() => {
-    if (!canvasRef.current) {
+    const canvas = ref.current
+    if (!canvas) {
       return
     }
 
-    clearCanvas(canvasRef.current, width, height)
-    renderFunction(canvasRef.current.getContext('2d'))
-  }, deps)
+    clearCanvas(canvas, width, height)
+
+    const context = canvas.getContext('2d')
+    if (context) {
+      render(context)
+    }
+  }, [width, height, ...deps])
+
+  return ref
 }

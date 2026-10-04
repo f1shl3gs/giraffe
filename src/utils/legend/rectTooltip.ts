@@ -1,8 +1,7 @@
+import {COUNT, FILL, X_MAX, X_MIN, Y_MAX, Y_MIN} from 'constants/columnKeys'
 import {range} from 'd3-array'
-
+import {ColumnGroupMap, LegendColumn, LegendData, Scale, Table} from 'types'
 import {getRangeLabel} from './tooltip'
-import {X_MIN, X_MAX, Y_MIN, Y_MAX, FILL, COUNT} from 'constants/columnKeys'
-import {Table, Scale, LegendData, LegendColumn, ColumnGroupMap} from 'types'
 
 export const findHoveredRects = (
   rectTable: Table,

@@ -1,34 +1,38 @@
+// Libraries
 import {FunctionComponent} from 'react'
 
-//components
+// Components
 import CircleMarkerLayer from './CircleMarkerLayer'
-import HeatmapLayer from './HeatmapLayer'
-import PointMapLayer from './PointMapLayer'
-import TrackMapLayer from './TrackMapLayer'
-
-//types
-import {
-  Config,
+import type {GeoTooltipConfig} from './GeoTooltip'
+// Types
+import type {
   GeoCircleViewLayer,
   GeoHeatMapViewLayer,
   GeoPointMapViewLayer,
   GeoTrackMapViewLayer,
   GeoViewLayer,
-} from 'types'
+} from './geoTypes'
+import HeatmapLayer from './HeatmapLayer'
+import PointMapLayer from './PointMapLayer'
 import {GeoTable} from './processing/GeoTable'
+import TrackMapLayer from './TrackMapLayer'
 
 interface Props {
   layer: GeoViewLayer
   preprocessedTable: GeoTable
   index: number
-  stylingConfig: Partial<Config>
+  tooltipConfig: GeoTooltipConfig
+  width: number
+  height: number
 }
 
 export const LayerSwitcher: FunctionComponent<Props> = ({
   layer,
   preprocessedTable,
   index,
-  stylingConfig,
+  tooltipConfig,
+  width,
+  height,
 }) => {
   switch (layer.type) {
     case 'circleMap':
@@ -40,7 +44,9 @@ export const LayerSwitcher: FunctionComponent<Props> = ({
           colorFieldName={circleLayer.colorField}
           table={preprocessedTable}
           properties={circleLayer}
-          stylingConfig={stylingConfig}
+          tooltipConfig={tooltipConfig}
+          width={width}
+          height={height}
         />
       )
     case 'heatmap':
@@ -63,7 +69,9 @@ export const LayerSwitcher: FunctionComponent<Props> = ({
           colorFieldName={pointMapLayer.colorField}
           table={preprocessedTable}
           properties={pointMapLayer}
-          stylingConfig={stylingConfig}
+          tooltipConfig={tooltipConfig}
+          width={width}
+          height={height}
           isClustered={pointMapLayer.isClustered === true}
         />
       )
@@ -74,7 +82,9 @@ export const LayerSwitcher: FunctionComponent<Props> = ({
           key={index}
           table={preprocessedTable}
           properties={trackMapLayer}
-          stylingConfig={stylingConfig}
+          tooltipConfig={tooltipConfig}
+          width={width}
+          height={height}
         />
       )
     default:

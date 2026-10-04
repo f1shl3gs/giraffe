@@ -1,22 +1,7 @@
 import {FluxTable} from 'types'
-import {groupBy} from './groupBy'
-import {escapeCSVFieldWithSpecialCharacters} from './escapeCSVFieldWithSpecialCharacters'
 import parseCSV from './csv'
-
-export const parseResponseError = (resp: string): FluxTable[] => {
-  const [columns, rows] = parseCSV(resp.trim())
-
-  return [
-    {
-      id: crypto.randomUUID(),
-      name: 'Error',
-      result: '',
-      groupKey: {},
-      dataTypes: {},
-      data: [columns, ...rows],
-    },
-  ]
-}
+import {escapeCSVFieldWithSpecialCharacters} from './escapeCSVFieldWithSpecialCharacters'
+import {groupBy} from './groupBy'
 
 /*
   A Flux CSV response can contain multiple CSV files each joined by a newline.

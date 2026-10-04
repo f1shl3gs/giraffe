@@ -1,29 +1,27 @@
-import {CSSProperties} from 'react'
-import {FunctionComponent} from 'react'
+import type {LegendConfig} from 'components/Legend/LegendConfig'
+import {CSSProperties, FunctionComponent} from 'react'
 import {createPortal} from 'react-dom'
-
-import {Config, AnnotationMark, TooltipPosition} from 'types'
-import {
-  ANNOTATION_TOOLTIP_CONTAINER_NAME,
-  ANNOTATION_DEFAULT_MAX_WIDTH,
-} from 'constants'
+import type {AnnotationMark, TooltipPosition} from 'types'
 import {useAnnotationTooltipElement} from 'utils/legend/useTooltipElement'
+import {
+  ANNOTATION_DEFAULT_MAX_WIDTH,
+  ANNOTATION_TOOLTIP_CONTAINER_NAME,
+} from 'constants/index'
 
 interface Props {
   boundingReference: DOMRect
-  config: Config
   data: AnnotationMark
+  legend?: LegendConfig
   width: number
 }
 
-export const AnnotationTooltip: FunctionComponent<Props> = props => {
-  const {boundingReference, config, data, width} = props
-  const {
-    legendBackgroundColor: backgroundColor,
-    legendBorder: border,
-    legendFont: font,
-    legendFontColor: fontColor,
-  } = config
+export const AnnotationTooltip: FunctionComponent<Props> = ({
+  boundingReference,
+  data,
+  legend,
+  width,
+}) => {
+  const {backgroundColor, border, font, fontColor} = legend || {}
 
   const {dimension, startValue, stopValue} = data || {}
 

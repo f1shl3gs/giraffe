@@ -1,9 +1,7 @@
 // Types
-import {GeoTable, MinAndMax} from './processing/GeoTable'
-import {DashboardColor} from 'types/geo'
 
-// Utils
-import {getMinAndMax} from './processing/GeoTable'
+import type {DashboardColor} from './geoTypes'
+import {GeoTable, getMinAndMax, MinAndMax} from './processing/GeoTable'
 
 const DEFAULT_COLOR = '#1010FF'
 

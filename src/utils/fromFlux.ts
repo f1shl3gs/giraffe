@@ -1,7 +1,7 @@
-import {ColumnType, FluxDataType, Table} from 'types'
-import {newTable} from './newTable'
+import type {ColumnType, FluxDataType, Table} from 'types'
 import {RESULT} from 'constants/columnKeys'
 import parseCSV from './csv'
+import {newTable} from './newTable'
 
 export interface FromFluxResult {
   error?: Error

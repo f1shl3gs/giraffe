@@ -1,18 +1,25 @@
 // Libraries
+
+import {TICK_COUNT_LIMIT} from 'constants/index'
 import {ticks} from 'd3-array'
 import {utcTicks} from 'd3-time'
 import memoizeOne from 'memoize-one'
-
 // Types
 import {AxisTicks, Formatter, FormatterType} from 'types'
-
 // Constants
 import {TIME, VALUE} from 'constants/columnKeys'
-import {TICK_COUNT_LIMIT} from 'constants'
-
 // Utils
 import {getTextMetrics} from './textMetrics'
-import {isFiniteNumber} from './isFiniteNumber'
+
+/*
+  Guards the optional tick parameters, which arrive as null, undefined or NaN
+  whenever the axis config leaves them unset. Each of those satisfies a bare
+  `Math.abs(value) !== Infinity`, so the type check and the NaN check both have
+  to stay -- dropping either one leaves `step` null and the axis renders no
+  ticks at all.
+*/
+const isFiniteTickValue = (value: unknown): boolean =>
+  typeof value === 'number' && value === value && Math.abs(value) !== Infinity
 
 /*
   Minimum spacing defined as:
@@ -117,27 +124,27 @@ export const generateTicks = (
   tickStart: number,
   tickStep: number,
 ): number[] => {
-  const generatedTicks = []
+  const generated: number[] = []
   const [start = 0, end = 0] = domain
-  const stepStart = isFiniteNumber(tickStart) ? tickStart : start
+  const stepStart = isFiniteTickValue(tickStart) ? tickStart : start
 
   let step = tickStep
-  if (!isFiniteNumber(tickStep)) {
+  if (!isFiniteTickValue(tickStep)) {
     const parts =
-      isFiniteNumber(totalTicks) && totalTicks !== 0 ? totalTicks : 1
-    step = (end - stepStart) / (isFiniteNumber(tickStart) ? parts : parts + 1)
+      isFiniteTickValue(totalTicks) && totalTicks !== 0 ? totalTicks : 1
+    step = (end - stepStart) / (isFiniteTickValue(tickStart) ? parts : parts + 1)
   }
 
-  const tickCountLimit = isFiniteNumber(totalTicks)
+  const tickCountLimit = isFiniteTickValue(totalTicks)
     ? Math.min(totalTicks, TICK_COUNT_LIMIT)
     : TICK_COUNT_LIMIT
 
-  let counter = isFiniteNumber(tickStart) ? 0 : 1
+  let counter = isFiniteTickValue(tickStart) ? 0 : 1
   let generatedTick = stepStart + step * counter
 
   if (
     tickStep !== 0 &&
-    (isFiniteNumber(totalTicks) || isFiniteNumber(tickStep))
+    (isFiniteTickValue(totalTicks) || isFiniteTickValue(tickStep))
   ) {
     /*
       - When 'step' marks the ticks to the right (or up) on the axis
@@ -148,25 +155,26 @@ export const generateTicks = (
     while (
       ((step > 0 && generatedTick <= end) ||
         (step < 0 && generatedTick >= start)) &&
-      generatedTicks.length < tickCountLimit
+      generated.length < tickCountLimit
     ) {
       if (generatedTick >= start && generatedTick <= end) {
         if (columnKey === TIME) {
-          generatedTicks.push(new Date(generatedTick))
+          generated.push(new Date(generatedTick))
         } else {
-          generatedTicks.push(generatedTick)
+          generated.push(generatedTick)
         }
       }
       counter += 1
       generatedTick = stepStart + step * counter
     }
   }
-  return generatedTicks
+
+  return generated
 }
 
 /*
   ticks can be either
-    - generated: user's defined parameters and judgmenet for spacing
+    - generated: user's defined parameters and judgment for spacing
     - calculated: Giraffe's determination and spacing requirements
 */
 const getTicks = (
@@ -179,10 +187,10 @@ const getTicks = (
   tickStep?: number,
 ) => {
   const [start = 0, end = 0] = domain
-  if (isFiniteNumber(totalTicks) || isFiniteNumber(tickStep)) {
+  if (isFiniteTickValue(totalTicks) || isFiniteTickValue(tickStep)) {
     return generateTicks(domain, columnKey, totalTicks, tickStart, tickStep)
   }
-  if (isFiniteNumber(tickStart)) {
+  if (isFiniteTickValue(tickStart)) {
     const specifiedTickStart = Math.min(Math.max(tickStart, start), end)
     return calculateTicks(
       [specifiedTickStart, end],

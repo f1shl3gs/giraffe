@@ -1,6 +1,6 @@
 import {range} from 'd3-array'
 import {NumericColumnData, Table} from 'types'
-import {flatMap} from './flatMap'
+
 import {isString} from './isString'
 
 /*
@@ -25,14 +25,7 @@ const maxesBy = <X>(xs: X[], d: (x: X) => number): X[] => {
   return maxes
 }
 
-const EXCLUDED_COLUMNS = new Set([
-  '_start',
-  '_stop',
-  '_time',
-  'table',
-  'result',
-  '',
-])
+const EXCLUDED_COLUMNS = ['_start', '_stop', '_time', 'table', 'result', '']
 
 /*
   Determine if the values in a column should be considered in `latestValues`.
@@ -45,7 +38,8 @@ const isValueCol = (table: Table, colKey: string): boolean => {
     (columnType === 'number' ||
       columnType === 'time' ||
       columnType === 'string') &&
-    !EXCLUDED_COLUMNS.has(columnName)
+    columnName !== null &&
+    !EXCLUDED_COLUMNS.includes(columnName)
   )
 }
 
@@ -115,7 +109,7 @@ export const getLatestValues = (table: Table): number[] => {
   const latestRowIndices =
     table.length === 1 ? [0] : maxesBy(range(0, table.length), d)
 
-  const latestValues = flatMap(latestRowIndices, i =>
+  const latestValues = latestRowIndices.flatMap(i =>
     valueColsData.map(colData => colData[i]),
   )
 

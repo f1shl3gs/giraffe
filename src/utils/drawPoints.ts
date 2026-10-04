@@ -1,40 +1,29 @@
-import {Scale, NumericColumnData, SymbolType} from 'types'
+// Types
+import {NumericColumnData, Scale, SymbolType} from 'types'
+
+// Utils
 import {
   drawCircle,
-  drawSquare,
+  drawEx,
   drawPlus,
+  drawSquare,
   drawTriangle,
   drawTritip,
-  drawEx,
-} from '../utils/drawShapes'
+} from 'utils/drawShapes'
 
-interface DrawPointsOptions {
-  context: CanvasRenderingContext2D
-  xColData: NumericColumnData
-  yColData: NumericColumnData
-  fillColData: NumericColumnData
-  symbolColData: NumericColumnData
-  yScale: Scale<number, number>
-  xScale: Scale<number, number>
-  fillScale: Scale<number, string>
-  symbolScale: Scale<number, SymbolType>
-  pointSize: number
-  rowIndices?: number[]
-}
-
-export const drawPoints = ({
-  context,
-  xColData,
-  yColData,
-  fillColData,
-  symbolColData,
-  yScale,
-  xScale,
-  fillScale,
-  symbolScale,
-  pointSize,
-  rowIndices,
-}: DrawPointsOptions): void => {
+export const drawPoints = (
+  ctx: CanvasRenderingContext2D,
+  xColData: NumericColumnData,
+  yColData: NumericColumnData,
+  fillColData: NumericColumnData,
+  symbolColData: NumericColumnData,
+  xScale: Scale<number, number>,
+  yScale: Scale<number, number>,
+  fillScale: Scale<number, string>,
+  symbolScale: Scale<number, SymbolType>,
+  pointSize: number,
+  rowIndices?: number[],
+): void => {
   const n = rowIndices ? rowIndices.length : xColData.length
 
   for (let i = 0; i < n; i++) {
@@ -44,21 +33,21 @@ export const drawPoints = ({
     const fillStyle = fillScale(fillColData[rowIndex])
     const symbolType = symbolScale(symbolColData[rowIndex])
 
-    context.fillStyle = fillStyle
-    context.strokeStyle = fillStyle
+    ctx.fillStyle = fillStyle
+    ctx.strokeStyle = fillStyle
 
     if (symbolType === 'circle') {
-      drawCircle(context, x, y, pointSize)
+      drawCircle(ctx, x, y, pointSize)
     } else if (symbolType === 'square') {
-      drawSquare(context, x, y, pointSize)
+      drawSquare(ctx, x, y, pointSize)
     } else if (symbolType === 'triangle') {
-      drawTriangle(context, x, y, pointSize)
+      drawTriangle(ctx, x, y, pointSize)
     } else if (symbolType === 'plus') {
-      drawPlus(context, x, y, pointSize)
+      drawPlus(ctx, x, y, pointSize)
     } else if (symbolType === 'tritip') {
-      drawTritip(context, x, y, pointSize)
+      drawTritip(ctx, x, y, pointSize)
     } else if (symbolType === 'ex') {
-      drawEx(context, x, y, pointSize)
+      drawEx(ctx, x, y, pointSize)
     }
   }
 }

@@ -1,7 +1,8 @@
 // Libraries
-import {FunctionComponent, useEffect} from 'react'
-import L from 'leaflet'
+
 import type {LatLngExpression} from 'leaflet'
+import L from 'leaflet'
+import {FunctionComponent, useEffect} from 'react'
 
 // Utils
 import {useGeoMap} from './GeoMapContext'

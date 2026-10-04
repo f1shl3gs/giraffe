@@ -1,13 +1,9 @@
-import {newTable} from '../newTable'
-import {convertLineSpec} from './staticLegend'
 import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
-import {STACKED_LINE_CUMULATIVE} from 'constants/columnKeys'
-import {lineTransform} from 'transforms/line'
 import {getRandomTable} from '../fixtures/randomTable'
-import {LinePosition} from 'types'
+import {newTable} from '../newTable'
+import {getLegendData} from './staticLegend'
 
-describe('convertLineSpec', () => {
-  const xColKey = '_time'
+describe('getLegendData', () => {
   const yColKey = '_value'
   const getColumnFormatter = () => (x: string) => x
   const maxValue = 100
@@ -23,23 +19,12 @@ describe('convertLineSpec', () => {
   )
 
   describe('overlaid line graphs', () => {
-    const position: LinePosition = 'overlaid'
-
     it('creates certain columns for overlaid line graphs', () => {
-      const lineSpec = lineTransform(
+      const result = getLegendData(
         sampleTable,
-        xColKey,
-        yColKey,
-        fillColumnKeys,
-        NINETEEN_EIGHTY_FOUR,
-        position,
-      )
-
-      const result = convertLineSpec(
-        lineSpec,
+        {fill: fillColumnKeys, colors: NINETEEN_EIGHTY_FOUR},
         yColKey,
         getColumnFormatter,
-        position,
       )
 
       expect(result.length).toEqual(fillColumnKeys.length + 1)
@@ -54,20 +39,11 @@ describe('convertLineSpec', () => {
     })
 
     it('sorts the legend data in descending order by the value axis', () => {
-      const lineSpec = lineTransform(
+      const result = getLegendData(
         sampleTable,
-        xColKey,
-        yColKey,
-        fillColumnKeys,
-        NINETEEN_EIGHTY_FOUR,
-        position,
-      )
-
-      const result = convertLineSpec(
-        lineSpec,
+        {fill: fillColumnKeys, colors: NINETEEN_EIGHTY_FOUR},
         yColKey,
         getColumnFormatter,
-        position,
       )
 
       expect(result.length).toBeGreaterThan(0)
@@ -113,20 +89,11 @@ describe('convertLineSpec', () => {
           '3rd',
         ])
 
-      const lineSpec = lineTransform(
+      const result = getLegendData(
         table,
-        xColKey,
-        yColKey,
-        customFillKeys,
-        NINETEEN_EIGHTY_FOUR,
-        position,
-      )
-
-      const result = convertLineSpec(
-        lineSpec,
+        {fill: customFillKeys, colors: NINETEEN_EIGHTY_FOUR},
         yColKey,
         getColumnFormatter,
-        position,
       )
 
       expect(
@@ -184,20 +151,11 @@ describe('convertLineSpec', () => {
           '3rd',
         ])
 
-      const lineSpec = lineTransform(
+      const result = getLegendData(
         table,
-        xColKey,
-        yColKey,
-        customFillKeys,
-        NINETEEN_EIGHTY_FOUR,
-        position,
-      )
-
-      const result = convertLineSpec(
-        lineSpec,
+        {fill: customFillKeys, colors: NINETEEN_EIGHTY_FOUR},
         yColKey,
         getColumnFormatter,
-        position,
       )
 
       expect(
@@ -222,222 +180,27 @@ describe('convertLineSpec', () => {
     })
   })
 
-  describe('stacked line graphs', () => {
-    const position: LinePosition = 'stacked'
-
-    it('creates certain columns for stacked line graphs', () => {
-      const addtionalColumKeys = ['cumulative', 'lines']
-      const lineSpec = lineTransform(
-        sampleTable,
-        xColKey,
-        yColKey,
-        fillColumnKeys,
-        NINETEEN_EIGHTY_FOUR,
-        position,
-      )
-
-      const result = convertLineSpec(
-        lineSpec,
-        yColKey,
-        getColumnFormatter,
-        position,
-      )
-
-      expect(result.length).toEqual(fillColumnKeys.length + 3)
-      result.forEach(legendColumn => {
-        expect(
-          [
-            ...fillColumnKeys,
-            ...addtionalColumKeys,
-            `Latest ${yColKey}`,
-          ].indexOf(legendColumn.name),
-        ).toBeGreaterThanOrEqual(0)
-        expect(legendColumn.values.length).toEqual(
-          numberOfRecords / recordsPerLine,
-        )
-      })
+  describe('band graphs', () => {
+    it('returns no data when no fill columns are configured', () => {
+      expect(
+        getLegendData(
+          sampleTable,
+          {colors: NINETEEN_EIGHTY_FOUR},
+          yColKey,
+          getColumnFormatter,
+        ),
+      ).toEqual([])
     })
 
-    it('sorts the legend data in descending order by cumulative of the value axis', () => {
-      const lineSpec = lineTransform(
-        sampleTable,
-        xColKey,
-        yColKey,
-        fillColumnKeys,
-        NINETEEN_EIGHTY_FOUR,
-        position,
-      )
-
-      const result = convertLineSpec(
-        lineSpec,
-        yColKey,
-        getColumnFormatter,
-        position,
-      )
-
-      const cumulativeLegendColumn = result.find(
-        legendColumn => legendColumn.key === `_${STACKED_LINE_CUMULATIVE}`,
-      )
-      expect(cumulativeLegendColumn).toBeDefined()
-      cumulativeLegendColumn.values.forEach((value, index, values) => {
-        if (index > 0 && index < values.length) {
-          expect(Number(value)).toBeLessThan(Number(values[index - 1]))
-        }
-      })
-    })
-
-    it('sorts the legend data in descending order with the correct values in fill columns when the time values are sorted', () => {
-      const customFillKeys = ['rank', 'place']
-      const table = newTable(8)
-        .addColumn(
-          '_time',
-          'dateTime:RFC3339',
-          'time',
-          [
-            1622065487240, 1622065487240, 1622065487240, 1622065487240,
-            1622065667240, 1622065667240, 1622065667240, 1622065667240,
-          ],
-        )
-        .addColumn(
-          '_value',
-          'system',
-          'number',
-          [10, 20, 30, 40, 10, 20, 30, 40],
-        )
-        .addColumn(customFillKeys[0], 'string', 'string', [
-          'fourth',
-          'third',
-          'second',
-          'first',
-          'fourth',
-          'third',
-          'second',
-          'first',
-        ])
-        .addColumn(customFillKeys[1], 'string', 'string', [
-          '4th',
-          '3rd',
-          '2nd',
-          '1st',
-          '4th',
-          '3rd',
-          '2nd',
-          '1st',
-        ])
-
-      const lineSpec = lineTransform(
-        table,
-        xColKey,
-        yColKey,
-        customFillKeys,
-        NINETEEN_EIGHTY_FOUR,
-        position,
-      )
-
-      const result = convertLineSpec(
-        lineSpec,
-        yColKey,
-        getColumnFormatter,
-        position,
-      )
-
+    it('returns no data when the value column is missing', () => {
       expect(
-        result.find(legendColumn => legendColumn.key === customFillKeys[0]),
-      ).toBeDefined()
-      expect(
-        result.find(legendColumn => legendColumn.key === customFillKeys[1]),
-      ).toBeDefined()
-
-      result.forEach(legendColumn => {
-        if (legendColumn.key === customFillKeys[0]) {
-          expect(legendColumn.values).toEqual([
-            'first',
-            'second',
-            'third',
-            'fourth',
-          ])
-        }
-        if (legendColumn.key === customFillKeys[1]) {
-          expect(legendColumn.values).toEqual(['1st', '2nd', '3rd', '4th'])
-        }
-      })
-    })
-
-    it('sorts the legend data in descending order with the correct values in fill columns when the time values are unsorted', () => {
-      const customFillKeys = ['rank', 'place']
-      const table = newTable(8)
-        .addColumn(
-          '_time',
-          'dateTime:RFC3339',
-          'time',
-          [
-            1622065487240, 1622065667240, 1622065487240, 1622065667240,
-            1622065487240, 1622065667240, 1622065487240, 1622065667240,
-          ],
-        )
-        .addColumn(
-          '_value',
-          'system',
-          'number',
-          [10, 10, 20, 20, 30, 30, 40, 40],
-        )
-        .addColumn(customFillKeys[0], 'string', 'string', [
-          'fourth',
-          'fourth',
-          'third',
-          'third',
-          'second',
-          'second',
-          'first',
-          'first',
-        ])
-        .addColumn(customFillKeys[1], 'string', 'string', [
-          '4th',
-          '4th',
-          '3rd',
-          '3rd',
-          '2nd',
-          '2nd',
-          '1st',
-          '1st',
-        ])
-
-      const lineSpec = lineTransform(
-        table,
-        xColKey,
-        yColKey,
-        customFillKeys,
-        NINETEEN_EIGHTY_FOUR,
-        position,
-      )
-
-      const result = convertLineSpec(
-        lineSpec,
-        yColKey,
-        getColumnFormatter,
-        position,
-      )
-
-      expect(
-        result.find(legendColumn => legendColumn.key === customFillKeys[0]),
-      ).toBeDefined()
-      expect(
-        result.find(legendColumn => legendColumn.key === customFillKeys[1]),
-      ).toBeDefined()
-
-      result.forEach(legendColumn => {
-        if (legendColumn.key === customFillKeys[0]) {
-          expect(legendColumn.values).toEqual([
-            'first',
-            'second',
-            'third',
-            'fourth',
-          ])
-        }
-        if (legendColumn.key === customFillKeys[1]) {
-          expect(legendColumn.values).toEqual(['1st', '2nd', '3rd', '4th'])
-        }
-      })
+        getLegendData(
+          sampleTable,
+          {fill: fillColumnKeys, colors: NINETEEN_EIGHTY_FOUR},
+          'notAColumn',
+          getColumnFormatter,
+        ),
+      ).toEqual([])
     })
   })
 })

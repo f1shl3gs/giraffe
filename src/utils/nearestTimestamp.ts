@@ -1,5 +1,16 @@
-export const nearestTimestamp = (timestamps: number[], rawValue: number) => {
-  if (timestamps.length === 0) {
+import type {NumericColumnData} from 'types'
+
+/*
+  `timestamps` is nullable because Table.getColumn is: it returns null for a
+  missing column, and for one whose type does not widen to number. Callers get
+  the raw inverted value back in that case, which is what an unsnappable axis
+  should do.
+*/
+export const nearestTimestamp = (
+  timestamps: NumericColumnData | null,
+  rawValue: number,
+): number => {
+  if (!timestamps || timestamps.length === 0) {
     return rawValue
   }
 

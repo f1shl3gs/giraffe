@@ -1,6 +1,4 @@
-import {useCallback, useRef, MouseEvent} from 'react'
-
-import {useForceUpdate} from './useForceUpdate'
+import {MouseEvent, useCallback, useReducer, useRef} from 'react'
 
 // Minimum number of pixels a user must drag before we decide whether the
 // action is a vertical or horizontal drag
@@ -77,94 +75,91 @@ export const useDragEvent = (): [DragEvent | null, UseDragEventProps] => {
   const dragEventRef = useRef<DragEvent | null>(null)
   const forceUpdate = useForceUpdate()
 
-  const onMouseDown = useCallback(
-    (mouseDownEvent: MouseEvent<Element>) => {
-      mouseDownEvent.stopPropagation()
+  const onMouseDown = useCallback((mouseDownEvent: MouseEvent<Element>) => {
+    mouseDownEvent.stopPropagation()
 
-      const el = mouseDownEvent.currentTarget
+    const el = mouseDownEvent.currentTarget
 
-      const getXYCoords = baseEvent => {
-        const {left, top} = el.getBoundingClientRect()
+    const getXYCoords = baseEvent => {
+      const {left, top} = el.getBoundingClientRect()
 
-        return [baseEvent.pageX - left, baseEvent.pageY - top]
+      return [baseEvent.pageX - left, baseEvent.pageY - top]
+    }
+
+    const onMouseMove = mouseMoveEvent => {
+      const [x, y] = getXYCoords(mouseMoveEvent)
+
+      const {initialX, initialY} = dragEventRef.current
+      let {direction} = dragEventRef.current
+
+      if (!direction) {
+        const dx = Math.abs(x - initialX)
+        const dy = Math.abs(y - initialY)
+
+        if (dx >= dy && dx > MIN_DRAG_DELTA) {
+          direction = 'x'
+        } else if (dy > MIN_DRAG_DELTA) {
+          direction = 'y'
+        }
       }
 
-      const onMouseMove = mouseMoveEvent => {
-        const [x, y] = getXYCoords(mouseMoveEvent)
-
-        const {initialX, initialY} = dragEventRef.current
-        let {direction} = dragEventRef.current
-
-        if (!direction) {
-          const dx = Math.abs(x - initialX)
-          const dy = Math.abs(y - initialY)
-
-          if (dx >= dy && dx > MIN_DRAG_DELTA) {
-            direction = 'x'
-          } else if (dy > MIN_DRAG_DELTA) {
-            direction = 'y'
-          }
-        }
-
-        dragEventRef.current = {
-          ...dragEventRef.current,
-          type: 'drag',
-          direction,
-          x,
-          y,
-        }
-
-        forceUpdate()
-      }
-
-      const onMouseUp = mouseUpEvent => {
-        document.removeEventListener('mousemove', onMouseMove)
-        document.removeEventListener('mouseup', onMouseUp)
-
-        const [x, y] = getXYCoords(mouseUpEvent)
-
-        let mouseActionState = null
-
-        if (dragEventRef?.current?.mouseActionState === 'mouseDownHappened') {
-          mouseActionState = 'mouseUpHappened'
-        }
-
-        dragEventRef.current = {
-          ...dragEventRef.current,
-          type: 'dragend',
-          mouseActionState,
-          x,
-          y,
-          mouseEvent: mouseUpEvent,
-        }
-
-        forceUpdate()
-      }
-
-      document.addEventListener('mousemove', onMouseMove)
-      document.addEventListener('mouseup', onMouseUp)
-
-      const [x, y] = getXYCoords(mouseDownEvent)
-      const isShiftDown = mouseDownEvent.getModifierState('Shift')
-
-      // TODO:  even though the 'isShiftDown' gets reset with each mousedown,
-      // incase other mouse events/triggers/callbacks want to use the shift key, make sure to set
-      // it to false in all the other places where events are emitted to reset it properly!
       dragEventRef.current = {
+        ...dragEventRef.current,
         type: 'drag',
-        initialX: x,
-        initialY: y,
+        direction,
         x,
         y,
-        direction: null,
-        mouseActionState: 'mouseDownHappened',
-        isShiftDown,
       }
 
       forceUpdate()
-    },
-    [],
-  )
+    }
+
+    const onMouseUp = mouseUpEvent => {
+      document.removeEventListener('mousemove', onMouseMove)
+      document.removeEventListener('mouseup', onMouseUp)
+
+      const [x, y] = getXYCoords(mouseUpEvent)
+
+      let mouseActionState = null
+
+      if (dragEventRef?.current?.mouseActionState === 'mouseDownHappened') {
+        mouseActionState = 'mouseUpHappened'
+      }
+
+      dragEventRef.current = {
+        ...dragEventRef.current,
+        type: 'dragend',
+        mouseActionState,
+        x,
+        y,
+        mouseEvent: mouseUpEvent,
+      }
+
+      forceUpdate()
+    }
+
+    document.addEventListener('mousemove', onMouseMove)
+    document.addEventListener('mouseup', onMouseUp)
+
+    const [x, y] = getXYCoords(mouseDownEvent)
+    const isShiftDown = mouseDownEvent.getModifierState('Shift')
+
+    // TODO:  even though the 'isShiftDown' gets reset with each mousedown,
+    // incase other mouse events/triggers/callbacks want to use the shift key, make sure to set
+    // it to false in all the other places where events are emitted to reset it properly!
+    dragEventRef.current = {
+      type: 'drag',
+      initialX: x,
+      initialY: y,
+      x,
+      y,
+      direction: null,
+      mouseActionState: 'mouseDownHappened',
+      isShiftDown,
+    }
+
+    forceUpdate()
+  }, [])
 
   const {current: dragEvent} = dragEventRef
 
@@ -174,4 +169,8 @@ export const useDragEvent = (): [DragEvent | null, UseDragEventProps] => {
   }
 
   return [dragEvent, {onMouseDown}]
+}
+
+const useForceUpdate = () => {
+  return useReducer(count => count + 1, 0)[1] as () => void
 }

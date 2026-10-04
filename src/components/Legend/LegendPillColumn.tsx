@@ -1,12 +1,10 @@
-import {FunctionComponent} from 'react'
-
-import {LegendType} from 'types'
-import {LegendPillsStyles} from 'style/legend'
-
 import {
   LEGEND_COLUMN_CLASSNAME,
   STATIC_LEGEND_COLUMN_CLASSNAME,
-} from 'constants'
+} from 'constants/index'
+import {FunctionComponent} from 'react'
+import {LegendPillsStyles} from 'style/legend'
+import {LegendType} from 'types'
 
 interface Props {
   type: LegendType

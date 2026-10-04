@@ -1,4 +1,5 @@
 // Libraries
+
 import {
   FunctionComponent,
   useContext,
@@ -7,16 +8,15 @@ import {
   useRef,
   useState,
 } from 'react'
-
+import type {FluxDataType} from 'types'
 import {DapperScrollbars} from '../DapperScrollbars'
-import {FluxDataType} from 'index'
-import {SubsetTable} from './SimpleTableGraph'
-import {FluxResult, Column} from './flows'
-import {PaginationContext} from './pagination'
+import {Column, FluxResult} from './flows'
 import InnerTable from './InnerTable'
+import {PaginationContext} from './pagination'
+import type {SubsetTable} from './SimpleTable'
 
 // Styles
-import './SimpleTableGraph.scss'
+import './SimpleTable.scss'
 
 interface ExtendedColumn {
   name: string
@@ -61,7 +61,7 @@ const getNumberOfRowsOnCurrentPage = (
 
   while (rowIdx < result.table.length) {
     if (result.table.columns?.table?.data?.[rowIdx] !== currentTable) {
-      signature = Object.values(result.table.columns)
+      signature = Object.values(result.table.columns ?? {})
         .map(column => {
           if (column.data[rowIdx] !== undefined) {
             return `${column.name}::${
@@ -111,7 +111,7 @@ const subsetResult = (
   disableFilter: boolean,
 ): SubsetTable[] => {
   // only look at data within the page
-  const subset = Object.values(result.table.columns)
+  const subset = Object.values(result.table.columns ?? {})
     .map(
       (column: Column): ExtendedColumn => ({
         ...column,
@@ -123,7 +123,7 @@ const subsetResult = (
       }),
     )
     .filter(column => !!column.data.filter(_c => _c !== undefined).length)
-    .reduce((acc, curr) => {
+    .reduce<Record<string, ExtendedColumn[]>>((acc, curr) => {
       if (acc[curr.name]) {
         acc[curr.name].push(curr)
         return acc
@@ -155,7 +155,7 @@ const subsetResult = (
     tables.push({
       idx: subset['table']?.[0]?.data?.[ni] ?? -1,
       yield: subset['result']?.[0]?.data?.[ni] ?? '',
-      cols: [],
+      cols: {},
       signature: '',
       start: ni,
       end: -1,
@@ -168,7 +168,7 @@ const subsetResult = (
 
   // reorder the column names, filter empty columns, join repeating tables under one header
   const cleanedTables = tables
-    .reduce((acc, curr) => {
+    .reduce<SubsetTable[]>((acc, curr) => {
       curr.cols = [
         subset['table'],
         subset['_measurement'],
@@ -199,7 +199,7 @@ const subsetResult = (
             .map(_c => ({..._c, data: _c.data.slice(curr.start, curr.end)}))
             .filter(_c => !!_c.data.filter(_d => _d !== undefined).length),
         )
-        .reduce((acc, curr) => {
+        .reduce<Record<string, ExtendedColumn>>((acc, curr) => {
           if (!curr.length) {
             return acc
           }
@@ -213,7 +213,7 @@ const subsetResult = (
       acc.push(curr)
       return acc
     }, [])
-    .reduce((acc, curr) => {
+    .reduce<SubsetTable[]>((acc, curr) => {
       const last: SubsetTable = acc[acc.length - 1]
 
       if (
@@ -273,29 +273,26 @@ const PagedTable: FunctionComponent<Props> = ({result, showAll}) => {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
+    const measuredHeaderHeight = pagedTableHeaderRef?.current?.clientHeight ?? 0
+
     if (
-      pagedTableHeaderRef?.current?.clientHeight > 0 &&
+      measuredHeaderHeight > 0 &&
       tableHeaderHeight === INITIAL_HEADER_HEIGHT
     ) {
-      const calculatedHeaderHeight = pagedTableHeaderRef.current.clientHeight
-
-      if (calculatedHeaderHeight !== tableHeaderHeight) {
-        setTableHeaderHeight(calculatedHeaderHeight)
+      if (measuredHeaderHeight !== tableHeaderHeight) {
+        setTableHeaderHeight(measuredHeaderHeight)
       }
     }
   })
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (
-      pagedTableBodyRef?.current?.children?.[0]?.clientHeight > 0 &&
-      tableRowHeight === INITIAL_ROW_HEIGHT
-    ) {
-      const calculatedRowHeight =
-        pagedTableBodyRef.current.children[0].clientHeight
+    const measuredRowHeight =
+      pagedTableBodyRef?.current?.children?.[0]?.clientHeight ?? 0
 
-      if (calculatedRowHeight !== tableRowHeight) {
-        setTableRowHeight(calculatedRowHeight)
+    if (measuredRowHeight > 0 && tableRowHeight === INITIAL_ROW_HEIGHT) {
+      if (measuredRowHeight !== tableRowHeight) {
+        setTableRowHeight(measuredRowHeight)
       }
     }
   })
@@ -306,8 +303,8 @@ const PagedTable: FunctionComponent<Props> = ({result, showAll}) => {
       return
     }
 
-    let timeout
-    let animationFrameID
+    let timeout: ReturnType<typeof setTimeout> | undefined
+    let animationFrameID: number | undefined
     const resizer = new ResizeObserver(entries => {
       if (timeout) {
         clearTimeout(timeout)
@@ -336,7 +333,9 @@ const PagedTable: FunctionComponent<Props> = ({result, showAll}) => {
     // cleanup
     return () => {
       resizer.disconnect()
-      cancelAnimationFrame(animationFrameID)
+      if (animationFrameID) {
+        cancelAnimationFrame(animationFrameID)
+      }
       if (timeout) {
         clearTimeout(timeout)
       }

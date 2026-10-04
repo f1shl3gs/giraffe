@@ -1,6 +1,7 @@
 // Libraries
-import {Fragment, FunctionComponent, ReactElement} from 'react'
+
 import classnames from 'classnames'
+import {Fragment, FunctionComponent, ReactElement} from 'react'
 
 // Styles
 import './TableGraphs.scss'

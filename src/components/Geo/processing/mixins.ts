@@ -1,6 +1,5 @@
 import {HEX_DIGIT_NUM} from 'utils/geo'
-import {CoordinateEncoding} from './GeoTable'
-import {Coordinates} from './GeoTable'
+import {CoordinateEncoding, Coordinates} from './GeoTable'
 import {s2IdToLatLng} from './s2IdToLatLng'
 
 export const getLatLonMixin = function (index: number): Coordinates {

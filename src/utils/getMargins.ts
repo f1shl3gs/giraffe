@@ -1,11 +1,10 @@
-import {getTextMetrics} from './textMetrics'
-import {maxBy} from './extrema'
-
 import {
-  TICK_PADDING_TOP,
-  TICK_PADDING_RIGHT,
   AXIS_LABEL_PADDING_BOTTOM,
-} from 'constants'
+  TICK_PADDING_RIGHT,
+  TICK_PADDING_TOP,
+} from 'constants/index'
+import {maxBy} from './extrema'
+import {getTextMetrics} from './textMetrics'
 
 export const getMargins = (
   showAxes: boolean,

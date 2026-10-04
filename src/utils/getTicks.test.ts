@@ -3,8 +3,8 @@ import {TIME, VALUE} from 'constants/columnKeys'
 import {
   calculateTicks,
   generateTicks,
-  getVerticalTicks,
   getHorizontalTicks,
+  getVerticalTicks,
 } from './getTicks'
 
 vi.mock('./textMetrics')

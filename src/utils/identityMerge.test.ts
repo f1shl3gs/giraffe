@@ -1,9 +1,9 @@
 import {
-  identityMerge,
   enumeratePaths,
   getByPath,
-  setByPath,
+  identityMerge,
   isEqual,
+  setByPath,
 } from './identityMerge'
 
 describe('identityMerge', () => {

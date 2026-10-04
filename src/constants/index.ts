@@ -1,16 +1,15 @@
 import {
-  curveLinear,
-  curveMonotoneY,
-  curveMonotoneX,
   curveBasis,
+  curveLinear,
+  curveMonotoneX,
+  curveMonotoneY,
+  curveNatural,
   curveStep,
   curveStepAfter,
   curveStepBefore,
-  curveNatural,
 } from 'd3-shape'
 
-import {Config, LayerConfig, StaticLegend, SymbolType} from 'types'
-import {NINETEEN_EIGHTY_FOUR as DEFAULT_COLOR_SCHEME} from './colorSchemes'
+import {SymbolType} from 'types'
 
 // TODO: Make configurable
 export const TICK_PADDING_RIGHT = 8
@@ -30,86 +29,6 @@ export const CURVES = {
   stepBefore: curveStepBefore,
   stepAfter: curveStepAfter,
   natural: curveNatural,
-}
-
-export const CONFIG_DEFAULTS: Partial<Config> = {
-  layers: [],
-  valueFormatters: {},
-  xAxisLabel: '',
-  yAxisLabel: '',
-  xScale: 'linear',
-  yScale: 'linear',
-  showAxes: true,
-  axisColor: '#292933',
-  axisOpacity: 1,
-  gridColor: '#292933',
-  gridOpacity: 1,
-  tickFont: '10px sans-serif',
-  tickFontColor: '#8e91a1',
-  legendFont: '10px monospace',
-  legendFontColor: '#bec2cc',
-  legendFontBrightColor: '#f6f6f8',
-  legendBackgroundColor: '#0f0e15',
-  legendBorder: '2px solid #202028',
-  legendCrosshairColor: 'rgba(255,255,255,0.75)',
-  legendColorizeRows: true,
-  legendOpacity: 1,
-}
-
-export const STATIC_LEGEND_DEFAULTS: Partial<StaticLegend> = {
-  cursor: 'auto',
-  heightRatio: 0.2,
-  layer: 0,
-  renderEffect: () => {},
-  valueAxis: 'y',
-  widthRatio: 1.0,
-}
-
-export const LAYER_DEFAULTS: {[layerType: string]: Partial<LayerConfig>} = {
-  line: {
-    lineWidth: 1,
-    hoverDimension: 'auto',
-    fill: [],
-    colors: DEFAULT_COLOR_SCHEME,
-    interpolation: 'linear',
-    maxTooltipRows: 24,
-    shadeBelow: false,
-    shadeBelowOpacity: 0.1,
-  },
-  heatmap: {
-    colors: DEFAULT_COLOR_SCHEME,
-    binSize: 10,
-    strokeWidth: 0,
-    strokePadding: 0,
-    strokeOpacity: 0,
-    fillOpacity: 1,
-  },
-  scatter: {
-    colors: DEFAULT_COLOR_SCHEME,
-    fill: [],
-    symbol: [],
-  },
-  histogram: {
-    fill: [],
-    colors: DEFAULT_COLOR_SCHEME,
-    position: 'stacked',
-    binCount: null,
-    strokeWidth: 1,
-    strokePadding: 0.75,
-    strokeOpacity: 1,
-    fillOpacity: 0.75,
-  },
-  mosaic: {
-    yLabelColumns: [],
-    yLabelColumnSeparator: '',
-    fill: [],
-    hoverDimension: 'auto',
-    colors: DEFAULT_COLOR_SCHEME,
-    strokeWidth: 1,
-    strokePadding: 0.75,
-    strokeOpacity: 1,
-    fillOpacity: 0.75,
-  },
 }
 
 export const ALL_SYMBOL_TYPES: SymbolType[] = [

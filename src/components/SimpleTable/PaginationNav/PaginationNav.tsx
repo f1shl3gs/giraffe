@@ -1,14 +1,15 @@
 // Libraries
-import React, {
+
+import classnames from 'classnames'
+import {
   ChangeEvent,
+  FunctionComponent,
   RefObject,
-  useState,
   useEffect,
   useLayoutEffect,
-  FunctionComponent,
   useRef,
+  useState,
 } from 'react'
-import classnames from 'classnames'
 
 // Components
 import {PaginationDirectionItem} from './PaginationDirectionItem'

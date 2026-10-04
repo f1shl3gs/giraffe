@@ -1,9 +1,8 @@
-import {line, curveLinear, area} from 'd3-shape'
+import {CURVES} from 'constants/index'
 import {range} from 'd3-array'
-
-import {LineInterpolation, LineData} from 'types'
-import {CURVES} from 'constants'
-import {isDefined} from '../utils/isDefined'
+import {area, curveLinear, line} from 'd3-shape'
+import {LineData, LineInterpolation} from 'types'
+import {isDefined} from 'utils/isDefined'
 
 interface DrawLinesOptions {
   context: CanvasRenderingContext2D
@@ -25,7 +24,7 @@ export const drawLines = ({
   shadeAboveY,
 }: DrawLinesOptions): void => {
   if (shadeBelow) {
-    for (const {xs, ys, fill} of Object.values(lineData)) {
+    for (const {xs, ys, fill} of lineData.values()) {
       const areaGenerator = area<number>()
         .y0(shadeAboveY)
         .y1((i: any) => ys[i])
@@ -45,7 +44,7 @@ export const drawLines = ({
   context.lineWidth = lineWidth
   context.globalAlpha = 1
 
-  for (const {xs, ys, fill} of Object.values(lineData)) {
+  for (const {xs, ys, fill} of lineData.values()) {
     const lineGenerator = line<number>()
       .context(context)
       .y((i: any) => ys[i])

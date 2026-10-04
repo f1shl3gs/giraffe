@@ -1,11 +1,14 @@
-import {InfluxColors} from 'constants/colorSchemes'
 import {
   GeoCircleViewLayer,
   GeoHeatMapViewLayer,
   GeoPointMapViewLayer,
   GeoQueryVariables,
   GeoTrackMapViewLayer,
-} from 'types/geo'
+} from 'components/Geo/geoTypes'
+import {geoCSV} from 'components/Geo/processing/data/geo'
+import {preprocessData} from 'components/Geo/processing/tableProcessing'
+import {InfluxColors} from 'constants/colorSchemes'
+import {fromFlux} from './fromFlux'
 import {
   calculateVariableAssignment,
   formatCircleMarkerRowInfo,
@@ -13,9 +16,6 @@ import {
   getMinZoom,
   getRowLimit,
 } from './geo'
-import {preprocessData} from 'components/Geo/processing/tableProcessing'
-import {fromFlux} from './fromFlux'
-import {geoCSV} from 'components/Geo/processing/data/geo'
 
 const pointMapLayer: GeoPointMapViewLayer = {
   type: 'pointMap',

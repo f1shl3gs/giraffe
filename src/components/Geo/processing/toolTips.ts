@@ -1,5 +1,5 @@
 // Types
-import {Axis} from 'types/geo'
+import type {Axis} from '../geoTypes'
 
 export const formatValue = (
   key: string,

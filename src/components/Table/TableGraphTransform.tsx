@@ -1,17 +1,16 @@
 // Libraries
-import {FunctionComponent, JSX} from 'react'
+
 import memoizeOne from 'memoize-one'
-
-// Utils
-import {transformTableData} from 'utils/tableGraph'
-import {isEqual} from 'utils/isEqual'
-
+import {FunctionComponent, JSX} from 'react'
 // Types
 import {
-  TableViewProperties,
   SortOptions,
+  TableViewProperties,
   TransformTableDataReturnType,
 } from 'types'
+import {isEqual} from 'utils/isEqual'
+// Utils
+import {transformTableData} from 'utils/tableGraph'
 
 interface Props {
   data: string[][]

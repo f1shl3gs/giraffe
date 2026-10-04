@@ -1,20 +1,18 @@
-import {FunctionComponent, useState} from 'react'
-
 import {
   ASCENDING,
-  DESCENDING,
   DEFAULT_SORT_DIRECTION,
+  DESCENDING,
 } from 'constants/tableGraph'
+import {FunctionComponent, useState} from 'react'
 import {
-  TableViewProperties,
-  SortOptions,
   FluxTable,
-  TimeZone,
+  SortOptions,
+  TableViewProperties,
   Theme,
+  TimeZone,
 } from 'types'
-
-import {TableGraphTransform} from './TableGraphTransform'
 import {TableGraphTable} from './TableGraphTable'
+import {TableGraphTransform} from './TableGraphTransform'
 
 interface Props {
   table: FluxTable
@@ -44,9 +42,12 @@ const handleSetSort = (fieldName: string, setState: Function) => {
   })
 }
 
-export const TableGraph: FunctionComponent<Props> = (props: Props) => {
-  const {table, properties, timeZone, theme} = props
-
+export const TableGraph: FunctionComponent<Props> = ({
+  table,
+  properties,
+  timeZone,
+  theme,
+}) => {
   const [state, setState] = useState<State>({
     sortOptions: {
       field: properties.tableOptions.sortBy?.internalName ?? null,

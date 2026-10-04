@@ -1,7 +1,7 @@
-import {FunctionComponent, useEffect} from 'react'
 import L from 'leaflet'
-import {BingLayerObject} from './BingLayerObject'
+import {FunctionComponent, useEffect} from 'react'
 import {useGeoMap} from '../GeoMapContext'
+import {BingLayerObject} from './BingLayerObject'
 
 interface Props {
   bingKey: string

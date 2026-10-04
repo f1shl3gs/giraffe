@@ -13,7 +13,6 @@ export default defineConfig({
   copy: ['src/fonts', 'node_modules/leaflet/dist/images'],
   deps: {
     neverBundle: ['react', 'react-dom'],
-    alwaysBundle: ['merge-images'],
     onlyBundle: false,
   },
   css: {

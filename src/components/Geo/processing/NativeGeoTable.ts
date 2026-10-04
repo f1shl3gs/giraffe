@@ -1,8 +1,10 @@
 // Types
-import {CoordinateEncoding} from './GeoTable'
-import {Table} from 'types'
-import {GeoTable, Track} from './GeoTable'
 
+import {Table} from 'types'
+import {timestampToString} from 'utils/geo'
+import type {LatLonColumns} from '../geoTypes'
+import {CoordinateEncoding, GeoTable, Track} from './GeoTable'
+import {getLatLonMixin} from './mixins'
 // Constants
 import {
   GEO_HASH_COLUMN,
@@ -13,9 +15,6 @@ import {
   TABLE_COLUMN,
   TIME_COLUMN,
 } from './tableProcessing'
-import {getLatLonMixin} from './mixins'
-import {LatLonColumns} from 'types/geo'
-import {timestampToString} from 'utils/geo'
 
 export class NativeGeoTable implements GeoTable {
   coordinateEncoding: CoordinateEncoding

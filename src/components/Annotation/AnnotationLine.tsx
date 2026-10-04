@@ -1,5 +1,5 @@
 // Libraries
-import {FunctionComponent, createElement} from 'react'
+import {createElement, FunctionComponent} from 'react'
 
 // Types
 import {AnnotationDimension, AnnotationPinType} from 'types'

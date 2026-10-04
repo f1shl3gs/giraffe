@@ -1,110 +1,12 @@
-import {CSSProperties, ReactElement, ReactNode } from 'react'
-
-import {FromFluxResult} from 'utils/fromFlux'
-import {GeoLayerConfig} from './geo'
-import {TimeZone} from './timeZones'
+import {CSSProperties, ReactNode} from 'react'
 
 export * from './component'
-export * from './geo'
 export * from './input'
 export * from './timeZones'
 
 export interface PlotDimensions {
   height: number
   width: number
-}
-
-export type SizedConfig = Config & {width: number; height: number}
-export interface Config {
-  width?: number
-  height?: number
-
-  interactionHandlers?: InteractionHandlers
-
-  gridColor?: string
-  gridOpacity?: number
-
-  cursor?: string
-
-  showAxes?: boolean
-  axisColor?: string
-  axisOpacity?: number
-
-  // Tick placement on the axes can be specified otherwise they are calculated,
-  //   - specified for an entire axis, or
-  //   - specified by a step interval per tick and/or a total number of ticks
-  xTicks?: number[]
-  xTickStart?: number
-  xTickStep?: number
-  xTotalTicks?: number
-  yTicks?: Array<number | string>
-  yTickStart?: number
-  yTickStep?: number
-  yTotalTicks?: number
-
-  // Ticks can have font, color, and be formatted for precision and labeling
-  tickFont?: string
-  tickFontColor?: string
-  valueFormatters?: {
-    [colKey: string]: Formatter
-  }
-
-  // The labels on the axes
-  xAxisLabel?: string
-  yAxisLabel?: string
-
-  // The scaling of the axes, usually linear or logarithmic
-  xScale?: string
-  yScale?: string
-
-  fluxResponse?: string
-  fromFluxResult?: FromFluxResult
-  table?: Table
-  layers: LayerConfig[]
-
-  // The x domain of the plot can be explicitly set when `xDomain` is passed,
-  // along with `includeXDomainZoom`, or `onSetXDomain` and `onResetXDomain`,
-  // or `includeXDomainZoom` with any of the other two.
-  // This is known as "controlled" mode, where it always uses the passed x domain
-  //   - Any brush interaction with the plot that should change the x domain
-  //     will use the built-in brush handler if `includeXDomainZoom` is true,
-  //     and call `onSetXDomain` if provided.
-  //   - Double clicking the plot will use the built-in reset handler if
-  //     `includeXDomainZoom` is true, and call `onResetXDomain` if provided.
-  //
-  // When the `xDomain` option is not passed, then the
-  // component is "uncontrolled". It will compute, set, and reset the `xDomain`
-  // automatically.
-  xDomain?: number[]
-  includeXDomainZoom?: boolean
-  onSetXDomain?: (xDomain: number[]) => void
-  onResetXDomain?: () => void
-
-  // Similar to xDomain above
-  yDomain?: number[]
-  includeYDomainZoom?: boolean
-  onSetYDomain?: (yDomain: number[]) => void
-  onResetYDomain?: () => void
-
-  // legend properties apply to both the static legend and the tooltip
-  legendBackgroundColor?: string
-  legendBorder?: string
-  legendColorizeRows?: boolean
-  legendColumns?: string[]
-  legendCrosshairColor?: string
-  legendFont?: string
-  legendFontBrightColor?: string
-  legendFontColor?: string
-  legendHide?: boolean
-  legendMessage?: string
-  legendOpacity?: number
-  legendOrientationThreshold?: number
-
-  // applies only to the static legend, overrides "legend" properties above
-  staticLegend?: StaticLegend
-
-  // The type of the y-axis column
-  yColumnType?: ColumnType
 }
 
 export type LegendType = 'tooltip' | 'static'
@@ -122,39 +24,6 @@ export enum LegendPropertyNames {
   message = 'legendMessage',
   opacity = 'legendOpacity',
   orientationThreshold = 'legendOrientationThreshold',
-}
-
-export interface StaticLegend {
-  backgroundColor?: string
-  border?: string
-  colorizeRows?: boolean
-  columns?: string[]
-  crosshairColor?: string
-  cursor?: string // no corresponding legend property, unique to static legend
-  font?: string
-  fontBrightColor?: string
-  fontColor?: string
-  heightRatio?: number // no corresponding legend property, unique to static legend
-  hide?: boolean
-  layer?: number // no corresponding legend property, unique to static legend
-  message?: string
-  opacity?: number
-  orientationThreshold?: number
-  renderEffect?: (options: StaticLegendRenderEffectOptions) => void // no corresponding legend property, unique to static legend
-  style?: CSSProperties // no correspinding legend property, unique to static legend
-  valueAxis?: 'x' | 'y' // no corresponding legend property, unique to static legend
-  widthRatio?: number // no corresponding legend property, unique to static legend
-}
-
-export interface StaticLegendRenderEffectOptions {
-  totalHeight: number
-  staticLegendHeight: number
-  legendDataLength: number
-  lineCount: number
-  lineSpacingRatio: number
-  padding: number
-  headerTextMetrics: TextMetrics
-  sampleTextMetrics: TextMetrics
 }
 
 export interface InteractionHandlerArguments {
@@ -250,7 +119,6 @@ export type FluxDataType =
 
 export enum LayerTypes {
   Gauge = 'gauge',
-  Custom = 'custom',
   Annotation = 'annotation',
   SingleStat = 'single stat',
   Heatmap = 'heatmap',
@@ -262,40 +130,6 @@ export enum LayerTypes {
   Table = 'table',
   Geo = 'geo',
   SimpleTable = 'simple table',
-}
-
-export type LayerConfig =
-  | AnnotationLayerConfig
-  | BandLayerConfig
-  | CustomLayerConfig
-  | GaugeLayerConfig
-  | GeoLayerConfig
-  | HeatmapLayerConfig
-  | HistogramLayerConfig
-  | LineLayerConfig
-  | MosaicLayerConfig
-  | ScatterLayerConfig
-  | SimpleTableLayerConfig
-  | SingleStatLayerConfig
-  | TableGraphLayerConfig
-
-export interface CustomLayerConfig {
-  type: 'custom' // do not refactor or restrict to LayerTypes.Custom
-  render: (p: CustomLayerRenderProps) => ReactElement
-}
-
-export interface AnnotationLayerConfig {
-  type: 'annotation'
-  x: string
-  y: string
-  annotations: AnnotationMark[]
-  fill: string[]
-  hoverDimension?: LineHoverDimension | 'auto'
-  hoverMargin?: number
-  svgAttributes?: SVGAttributes
-  svgStyle?: CSSProperties
-  lineWidth?: number
-  handleAnnotationClick?: (id: string) => void
 }
 
 export interface CustomLayerRenderProps {
@@ -310,18 +144,6 @@ export interface CustomLayerRenderProps {
   innerHeight: number
   yColumnType: ColumnType
   columnFormatter: (colKey: string) => (x: any) => string
-}
-
-export interface GaugeLayerConfig {
-  type: 'gauge' // do not refactor or restrict to LayerTypes.Gauge
-  prefix?: string
-  suffix?: string
-  tickPrefix?: string
-  tickSuffix?: string
-  decimalPlaces?: DecimalPlaces
-  gaugeColors: Color[]
-  gaugeSize?: number
-  gaugeTheme?: Partial<GaugeTheme>
 }
 
 export interface GaugeTheme {
@@ -344,156 +166,10 @@ export interface GaugeTheme {
   overflowDelta: number
 }
 
-export interface SingleStatLayerConfig {
-  type: 'single stat' // do not refactor or restrict to LayerTypes.SingleStat
-  prefix: string
-  suffix: string
-  decimalPlaces: DecimalPlaces
-  textColor: string
-  textOpacity?: number
-  backgroundColor?: string
-  testID?: string
-  style?: CSSProperties
-  resizerStyle?: CSSProperties
-  svgAttributes?: SVGAttributes
-  svgStyle?: CSSProperties
-  svgTextAttributes?: SVGAttributes
-  svgTextStyle?: CSSProperties
-}
-
 export type SVGAttributeFunction = (stat: string) => string
 
 export interface SVGAttributes {
   [attributeName: string]: string | SVGAttributeFunction
-}
-
-export interface HeatmapLayerConfig {
-  type: 'heatmap' // do not refactor or restrict to LayerTypes.Heatmap
-  x: string
-  y: string
-  binSize?: number
-  colors?: string[]
-  fillOpacity?: number
-  strokeOpacity?: number
-  strokeWidth?: number
-  strokePadding?: number
-}
-
-export interface HistogramLayerConfig {
-  type: 'histogram' // do not refactor or restrict to LayerTypes.Histogram
-  x: string
-  position?: HistogramPosition
-  binCount?: number
-  fill?: string[]
-  colors?: string[]
-  fillOpacity?: number
-  strokeOpacity?: number
-  strokeWidth?: number
-  strokePadding?: number
-}
-
-export interface MosaicLayerConfig {
-  type: 'mosaic' // do not refactor or restrict to LayerTypes.Mosaic
-  x: string
-  y: string[]
-  yLabelColumns?: string[]
-  yLabelColumnSeparator?: string
-  fill: string[]
-  hoverDimension?: MosaicHoverDimension | 'auto'
-  colors?: string[]
-  strokeWidth?: number
-  strokePadding?: number
-  strokeOpacity?: number
-  fillOpacity?: number
-}
-
-export type RectLayerConfig = HeatmapLayerConfig | HistogramLayerConfig
-
-export interface LineLayerConfig {
-  type: 'line' // do not refactor or restrict to LayerTypes.Line
-  x: string
-  y: string
-  fill?: string[]
-  position?: LinePosition
-  hoverDimension?: LineHoverDimension | 'auto'
-  maxTooltipRows?: number
-  interpolation?: LineInterpolation
-  lineWidth?: number
-  colors?: string[]
-  shadeBelow?: boolean
-  shadeBelowOpacity?: number
-  colorMapping?: ColumnGroupMap
-  colorMappingCallback?: (arg: any) => void
-}
-
-export interface BandLayerConfig {
-  type: 'band' // do not refactor or restrict to LayerTypes.Line
-  x: string
-  y: string
-  fill: string[]
-  position?: LinePosition
-  hoverDimension?: LineHoverDimension | 'auto'
-  maxTooltipRows?: number
-  interpolation?: LineInterpolation
-  lineWidth?: number
-  lineOpacity?: number
-  colors?: string[]
-  shadeOpacity?: number
-  mainColumnName: string
-  upperColumnName?: string
-  lowerColumnName?: string
-}
-
-export interface ScatterLayerConfig {
-  type: 'scatter' // do not refactor or restrict to LayerTypes.Scatter
-  x: string
-  y: string
-  fill?: string[]
-  colors?: string[]
-  symbol?: string[]
-}
-
-export interface SimpleTableLayerConfig {
-  type: 'simple table' // do not refactor or restrict to LayerTypes.SimpleTable
-  showAll: boolean
-}
-
-export interface TableGraphLayerConfig {
-  type: 'table' // do not refactor or restrict to LayerTypes.Table
-  tables?: FluxTable[]
-  timeZone: TimeZone
-  tableTheme?: Theme
-  properties: TableViewProperties
-}
-
-export interface DashboardQuery {
-  text?: string
-  editMode?: QueryEditMode
-  name?: string
-  builderConfig?: BuilderConfig
-}
-
-export type QueryEditMode = 'builder' | 'advanced'
-
-export interface BuilderConfig {
-  buckets?: string[]
-  tags?: BuilderTagsType[]
-  functions?: BuilderFunctionsType[]
-  aggregateWindow?: {
-    period?: string
-  }
-}
-
-export interface BuilderTagsType {
-  key?: string
-  values?: string[]
-  aggregateFunctionType?: BuilderAggregateFunctionType
-}
-
-export type BuilderAggregateFunctionType = 'filter' | 'group'
-
-export interface BuilderFunctionsType {
-  name?: string
 }
 
 export interface RenamableField {
@@ -509,7 +185,6 @@ export interface TableViewProperties {
   shape?: string
   note?: string
   showNoteWhenEmpty?: boolean
-  queries?: DashboardQuery[]
   colors: Color[]
   tableOptions: {
     wrapping?: 'truncate' | 'wrap' | 'single-line'
@@ -585,148 +260,6 @@ export interface FluxTable {
 
   We call the collection of this derived data a "spec".
 */
-export type LayerSpec =
-  | AnnotationLayerSpec
-  | LineLayerSpec
-  | BandLayerSpec
-  | ScatterLayerSpec
-  | RectLayerSpec
-  | MosaicLayerSpec
-
-export enum SpecTypes {
-  Annotation = 'annotation',
-  Line = 'line',
-  Band = 'band',
-  Scatter = 'scatter',
-  Rect = 'rect',
-  Mosaic = 'mosaic',
-  Table = 'table',
-}
-
-export interface AnnotationLayerSpec {
-  type: 'annotation'
-  table: Table
-  annotationData: AnnotationMark[]
-  xColumnKey: string
-  yColumnKey: string
-  xColumnType: ColumnType
-  yColumnType: ColumnType
-  xDomain: number[]
-  yDomain: number[]
-}
-
-export interface MosaicLayerSpec {
-  type: 'mosaic'
-  inputTable: Table
-  table: Table // has `X_MIN`, `X_MAX`, `Y_MIN`, `Y_MAX`, and `COUNT` columns, and maybe a `FILL` column
-  xDomain: number[]
-  yDomain: number[]
-  xColumnKey: string
-  xColumnType: ColumnType
-  yColumnType: ColumnType
-  yColumnsName: string
-  scales: {fill: Scale<number, string>}
-  columnGroupMaps: {
-    fill: ColumnGroupMap
-  }
-  ySeries: Array<string>
-  yTicks: Array<string>
-}
-
-export interface LineLayerSpec {
-  type: 'line' // do not refactor or restrict to SpecTypes.Line
-  inputTable: Table
-  table: Table // has `FILL` column added
-  lineData: LineData
-  xDomain: number[]
-  yDomain: number[]
-  xColumnKey: string
-  yColumnKey: string
-  xColumnType: ColumnType
-  yColumnType: ColumnType
-  scales: {
-    fill: Scale<number, string>
-  }
-  columnGroupMaps: {
-    fill: ColumnGroupMap
-    latestIndices: LatestIndexMap
-  }
-  stackedDomainValueColumn?: NumericColumnData
-}
-
-export interface BandLayerSpec {
-  type: 'band' // do not refactor or restrict to SpecTypes.Line
-  bandLineMap: BandLineMap
-  bandName: string
-  upperColumnName: string
-  lowerColumnName: string
-  inputTable: Table
-  table: Table // has `FILL` column added
-  lineData: LineData
-  xDomain: number[]
-  yDomain: number[]
-  xColumnKey: string
-  yColumnKey: string
-  xColumnType: ColumnType
-  yColumnType: ColumnType
-  scales: {
-    fill: Scale<number, string>
-  }
-  columnGroupMaps: {
-    fill: ColumnGroupMap
-    latestIndices: LatestIndexMap
-  }
-}
-
-export interface ScatterLayerSpec {
-  type: 'scatter' // do not refactor or restrict to SpecTypes.Scatter
-  inputTable: Table
-  table: Table // has `FILL` and `SYMBOL` columns added
-  xDomain: number[]
-  yDomain: number[]
-  xColumnKey: string
-  yColumnKey: string
-  xColumnType: ColumnType
-  yColumnType: ColumnType
-  scales: {
-    fill: Scale<number, string>
-    symbol: Scale<number, SymbolType>
-  }
-  columnGroupMaps: {
-    fill: ColumnGroupMap
-    symbol: ColumnGroupMap
-  }
-}
-
-export interface RectLayerSpec {
-  type: 'rect' // do not refactor or restrict to SpecTypes.Rect
-  inputTable: Table
-  table: Table // has `X_MIN`, `X_MAX`, `Y_MIN`, `Y_MAX`, and `COUNT` columns, and maybe a `FILL` column
-  binDimension: 'xy' | 'x'
-  xDomain: number[]
-  yDomain: number[]
-  xColumnKey: string
-  yColumnKey: string
-  xColumnType: ColumnType
-  yColumnType: ColumnType
-  scales: {fill: Scale<number, string>}
-  columnGroupMaps: {fill?: ColumnGroupMap}
-}
-
-export interface LayerProps {
-  columnFormatter: (colKey: string) => (x: any) => string
-  yColumnType: ColumnType
-  config: LayerConfig
-  plotConfig: SizedConfig
-  spec: LayerSpec
-  hoverX: number | null
-  hoverY: number | null
-  legendHide: boolean
-  height: number
-  width: number
-  xScale: Scale<number, number>
-  yScale: Scale<number, number>
-}
 
 export interface Scale<D = any, R = any> {
   (x: D): R
@@ -818,8 +351,6 @@ export type LinePosition = 'overlaid' | 'stacked'
 
 export type HistogramPosition = 'overlaid' | 'stacked'
 
-export type MosaicPosition = 'stacked'
-
 export type MosaicHoverDimension = 'x' | 'y' | 'xy'
 
 export type SymbolType =
@@ -848,19 +379,10 @@ export interface LatestIndexMap {
   [columnKey: string]: number
 }
 
-export type LineData = {
-  [groupID: number]: {
-    xs: number[]
-    ys: number[]
-    fill: string
-  }
-}
-
-export type CumulativeValuesByTime = {
-  [time: number]: {
-    [groupID: number]: number
-  }
-}
+export type LineData = Map<
+  number,
+  {xs: number[]; ys: number[]; fill: string}
+>
 
 export enum ErrorName {
   UnknownColumnTypeError = 'UnknownColumnTypeError',
@@ -884,6 +406,7 @@ export interface BandBorder {
   ys: Array<number>
   fill: string
 }
+
 export interface Band {
   lower?: BandBorder
   upper?: BandBorder
@@ -909,7 +432,10 @@ export interface StandardFunctionProps {
 export type AnnotationDimension = 'x' | 'y'
 
 export type AnnotationPinType = 'none' | 'circle' | 'start' | 'stop'
+
 export interface AnnotationMark {
+  id?: string
+
   title: string
   description: string
   color: string
@@ -917,5 +443,4 @@ export interface AnnotationMark {
   stopValue: number
   dimension: AnnotationDimension
   pin: AnnotationPinType
-  id?: string
 }

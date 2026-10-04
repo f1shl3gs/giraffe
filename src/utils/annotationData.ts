@@ -1,4 +1,7 @@
+// Types
 import {AnnotationMark, LineHoverDimension, Scale} from 'types'
+
+// Constants
 import {ANNOTATION_DEFAULT_OVERLAP_HOVER_MARGIN} from 'constants/index'
 
 export const getAnnotationsPositions = (
@@ -94,6 +97,7 @@ const getWeightedDistance = distance => {
   if (distance.annoType === 'range') {
     return distance.dist + ANNOTATION_DEFAULT_OVERLAP_HOVER_MARGIN
   }
+
   return distance.dist
 }
 
@@ -163,6 +167,7 @@ export const getAnnotationHoverIndices = (
                 annotationData[i].startValue === annotationData[i].stopValue
                   ? 'point'
                   : 'range'
+
               distances.push({index: i, dist, annoType})
             })
 

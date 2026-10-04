@@ -1,7 +1,7 @@
 import {
-  timeFormatter,
-  siPrefixFormatter,
   binaryPrefixFormatter,
+  siPrefixFormatter,
+  timeFormatter,
 } from './formatters'
 
 describe('timeFormatter', () => {

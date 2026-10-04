@@ -1,7 +1,5 @@
 import {extent} from 'd3-array'
 
-import {flatMap} from './flatMap'
-
 export const minBy = <T>(f: (x: T) => number, xs: T[]): T => {
   let minX = null
   let minDistance = Infinity
@@ -43,7 +41,7 @@ export const maxBy = <T>(f: (x: T) => number, xs: T[]): T => {
 export const extentOfExtents = (
   ...data: number[][]
 ): [number, number] | null => {
-  const result = extent(flatMap(data, d => extent(d)))
+  const result = extent(data.flatMap(d => extent(d)))
 
   if (result.some(x => x === undefined)) {
     return null

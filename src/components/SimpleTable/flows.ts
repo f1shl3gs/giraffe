@@ -1,4 +1,5 @@
-import {FromFluxResult, FluxDataType, Table} from 'index'
+import type {FluxDataType, Table} from 'types'
+import type {FromFluxResult} from 'utils/fromFlux'
 
 export type Column =
   | {

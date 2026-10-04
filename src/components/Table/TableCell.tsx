@@ -1,19 +1,19 @@
 // Libraries
-import {FunctionComponent, MouseEvent} from 'react'
 import classnames from 'classnames'
+import {CSSProperties, FunctionComponent, MouseEvent} from 'react'
+
+// Constants
+import {ASCENDING, DEFAULT_TIME_FIELD} from 'constants/tableGraph'
 
 // Types
-import {TableViewProperties, SortOptions, RenamableField} from 'types'
+import {RenamableField, SortOptions, TableViewProperties} from 'types'
 import {CellRendererProps} from './TableGraphTable'
 
 // Utils
 import {generateThresholdsListHexs} from 'utils/colorOperations'
-import {isString} from 'utils/isString'
 import {defaultTo} from 'utils/defaultTo'
 import {formatStatValue} from 'utils/formatStatValue'
-
-// Constants
-import {ASCENDING, DEFAULT_TIME_FIELD} from 'constants/tableGraph'
+import {isString} from 'utils/isString'
 
 // Styles
 import './TableGraphs.scss'
@@ -98,8 +98,8 @@ const getStyle = (props: Props) => {
   const {bgColor, textColor} = generateThresholdsListHexs(thresholdData)
   return {
     ...style,
-    backgroundColor: bgColor,
-    color: textColor,
+    backgroundColor: bgColor as CSSProperties['backgroundColor'],
+    color: textColor as CSSProperties['color'],
   }
 }
 
@@ -152,7 +152,7 @@ const getClassName = (props: Props): string => {
   })
 }
 
-function isBlank(pString) {
+function isBlank(pString: string) {
   // Checks for a non-white space character
   return !/[^\s]+/.test(pString)
 }
@@ -203,21 +203,32 @@ const getFieldName = (props: Props): string => {
     isFieldName(isVerticalTimeAxis, rowIndex, columnIndex) &&
     resolvedRenamableFields.find(({internalName}) => internalName === data)
 
-  return foundField && (foundField.displayName || foundField.internalName)
+  return foundField
+    ? foundField.displayName || foundField.internalName || ''
+    : ''
 }
 
-const isFieldName = (isVerticalTimeAxis, rowIndex, columnIndex): boolean =>
-  isVerticalTimeAxis ? isFirstRow(rowIndex) : isFirstCol(columnIndex)
+const isFieldName = (
+  isVerticalTimeAxis: boolean,
+  rowIndex: number,
+  columnIndex: number,
+): boolean => (isVerticalTimeAxis ? isFirstRow(rowIndex) : isFirstCol(columnIndex))
 
-const isHighlightedRow = (parent, rowIndex, hoveredRowIndex): boolean => {
+const isHighlightedRow = (
+  parent: Props['parent'],
+  rowIndex: number,
+  hoveredRowIndex: number,
+): boolean => {
   return (
-    (parent.current && rowIndex === parent.current.props.scrollToRow) ||
+    (parent?.current && rowIndex === parent.current.props.scrollToRow) ||
     (rowIndex === hoveredRowIndex && hoveredRowIndex > 0)
   )
 }
 
-const isHighlightedColumn = (columnIndex, hoveredColumnIndex): boolean =>
-  columnIndex === hoveredColumnIndex && hoveredColumnIndex > 0
+const isHighlightedColumn = (
+  columnIndex: number,
+  hoveredColumnIndex: number,
+): boolean => columnIndex === hoveredColumnIndex && hoveredColumnIndex > 0
 
 const isTimeData = (props: Props): boolean => {
   const {
@@ -237,30 +248,40 @@ const isTimeData = (props: Props): boolean => {
   )
 }
 
-const isSorted = (sortOptions, data): boolean => sortOptions.field === data
+const isSorted = (sortOptions: SortOptions, data: string): boolean =>
+  sortOptions.field === data
 
-const isAscending = (sortOptions): boolean =>
+const isAscending = (sortOptions: SortOptions): boolean =>
   sortOptions.direction === ASCENDING
 
-const isFirstRow = (rowIndex): boolean => rowIndex === 0
+const isFirstRow = (rowIndex: number): boolean => rowIndex === 0
 
-const isFirstCol = (columnIndex): boolean => columnIndex === 0
+const isFirstCol = (columnIndex: number): boolean => columnIndex === 0
 
-const isFixedRow = (rowIndex, columnIndex): boolean => {
+const isFixedRow = (rowIndex: number, columnIndex: number): boolean => {
   return isFirstRow(rowIndex) && !isFirstCol(columnIndex)
 }
 
-const isFixedColumn = (isFirstColumnFixed, rowIndex, columnIndex): boolean => {
+const isFixedColumn = (
+  isFirstColumnFixed: boolean,
+  rowIndex: number,
+  columnIndex: number,
+): boolean => {
   return isFirstColumnFixed && !isFirstRow(rowIndex) && isFirstCol(columnIndex)
 }
 
-const isFixedCorner = (rowIndex, columnIndex): boolean => {
+const isFixedCorner = (rowIndex: number, columnIndex: number): boolean => {
   return isFirstRow(rowIndex) && isFirstCol(columnIndex)
 }
 
-const isTimestamp = (dataType): boolean => dataType === 'dateTime:RFC3339'
+const isTimestamp = (dataType: string): boolean =>
+  dataType === 'dateTime:RFC3339'
 
-const isFixed = (isFirstColumnFixed, rowIndex, columnIndex): boolean => {
+const isFixed = (
+  isFirstColumnFixed: boolean,
+  rowIndex: number,
+  columnIndex: number,
+): boolean => {
   return (
     isFixedRow(rowIndex, columnIndex) ||
     isFixedColumn(isFirstColumnFixed, rowIndex, columnIndex) ||
@@ -268,7 +289,7 @@ const isFixed = (isFirstColumnFixed, rowIndex, columnIndex): boolean => {
   )
 }
 
-const getTimeFieldIndex = (resolvedRenamableFields): number => {
+const getTimeFieldIndex = (resolvedRenamableFields: RenamableField[]): number => {
   let hiddenBeforeTime = 0
   const timeIndex = resolvedRenamableFields.findIndex(
     ({internalName, visible}) => {

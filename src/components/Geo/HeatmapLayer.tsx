@@ -1,15 +1,18 @@
 // Libraries
 import {FunctionComponent} from 'react'
 
-import GeoHeatmapCanvas from './heatmap/GeoHeatmapCanvas'
+// Utils
+import {calculateMinAndMax, normalizeValue} from './dimensionCalculations'
 import {useGeoMap} from './GeoMapContext'
+import {GeoHeatMapViewLayer} from './geoTypes'
+import GeoHeatmapCanvas from './heatmap/GeoHeatmapCanvas'
 
 // Types
 import {GeoTable} from './processing/GeoTable'
-import {GeoHeatMapViewLayer} from 'types/geo'
 
-// Utils
-import {calculateMinAndMax, normalizeValue} from './dimensionCalculations'
+const DEFAULT_BLUR = 15
+const DEFAULT_RADIUS = 30
+const DEFAULT_GRADIENT = {0.4: 'blue', 0.8: 'orange', 1.0: 'red'}
 
 interface Props {
   table: GeoTable
@@ -19,12 +22,13 @@ interface Props {
   properties: GeoHeatMapViewLayer
 }
 
-const DEFAULT_BLUR = 15
-const DEFAULT_RADIUS = 30
-const DEFAULT_GRADIENT = {0.4: 'blue', 0.8: 'orange', 1.0: 'red'}
-
-const HeatmapLayer: FunctionComponent<Props> = props => {
-  const {properties, table, intensityFieldName, radius, blur} = props
+const HeatmapLayer: FunctionComponent<Props> = ({
+  properties,
+  table,
+  intensityFieldName,
+  radius,
+  blur,
+}) => {
   const map = useGeoMap()
   const {bounds} = properties.intensityDimension
   const intensityMinAndMax = intensityFieldName

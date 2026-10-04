@@ -1,4 +1,10 @@
 // Types
+
+import {Table} from 'types'
+import {timestampToString} from 'utils/geo'
+import type {LatLonColumns} from '../geoTypes'
+import {CoordinateEncoding, GeoTable, Track} from './GeoTable'
+import {getLatLonMixin} from './mixins'
 import {
   FIELD_COLUMN,
   filterMetaColumns,
@@ -6,20 +12,9 @@ import {
   TIME_COLUMN,
   VALUE_COLUMN,
 } from './tableProcessing'
-import {Table} from 'types'
-import {getLatLonMixin} from './mixins'
-import {CoordinateEncoding, GeoTable, Track} from './GeoTable'
-import {LatLonColumns} from 'types/geo'
-import {timestampToString} from 'utils/geo'
 
 interface GeoRow {
   [key: string]: number | string
-}
-
-export const isPivotSensible = table => {
-  const fieldColumn = table.getColumn(FIELD_COLUMN, 'string')
-  const valueColumn = table.getColumn(VALUE_COLUMN)
-  return fieldColumn && valueColumn
 }
 
 export class PivotedGeoTable implements GeoTable {

@@ -1,25 +1,35 @@
+import type {LegendConfig} from 'components/Legend/LegendConfig'
+import {TOOLTIP_MAXIMUM_OPACITY, TOOLTIP_MINIMUM_OPACITY} from 'constants/index'
 import {FunctionComponent, useMemo} from 'react'
 import {createPortal} from 'react-dom'
-
-import {LegendData, Config} from 'types'
-import {Legend} from './Legend'
+import {LegendData} from 'types'
 import {useLegendElement} from 'utils/legend/useTooltipElement'
-import {TOOLTIP_MAXIMUM_OPACITY, TOOLTIP_MINIMUM_OPACITY} from 'constants'
+import {Legend} from './Legend'
 
 interface Props {
   data: LegendData
-  config: Config
+  /* The tooltip only ever styles and filters the legend, so it takes the
+     legend half of the config rather than a whole PlotConfig. Geo renders
+     tooltips too and is not a plot. */
+  config: LegendConfig
+  width: number
+  height: number
 }
 
-export const Tooltip: FunctionComponent<Props> = ({data, config}) => {
+export const Tooltip: FunctionComponent<Props> = ({
+  data,
+  config,
+  width,
+  height,
+}) => {
   const {
-    legendBackgroundColor: backgroundColor,
-    legendBorder: border,
-    legendColumns,
-    legendFont: font,
-    legendFontBrightColor: fontBrightColor,
-    legendHide: isHidden,
-    legendOpacity,
+    backgroundColor,
+    border,
+    columns,
+    font,
+    fontBrightColor,
+    hide: isHidden,
+    opacity: legendOpacity,
   } = config
   const tooltipElement = useLegendElement('giraffe-tooltip-container')
 
@@ -34,7 +44,7 @@ export const Tooltip: FunctionComponent<Props> = ({data, config}) => {
   }, [legendOpacity])
 
   let isTooltipHidden = Boolean(isHidden)
-  if (Array.isArray(legendColumns) && legendColumns.length === 0) {
+  if (Array.isArray(columns) && columns.length === 0) {
     isTooltipHidden = true
   }
 
@@ -42,7 +52,15 @@ export const Tooltip: FunctionComponent<Props> = ({data, config}) => {
     return null
   }
 
-  const tooltipContents = <Legend type='tooltip' data={data} config={config} />
+  const tooltipContents = (
+    <Legend
+      type='tooltip'
+      data={data}
+      config={config}
+      width={width}
+      height={height}
+    />
+  )
 
   return createPortal(
     <div

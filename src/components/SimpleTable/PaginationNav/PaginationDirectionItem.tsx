@@ -1,10 +1,6 @@
 // Libraries
 import classnames from 'classnames'
 import {FunctionComponent, MouseEvent, RefObject} from 'react'
-
-// Component
-import {Index} from './Button'
-
 // Types
 import {
   ButtonShape,
@@ -14,6 +10,8 @@ import {
   IconFont,
   StandardFunctionProps,
 } from 'types'
+// Component
+import {Index} from './Button'
 
 // Styles
 import './Pagination.scss'

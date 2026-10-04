@@ -11,6 +11,9 @@
   the Storybook phase.
 */
 
+import classnames from 'classnames'
+// Constants
+import {InfluxColors} from 'constants/colorSchemes'
 // Libraries
 import {
   CSSProperties,
@@ -20,20 +23,15 @@ import {
   useRef,
   useState,
 } from 'react'
-import classnames from 'classnames'
-
 // Types
 import {ComponentSize, StandardFunctionProps} from 'types'
-
-// Constants
-import {InfluxColors} from 'constants/colorSchemes'
 
 // Styles
 import './DapperScrollbars.scss'
 
 /** Scroll geometry snapshot passed to `onScroll`. Replaces the ScrollState
  * object emitted by react-scrollbars-custom (same field names, plain object). */
-interface DapperScrollValues {
+export interface DapperScrollValues {
   scrollTop: number
   scrollLeft: number
   scrollHeight: number

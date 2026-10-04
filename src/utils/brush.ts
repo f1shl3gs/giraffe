@@ -1,4 +1,5 @@
 import {Scale} from 'types'
+
 import {DragEvent} from 'utils/useDragEvent'
 
 export const getRectDimensions = (

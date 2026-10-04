@@ -1,1 +1,2 @@
-export {LineLayer} from './LineLayer'
+export type {LineConfig, LineProps} from './Line'
+export {Line} from './Line'

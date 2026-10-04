@@ -1,11 +1,11 @@
-import {StaticLegend} from 'types'
+import type {StaticLegendConfig} from 'components/Plot/PlotConfig'
+import {STATIC_LEGEND_DEFAULTS} from 'components/Plot/StaticLegendDefaults'
 import {
-  STATIC_LEGEND_DEFAULTS,
   STATIC_LEGEND_MAXIMUM_HEIGHT_RATIO,
   STATIC_LEGEND_MAXIMUM_WIDTH_RATIO,
   STATIC_LEGEND_MINIMUM_HEIGHT_RATIO,
   STATIC_LEGEND_MINIMUM_WIDTH_RATIO,
-} from 'constants'
+} from 'constants/index'
 
 interface ResizedPlotDimensions {
   height: number
@@ -15,7 +15,7 @@ interface ResizedPlotDimensions {
 export const resizePlotWithStaticLegend = (
   height: number,
   width: number,
-  staticLegendProperties?: StaticLegend,
+  staticLegendProperties?: StaticLegendConfig,
 ): ResizedPlotDimensions => {
   const resizedPlotDimensions = {
     height: height || 0,

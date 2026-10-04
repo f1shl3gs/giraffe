@@ -1,10 +1,8 @@
 import {BandLineMap, LineData, NumericColumnData, Scale, Table} from 'types'
 
-import {isDefined} from './isDefined'
-import {isNumber} from './isNumber'
-
 // Constant
 import {FILL} from 'constants/columnKeys'
+import {isDefined} from './isDefined'
 
 export const getBandHoverPoints = (
   table: Table,
@@ -18,14 +16,14 @@ export const getBandHoverPoints = (
   const xColData = table.getColumn(xColKey, 'number')
   const yColData = table.getColumn(yColKey, 'number')
   const groupColData = table.getColumn(FILL, 'number')
-  const lines = lineData || {}
+  if (!xColData || !yColData || !groupColData) {
+    return []
+  }
 
   return hoverRowIndices.map(hoverIndex => {
-    let color = ''
     const lineIndex = groupColData[hoverIndex]
-    if (isNumber(lineIndex) && lines[lineIndex]) {
-      color = lines[lineIndex].fill
-    }
+    const color = lineData?.get(lineIndex)?.fill ?? ''
+
     return {
       x: xScale(xColData[hoverIndex]),
       y: yScale(yColData[hoverIndex]),
@@ -42,23 +40,18 @@ interface LineLengths {
 }
 
 export const getLineLengths = (lineData: LineData): LineLengths => {
-  const keys = Object.keys(lineData)
-
   const lineLengths = {}
   let total = 0
-  if (Array.isArray(keys)) {
-    keys.forEach(lineIndex => {
-      const length = Math.min(
-        lineData[lineIndex].xs.length,
-        lineData[lineIndex].ys.length,
-      )
-      if (!lineLengths[lineIndex]) {
-        lineLengths[lineIndex] = {}
-      }
-      lineLengths[lineIndex].length = length
-      lineLengths[lineIndex].startIndex = total
-      total += length
-    })
+
+  for (const [lineIndex, series] of lineData) {
+    const length = Math.min(series.xs.length, series.ys.length)
+
+    if (!lineLengths[lineIndex]) {
+      lineLengths[lineIndex] = {}
+    }
+    lineLengths[lineIndex].length = length
+    lineLengths[lineIndex].startIndex = total
+    total += length
   }
   return lineLengths
 }

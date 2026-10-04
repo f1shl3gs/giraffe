@@ -1,5 +1,5 @@
-import {s2IdToLatLngFixtures} from './s2IdToLatLng.fixtures'
 import {s2IdToKey, s2IdToLatLng} from './s2IdToLatLng'
+import {s2IdToLatLngFixtures} from './s2IdToLatLng.fixtures'
 
 describe('s2IdToKey edge cases', () => {
   it('decodes canonical level-0 face ids to bare "<face>/" quadkeys', () => {

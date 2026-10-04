@@ -1,10 +1,5 @@
 // Libraries
 import {FunctionComponent, RefObject} from 'react'
-
-// Components
-import {ButtonBase} from './ButtonBase'
-import {IconAndText} from './IconAndText'
-
 // Types
 import {
   ButtonShape,
@@ -14,7 +9,9 @@ import {
   ComponentStatus,
   IconFont,
 } from 'types'
-import {ButtonBaseProps} from './ButtonBase'
+// Components
+import {ButtonBase, ButtonBaseProps} from './ButtonBase'
+import {IconAndText} from './IconAndText'
 
 export interface ButtonProps extends ButtonBaseProps {
   /** Text to be displayed on button */

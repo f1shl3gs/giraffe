@@ -1,8 +1,8 @@
 // Libraries
-import {FunctionComponent} from 'react'
 
 // Components
 import {Icon} from 'components/Icon'
+import {FunctionComponent} from 'react'
 
 // Types
 import {IconFont} from 'types'

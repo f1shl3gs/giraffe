@@ -27,7 +27,6 @@ describe('getContent() table cell tests', () => {
     hoveredColumnIndex: 0,
     isFirstColumnFixed: false,
     isTimeVisible: true,
-    isScrolling: false,
     onClickFieldName: vi.fn(),
     onHover: vi.fn(),
     resolvedRenamableFields: [],

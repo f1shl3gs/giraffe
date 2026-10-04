@@ -1,7 +1,7 @@
 import {render} from '@testing-library/react'
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest'
-import GeoHeatmapCanvas from './GeoHeatmapCanvas'
 import {drawHeatmap} from './drawHeatmap'
+import GeoHeatmapCanvas from './GeoHeatmapCanvas'
 
 // drawHeatmap depends on a real canvas (jsdom has no 2d context), so mock it to isolate this integration test layer
 vi.mock('./drawHeatmap', () => ({drawHeatmap: vi.fn()}))

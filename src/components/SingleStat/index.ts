@@ -1,1 +1,2 @@
-export {SingleStatLayer} from './SingleStatLayer'
+export type {SingleStatConfig, SingleStatProps} from './SingleStat'
+export {SingleStat} from './SingleStat'

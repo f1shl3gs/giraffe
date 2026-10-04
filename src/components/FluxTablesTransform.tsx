@@ -1,12 +1,9 @@
 // Libraries
-import {useMemo, FunctionComponent, JSX} from 'react'
-
-// Utils
-import {parseResponse} from 'utils/fluxParsing'
-import {flatMap} from 'utils/flatMap'
-
+import {FunctionComponent, JSX, useMemo} from 'react'
 // Types
 import {FluxTable} from 'types'
+// Utils
+import {parseResponse} from 'utils/fluxParsing'
 
 interface Props {
   files: string[]
@@ -17,6 +14,6 @@ export const FluxTablesTransform: FunctionComponent<Props> = ({
   files,
   children,
 }) => {
-  const tables = useMemo(() => flatMap(files, parseResponse), [files])
+  const tables = useMemo(() => files.flatMap(parseResponse), [files])
   return children(tables)
 }

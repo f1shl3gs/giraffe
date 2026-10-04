@@ -1,6 +1,6 @@
 {
   "name": "@influxdata/giraffe",
-  "version": "2.38.1",
+  "version": "3.0.0",
   "type": "module",
   "module": "dist/index.js",
   "types": "./dist/index.d.ts",
@@ -15,7 +15,7 @@
     "directory": "giraffe"
   },
   "scripts": {
-    "build": "tsdown && tsc --emitDeclarationOnly --declaration --outDir dist",
+    "build": "tsdown && tsc -p tsconfig.build.json --emitDeclarationOnly --declaration --outDir dist",
     "fmt": "biome format --write .",
     "publish": "echo 'To publish giraffe, run ./publish $version'",
     "start": "tsdown --watch",
@@ -23,7 +23,10 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit --pretty",
-    "prepack": "tsdown && tsc --emitDeclarationOnly --declaration --outDir dist"
+    "typecheck:watch": "tsc --noEmit --pretty --watch",
+    "prepack": "tsdown && tsc -p tsconfig.build.json --emitDeclarationOnly --declaration --outDir dist",
+    "storybook": "storybook dev -p 50000",
+    "storybook:build": "storybook build -o storybook-static"
   },
   "keywords": [
     "band",
@@ -47,10 +50,18 @@
   ],
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",
+    "@storybook/addon-docs": "^10.5.10",
+    "@storybook/react": "^10.5.10",
+    "@storybook/react-vite": "^10.5.10",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
     "@tsdown/css": "^0.23.0",
     "@types/d3-array": "^3.2.2",
+    "@types/d3-color": "^3.1.3",
+    "@types/d3-format": "^3.0.4",
+    "@types/d3-interpolate": "^3.0.4",
+    "@types/d3-scale": "^4.0.9",
+    "@types/d3-shape": "^3.2.0",
     "@types/jest": "^30.0.0",
     "@types/jsdom": "^30",
     "@types/leaflet": "^1.9.20",
@@ -61,7 +72,6 @@
     "@vitest/coverage-v8": "^4.1.11",
     "classnames": "^2.2.3",
     "jsdom": "^30.0.1",
-    "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.4.1",
     "loader-utils": "^2.0.4",
     "memoize-one": "^6.0.0",
@@ -71,8 +81,10 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "sass": "^1.103.1",
+    "storybook": "^10.5.10",
     "tsdown": "^0.23.0",
     "typescript": "7.0.2",
+    "vite": "^8.2.2",
     "vitest": "^4.1.11"
   },
   "peerDependencies": {
@@ -87,6 +99,6 @@
     "d3-scale": "^4.0.2",
     "d3-shape": "^3.2.0",
     "d3-time": "^3.1.0",
-    "merge-images": "^2.0.0"
+    "leaflet": "^1.9.4"
   }
 }

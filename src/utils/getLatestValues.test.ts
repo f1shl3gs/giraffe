@@ -1,5 +1,5 @@
+import {newTable} from 'utils/newTable'
 import {getLatestValues} from './getLatestValues'
-import {newTable} from '../utils/newTable'
 
 describe('getLatestValues', () => {
   it('gives an empty array when table is empty', () => {

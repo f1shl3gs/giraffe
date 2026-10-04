@@ -1,5 +1,5 @@
 // Libraries
-import {useMemo, FunctionComponent, ReactElement} from 'react'
+import {FunctionComponent, ReactElement, useMemo} from 'react'
 import {Table} from 'types'
 
 // Utils

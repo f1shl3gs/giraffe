@@ -1,15 +1,18 @@
+import type {LegendConfig} from 'components/Legend/LegendConfig'
 import {FunctionComponent} from 'react'
-
+import {generateLegendStyles} from 'style/legend'
+import {LegendData, LegendType} from 'types'
 import {LegendColumn} from './LegendColumn'
 import {LegendPillColumn} from './LegendPillColumn'
-
-import {Config, LegendData, LegendType} from 'types'
-import {generateLegendStyles} from 'style/legend'
 
 interface Props {
   type: LegendType
   data: LegendData
-  config: Config
+  /* The legend takes the legend half of the config, not the whole PlotConfig,
+     so that non-plot callers (Geo) can render it too. */
+  config: LegendConfig
+  width: number
+  height: number
   isScrollable?: boolean
 }
 
@@ -17,16 +20,16 @@ export const Legend: FunctionComponent<Props> = ({
   type: legendType,
   data,
   config,
+  width,
+  height,
   isScrollable = false,
 }) => {
   const {
-    width,
-    height,
-    legendFontColor: fontColor,
-    legendFontBrightColor: fontBrightColor,
-    legendColumns: columnsWhitelist,
-    legendOrientationThreshold: orientationThreshold,
-    legendColorizeRows: colorizeRows,
+    fontColor,
+    fontBrightColor,
+    columns: columnsWhitelist,
+    orientationThreshold,
+    colorizeRows,
   } = config
 
   let columns = []

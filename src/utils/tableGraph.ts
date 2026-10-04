@@ -1,15 +1,11 @@
-import {fastFilter, fastMap, fastReduce} from './fast'
-
 // Types
 import {
   ColumnWidths,
   DecimalPlaces,
-  FluxTable,
   RenamableField,
   SortOptions,
   TableViewProperties,
 } from 'types'
-
 // Constants
 import {
   CELL_HORIZONTAL_PADDING,
@@ -18,6 +14,7 @@ import {
   DEFAULT_VERTICAL_TIME_AXIS,
   FORMAT_OPTIONS,
 } from 'constants/tableGraph'
+import {fastFilter, fastMap, fastReduce} from './fast'
 
 type TableOptions = TableViewProperties['tableOptions']
 
@@ -36,15 +33,6 @@ export interface TransformTableDataReturnType {
 export enum ErrorTypes {
   MetaQueryCombo = 'MetaQueryCombo',
   GeneralError = 'Error',
-}
-
-export const getInvalidDataMessage = (errorType: ErrorTypes): string => {
-  switch (errorType) {
-    case ErrorTypes.MetaQueryCombo:
-      return 'Cannot display data for meta queries mixed with data queries'
-    default:
-      return null
-  }
 }
 
 const calculateTimeColumnWidth = (timeFormat: string): number => {
@@ -303,19 +291,6 @@ export const transformTableData = (
   }
 }
 
-/*
-  Checks whether an input value of arbitrary type can be parsed into a
-  number. Note that there are two different `isNaN` checks, since
-
-  - `Number('')` is 0
-  - `Number('02abc')` is NaN
-  - `parseFloat('')` is NaN
-  - `parseFloat('02abc')` is 2
-
-*/
-export const isNumerical = (x: any): boolean =>
-  !isNaN(Number(x)) && !isNaN(parseFloat(x))
-
 export const findHoverTimeIndex = (
   sortedTimeVals: string[],
   hoverTime: number,
@@ -349,11 +324,6 @@ export const findHoverTimeIndex = (
  */
 export const getUnixISODiff = (unixMs: number, isoTime: string | number) => {
   return Math.abs(unixMs - new Date(isoTime).valueOf())
-}
-
-export const findTableNameHeaders = (tables: FluxTable[], name: string) => {
-  const table = tables.find(table => table.name === name)
-  return table.data[0] ?? []
 }
 
 export const resolveTimeFormat = (timeFormat: string) => {

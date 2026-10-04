@@ -1,8 +1,7 @@
-import {isNumber} from './isNumber'
-import {isString} from './isString'
-import {preventNegativeZero} from './preventNegativeZero'
-
+// Types
 import {DecimalPlaces} from 'types'
+
+import {preventNegativeZero} from './preventNegativeZero'
 
 export const MAX_DECIMAL_PLACES = 10
 
@@ -39,16 +38,15 @@ export const formatStatValue = (
     maximumFractionDigits: digits,
   })
 
-  if (isNumber(value)) {
+  if (typeof value === 'number') {
     localeFormattedValue = formatter.format(Number(value))
-  } else if (isString(value)) {
+  } else if (typeof value === 'string') {
     localeFormattedValue = value
   } else {
     return 'Data cannot be displayed'
   }
 
   localeFormattedValue = preventNegativeZero(localeFormattedValue)
-  const formattedValue = `${prefix || ''}${localeFormattedValue}${suffix || ''}`
 
-  return formattedValue
+  return `${prefix || ''}${localeFormattedValue}${suffix || ''}`
 }

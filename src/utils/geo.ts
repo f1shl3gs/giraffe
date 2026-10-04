@@ -1,15 +1,16 @@
+// Libraries
 import L from 'leaflet'
-import {
-  ClusterAggregation,
+
+import {getColor} from 'components/Geo/dimensionCalculations'
+import type {
   GeoCircleViewLayer,
   GeoPointMapViewLayer,
   GeoQueryVariables,
   GeoViewLayer,
-} from 'types'
+} from 'components/Geo/geoTypes'
+import {ClusterAggregation} from 'components/Geo/geoTypes'
 import {GeoTable} from 'components/Geo/processing/GeoTable'
-
 import {formatValue} from 'components/Geo/processing/toolTips'
-import {getColor} from 'components/Geo/dimensionCalculations'
 
 // Constants
 export const ZOOM_FRACTION = 8

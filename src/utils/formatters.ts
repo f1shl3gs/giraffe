@@ -35,30 +35,30 @@ const WEEK = 1000 * 60 * 60 * 24 * 7
 const TIME_FORMATS_BY_GRANULARITY = [
   {
     minWidth: 0,
-    maxWidth: 1 * MINUTE,
+    maxWidth: MINUTE,
     local12: 'hh:mm:ss.sss A',
     local24: 'HH:mm:ss.sss ZZ',
     zoned12: 'hh:mm:ss.sss A ZZ',
     zoned24: 'HH:mm:ss.sss ZZ',
   },
   {
-    minWidth: 1 * MINUTE,
-    maxWidth: 1 * HOUR,
+    minWidth: MINUTE,
+    maxWidth: HOUR,
     local12: 'hh:mm:ss A',
     local24: 'HH:mm:ss ZZ',
     zoned12: 'hh:mm:ss A ZZ',
     zoned24: 'HH:mm:ss ZZ',
   },
   {
-    minWidth: 1 * HOUR,
-    maxWidth: 1 * DAY,
+    minWidth: HOUR,
+    maxWidth: DAY,
     local12: 'hh:mm A',
     local24: 'HH:mm ZZ',
     zoned12: 'hh:mm A ZZ',
     zoned24: 'HH:mm ZZ',
   },
   {
-    minWidth: 1 * DAY,
+    minWidth: DAY,
     maxWidth: 2 * WEEK,
     local12: 'MMM DD, hh:mm A',
     local24: 'MMM DD, HH:mm ZZ',
@@ -398,7 +398,7 @@ export const binaryPrefixFormatter = ({
 
     const decimalFormattedNumber = formatSigFigs(binaryFormattedNumber)
 
-    if (format !== true) {
+    if (!format) {
       return `${prefix}${x}${suffix}`
     }
 

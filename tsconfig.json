@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "rootDir": "src",
     "outDir": "dist",
     "allowSyntheticDefaultImports": true,
     "declaration": true,
@@ -14,20 +13,12 @@
     ],
     "module": "esnext",
     "moduleResolution": "bundler",
-    // TS7 (tsgo) defaults to strict mode when `strict` is not explicitly set;
-    // commenting out strict options does NOT relax them, so an explicit false is required.
-    // Re-enable each strict option below as needed, verifying with `yarn build`.
-    "strict": false,
-    // Relaxed: source has many implicit any (e.g. event params in useMousePos.ts, '_' in useHoverPointIndices.ts); re-enable after annotating types
-    // "noImplicitAny": true,
-    // Relaxed: some functions don't cover every return path (e.g. mixins.ts); re-enable after adding missing returns
-    // "noImplicitReturns": true,
-    // Relaxed: mixins.ts uses a `this`-mixin pattern (getLatLonMixin.bind(this)); cannot enable until `this` is typed
-    // "noImplicitThis": true,
-    // Relaxed: historically loose checks, many `possibly undefined` cases to fix first (e.g. useDragEvent/initDrag); biggest lift, enable last
-    // "strictNullChecks": true,
-    // Relaxed: several unused imports (e.g. React) need cleanup first
-    // "noUnusedLocals": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
     "sourceMap": true,
     "target": "es2023",
     "types": [
@@ -42,11 +33,29 @@
 
     // import path
     "paths": {
-      "*": ["./src/*"]
+      // Explicit rather than a "*" wildcard: with "*", every bare specifier
+      // (including npm packages like `d3-shape`) is first looked up under
+      // src/, and tsgo gives up on the importing module's own exports when
+      // that probe misses.
+      "components/*": ["./src/components/*"],
+      // No bare "constants" entry on purpose. tsgo (TS 7) silently drops the
+      // exports of a non-wildcard `paths` entry when it resolves to a file --
+      // `from 'constants'` reported "has no exported member" for every name in
+      // src/constants/index.ts, while the identical target reached through the
+      // wildcard below worked. So import `from 'constants/index'` instead.
+      "constants/*": ["./src/constants/*"],
+      "hooks/*": ["./src/hooks/*"],
+      "stories/*": ["./stories/*"],
+      "style/*": ["./src/style/*"],
+      "types": ["./src/types"],
+      "types/*": ["./src/types/*"],
+      "utils": ["./src/utils"],
+      "utils/*": ["./src/utils/*"]
     }
   },
   "include": [
     "src",
+    "stories",
     "typings.d.ts",
     "assets.d.ts"
   ],

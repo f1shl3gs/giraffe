@@ -1,4 +1,5 @@
 // Libraries
+import type {CSSProperties, Ref} from 'react'
 import {
   ReactElement,
   RefObject,
@@ -10,8 +11,10 @@ import {
 
 // Components
 import {DapperScrollbars} from '../DapperScrollbars'
+import type {DapperScrollValues} from '../DapperScrollbars/DapperScrollbars'
 import {getItemOffset, getItemSize} from './gridGeometry'
-import {WindowGrid, WindowGridHandle} from './WindowGrid'
+import type {WindowGridCellArgs, WindowGridHandle} from './WindowGrid'
+import {WindowGrid} from './WindowGrid'
 
 // Styles
 import './TableGraphs.scss'
@@ -22,7 +25,18 @@ type HeightWidthFunction = (arg: {index: number}) => number
 export interface PropsMultiGrid {
   width: number
   height: number
-  columnCount?: number
+  /*
+    Required, not optional, because the grid uses all three with no guard:
+    `cellRenderer` is forwarded to <WindowGrid> untouched (which would crash on
+    the first cell), and `columnCount` / `rowCount` are subtracted in
+    `Math.max(0, columnCount - fixedColumnCount)`, where an absent one yields
+    NaN rather than 0. <WindowGrid> requires the same three, and MultiGrid's
+    only caller supplies them.
+
+    `columnWidth` / `rowHeight` stay optional on purpose -- every render site
+    guards those with `?? 0`.
+  */
+  columnCount: number
   classNameBottomLeftGrid?: string
   classNameBottomRightGrid?: string
   classNameTopLeftGrid?: string
@@ -31,21 +45,78 @@ export interface PropsMultiGrid {
   enableFixedRowScroll?: boolean
   fixedColumnCount?: number
   fixedRowCount?: number
-  style?: object
-  styleBottomLeftGrid?: object
-  styleBottomRightGrid?: object
-  styleTopLeftGrid?: object
-  styleTopRightGrid?: object
+  style?: CSSProperties
+  styleBottomLeftGrid?: CSSProperties
+  styleBottomRightGrid?: CSSProperties
+  styleTopLeftGrid?: CSSProperties
+  styleTopRightGrid?: CSSProperties
   scrollTop?: number
   scrollLeft?: number
-  rowCount?: number
+  /*
+    Destructured by the component and passed by <TableGraphTable>, but never
+    declared: they only type-checked because of the `[key: string]: any` that
+    used to sit at the end of this interface.
+  */
+  scrollToRow?: number
+  scrollToColumn?: number
+  rowCount: number
   rowHeight?: number | HeightWidthFunction
   columnWidth?: number | HeightWidthFunction
-  onScroll?: (arg: object) => {}
-  onSectionRendered?: () => {}
-  cellRenderer?: (arg: object) => ReactElement
-  [key: string]: any // MultiGrid can accept any prop, and will rerender if they change
-  ref?: RefObject<MultiGridInputHandles>
+  onScroll?: (values: DapperScrollValues) => void
+  onSectionRendered?: () => void
+  /*
+    `parent` is added by MultiGrid's own cellRenderer wrappers -- it tells a
+    renderer which quadrant it is drawing for -- so it is not part of what
+    <WindowGrid> hands out, hence the intersection rather than a field on
+    WindowGridCellArgs.
+  */
+  cellRenderer: (args: WindowGridCellArgs & {parent?: unknown}) => ReactElement
+  /*
+    Was `[key: string]: any`, which every caller leaned on: <TableGraphTable>
+    passes `onMount`, which was never declared. An index signature also makes
+    TS treat every key of a `{...defaults, ...rest}` spread as "specified more
+    than once", which is why the grid's own default object could not be given
+    a type. Declaring the one real member keeps the same permissiveness for
+    callers and leaves the spread analysable.
+  */
+  onMount?: (handle: MultiGridInputHandles | null) => void
+  /*
+    Ref, not RefObject: the only caller passes <ColumnSizer>'s registerChild,
+    which is a callback. useImperativeHandle accepts both, so the narrower type
+    was rejecting the one ref this component actually gets.
+  */
+  ref?: Ref<MultiGridInputHandles>
+}
+
+/*
+  PropsMultiGrid after `restWithDefault`.
+
+  These are the fields the grid defaults itself, so downstream of that object
+  they are plain values rather than `T | undefined` -- which is what lets the
+  maths below subtract `fixedRowCount` without a guard at every use. Only the
+  ones actually defaulted belong here; `columnCount`, `rowCount` and
+  `cellRenderer` are required on PropsMultiGrid itself because the grid uses
+  them unconditionally.
+
+  Naming the two apart is also what keeps the defaults honest: adding a field
+  here that nothing defaults would be a lie TS cannot catch.
+*/
+export interface ResolvedMultiGridProps extends PropsMultiGrid {
+  classNameBottomLeftGrid: string
+  classNameBottomRightGrid: string
+  classNameTopLeftGrid: string
+  classNameTopRightGrid: string
+  enableFixedColumnScroll: boolean
+  enableFixedRowScroll: boolean
+  fixedColumnCount: number
+  fixedRowCount: number
+  scrollToColumn: number
+  scrollToRow: number
+  style: CSSProperties
+  styleBottomLeftGrid: CSSProperties
+  styleBottomRightGrid: CSSProperties
+  styleTopLeftGrid: CSSProperties
+  styleTopRightGrid: CSSProperties
 }
 
 interface State {
@@ -56,16 +127,16 @@ interface State {
   showVerticalScrollbar: boolean
   leftGridWidth: number | null
   topGridHeight: number | null
-  bottomRightGridStyle: object | null
-  topRightGridStyle: object | null
-  containerTopStyle: object | null
-  containerBottomStyle: object | null
-  containerOuterStyle: object | null
-  bottomLeftGridStyle: object | null
-  topLeftGridStyle: object | null
+  bottomRightGridStyle: CSSProperties | null
+  topRightGridStyle: CSSProperties | null
+  containerTopStyle: CSSProperties | null
+  containerBottomStyle: CSSProperties | null
+  containerOuterStyle: CSSProperties | null
+  bottomLeftGridStyle: CSSProperties | null
+  topLeftGridStyle: CSSProperties | null
 }
 
-const getBottomGridHeight = (state: State, props: PropsMultiGrid) => {
+const getBottomGridHeight = (state: State, props: ResolvedMultiGridProps) => {
   const {height} = props
 
   const topGridHeight = state.topGridHeight ?? 0
@@ -73,7 +144,7 @@ const getBottomGridHeight = (state: State, props: PropsMultiGrid) => {
   return height - topGridHeight
 }
 
-const getRightGridWidth = (state: State, props: PropsMultiGrid) => {
+const getRightGridWidth = (state: State, props: ResolvedMultiGridProps) => {
   const {width} = props
   const leftGridWidth = state.leftGridWidth ?? 0
 
@@ -81,9 +152,9 @@ const getRightGridWidth = (state: State, props: PropsMultiGrid) => {
 }
 
 const cellRendererTopRightGrid = (
-  props: PropsMultiGrid,
-  parent,
-  {columnIndex, ...rest},
+  props: ResolvedMultiGridProps,
+  parent: unknown,
+  {columnIndex, ...rest}: WindowGridCellArgs,
 ) => {
   const {cellRenderer, columnCount, fixedColumnCount} = props
 
@@ -106,9 +177,9 @@ const cellRendererTopRightGrid = (
 }
 
 const cellRendererBottomLeftGrid = (
-  props: PropsMultiGrid,
-  parent,
-  {rowIndex, ...rest},
+  props: ResolvedMultiGridProps,
+  parent: unknown,
+  {rowIndex, ...rest}: WindowGridCellArgs,
 ) => {
   const {cellRenderer, fixedRowCount, rowCount} = props
 
@@ -132,9 +203,9 @@ const cellRendererBottomLeftGrid = (
 }
 
 const cellRendererBottomRightGrid = (
-  props: PropsMultiGrid,
-  parent,
-  {columnIndex, rowIndex, ...rest},
+  props: ResolvedMultiGridProps,
+  parent: unknown,
+  {columnIndex, rowIndex, ...rest}: WindowGridCellArgs,
 ) => {
   const {cellRenderer, fixedColumnCount, fixedRowCount} = props
 
@@ -146,7 +217,11 @@ const cellRendererBottomRightGrid = (
   })
 }
 
-const columnWidthRightGrid = (state: State, props: PropsMultiGrid, {index}) => {
+const columnWidthRightGrid = (
+  state: State,
+  props: ResolvedMultiGridProps,
+  {index}: {index: number},
+): number => {
   const {columnCount, fixedColumnCount, columnWidth} = props
   const {scrollbarSize, showHorizontalScrollbar} = state
 
@@ -160,10 +235,14 @@ const columnWidthRightGrid = (state: State, props: PropsMultiGrid, {index}) => {
 
   return typeof columnWidth === 'function'
     ? columnWidth({index: index + fixedColumnCount})
-    : columnWidth
+    : (columnWidth ?? 0)
 }
 
-const rowHeightBottomGrid = (state: State, props: PropsMultiGrid, {index}) => {
+const rowHeightBottomGrid = (
+  state: State,
+  props: ResolvedMultiGridProps,
+  {index}: {index: number},
+): number => {
   const {fixedRowCount, rowCount, rowHeight} = props
   const {scrollbarSize, showVerticalScrollbar} = state
 
@@ -177,10 +256,14 @@ const rowHeightBottomGrid = (state: State, props: PropsMultiGrid, {index}) => {
 
   return typeof rowHeight === 'function'
     ? rowHeight({index: index + fixedRowCount})
-    : rowHeight
+    : (rowHeight ?? 0)
 }
 
-const onScroll = (setState: Function, props: PropsMultiGrid, scrollInfo) => {
+const onScroll = (
+  setState: Function,
+  props: ResolvedMultiGridProps,
+  scrollInfo: DapperScrollValues,
+) => {
   const {scrollLeft, scrollTop} = scrollInfo
   setState((prevState: State) => ({
     ...prevState,
@@ -198,8 +281,8 @@ const onScroll = (setState: Function, props: PropsMultiGrid, scrollInfo) => {
 
 const renderTopLeftGrid = (
   state: State,
-  props: PropsMultiGrid,
-  topLeftGridRef,
+  props: ResolvedMultiGridProps,
+  topLeftGridRef: RefObject<WindowGridHandle | null>,
 ) => {
   const {fixedColumnCount, fixedRowCount} = props
 
@@ -230,8 +313,8 @@ const renderTopLeftGrid = (
 
 const renderTopRightGrid = (
   state: State,
-  props: PropsMultiGrid,
-  topRightGridRef,
+  props: ResolvedMultiGridProps,
+  topRightGridRef: RefObject<WindowGridHandle | null>,
 ) => {
   const {columnCount, fixedColumnCount, fixedRowCount, scrollLeft} = props
 
@@ -242,10 +325,10 @@ const renderTopRightGrid = (
   const width = getRightGridWidth(state, props)
   const height = state.topGridHeight ?? 0
 
-  const cellRendererTopRightGridCallback = args =>
+  const cellRendererTopRightGridCallback = (args: WindowGridCellArgs) =>
     cellRendererTopRightGrid.call(null, props, topRightGridRef, args)
-  const columnWidthRightGridCallback = args =>
-    columnWidthRightGrid.call(null, state, props, args)
+  const columnWidthRightGridCallback = ({index}: {index: number}) =>
+    columnWidthRightGrid.call(null, state, props, {index})
 
   const style = {
     ...state.topRightGridStyle,
@@ -271,8 +354,8 @@ const renderTopRightGrid = (
 
 const renderBottomLeftGrid = (
   state: State,
-  props: PropsMultiGrid,
-  bottomLeftGridRef,
+  props: ResolvedMultiGridProps,
+  bottomLeftGridRef: RefObject<WindowGridHandle | null>,
 ) => {
   const {fixedColumnCount, fixedRowCount, rowCount, scrollTop} = props
 
@@ -282,10 +365,10 @@ const renderBottomLeftGrid = (
 
   const height = getBottomGridHeight(state, props)
 
-  const cellRendererBottomLeftGridCallback = args =>
+  const cellRendererBottomLeftGridCallback = (args: WindowGridCellArgs) =>
     cellRendererBottomLeftGrid.call(null, props, bottomLeftGridRef, args)
-  const rowHeightBottomGridCallback = args =>
-    rowHeightBottomGrid.call(null, state, props, args)
+  const rowHeightBottomGridCallback = ({index}: {index: number}) =>
+    rowHeightBottomGrid.call(null, state, props, {index})
 
   const style = {
     ...state.bottomLeftGridStyle,
@@ -311,8 +394,8 @@ const renderBottomLeftGrid = (
 const renderBottomRightGrid = (
   state: State,
   setState: Function,
-  props,
-  bottomRightGridRef,
+  props: ResolvedMultiGridProps,
+  bottomRightGridRef: RefObject<WindowGridHandle | null>,
 ) => {
   const {
     columnCount,
@@ -326,14 +409,14 @@ const renderBottomRightGrid = (
   const width = getRightGridWidth(state, props)
   const height = getBottomGridHeight(state, props)
 
-  const cellRendererBottomRightGridCallback = args =>
+  const cellRendererBottomRightGridCallback = (args: WindowGridCellArgs) =>
     cellRendererBottomRightGrid.call(null, props, bottomRightGridRef, args)
-  const columnWidthRightGridCallback = args =>
-    columnWidthRightGrid.call(null, state, props, args)
-  const onScrollCallback = scrollInfo =>
+  const columnWidthRightGridCallback = ({index}: {index: number}) =>
+    columnWidthRightGrid.call(null, state, props, {index})
+  const onScrollCallback = (scrollInfo: DapperScrollValues) =>
     onScroll.call(null, setState, props, scrollInfo)
-  const rowHeightBottomGridCallback = args =>
-    rowHeightBottomGrid.call(null, state, props, args)
+  const rowHeightBottomGridCallback = ({index}: {index: number}) =>
+    rowHeightBottomGrid.call(null, state, props, {index})
 
   const style = {
     ...state.bottomRightGridStyle,
@@ -381,209 +464,226 @@ export interface MultiGridInputHandles {
  * If sticky columns, 2 sticky header Grids will be rendered.
  */
 
-export const MultiGrid =
-  // props typed as any: @types/react v19's PropsWithoutRef<> drops named
-  // members of PropsMultiGrid (index-signature interaction), and annotating
-  // the full type here previously required a cast that broke react-hooks
-  // component detection.
-  props => {
-    const {scrollToRow = -1, scrollToColumn = -1, ref, ...rest} = props
+/*
+  Typed, which the `any` above was working around: with the index signature gone
+  there is nothing left for PropsWithoutRef<> to drop. Binding `props` as well
+  as the rest is what the two effects below already assumed -- they read
+  props.scrollLeft / props.scrollToRow, and with only a destructured parameter
+  in scope those were references to a name that did not exist.
+*/
+/*
+  The grid's own defaults. See the note at the merge site for why this is a
+  named object rather than an inline literal.
+*/
+const gridDefaults = {
+  classNameBottomLeftGrid: '',
+  classNameBottomRightGrid: '',
+  classNameTopLeftGrid: '',
+  classNameTopRightGrid: '',
+  enableFixedColumnScroll: false,
+  enableFixedRowScroll: false,
+  fixedColumnCount: 0,
+  fixedRowCount: 0,
+  scrollToColumn: -1,
+  scrollToRow: -1,
+  style: {},
+  styleBottomLeftGrid: {},
+  styleBottomRightGrid: {},
+  styleTopLeftGrid: {},
+  styleTopRightGrid: {},
+}
 
-    const restWithDefault = {
-      classNameBottomLeftGrid: '',
-      classNameBottomRightGrid: '',
-      classNameTopLeftGrid: '',
-      classNameTopRightGrid: '',
-      enableFixedColumnScroll: false,
-      enableFixedRowScroll: false,
-      fixedColumnCount: 0,
-      fixedRowCount: 0,
-      scrollToColumn: -1,
-      scrollToRow: -1,
-      style: {},
-      styleBottomLeftGrid: {},
-      styleBottomRightGrid: {},
-      styleTopLeftGrid: {},
-      styleTopRightGrid: {},
-      ...rest,
+export const MultiGrid = (props: PropsMultiGrid) => {
+  const {scrollToRow = -1, scrollToColumn = -1, ref, ...rest} = props
+  /*
+    Merged rather than written as one literal: inline, each of these keys is a
+    property that `...rest` also has, which TS reports as TS2783 ("specified more
+    than once") -- thirteen lines of noise that bury the real errors in a file
+    this size. ResolvedMultiGridProps is what the merge produces.
+  */
+  const restWithDefault: ResolvedMultiGridProps = {...gridDefaults, ...rest}
+
+  const [state, setState] = useState<State>({
+    scrollLeft: 0,
+    scrollTop: 0,
+    scrollbarSize: 0,
+    showHorizontalScrollbar: false,
+    showVerticalScrollbar: false,
+    leftGridWidth: 0,
+    topGridHeight: 0,
+    bottomRightGridStyle: {
+      position: 'absolute',
+    },
+    topRightGridStyle: {
+      overflowX: 'hidden',
+      overflowY: 'hidden',
+      position: 'absolute',
+      top: 0,
+    },
+    containerTopStyle: null,
+    containerBottomStyle: null,
+    containerOuterStyle: null,
+    bottomLeftGridStyle: {
+      left: 0,
+      overflowY: 'hidden',
+      overflowX: 'hidden',
+      position: 'absolute',
+    },
+    topLeftGridStyle: {
+      left: 0,
+      overflowX: 'hidden',
+      overflowY: 'hidden',
+      position: 'absolute',
+      top: 0,
+    },
+  })
+
+  const [, setRenderCounter] = useState(0)
+
+  /*
+      The empty dependency list is load-bearing. Without it this handle is a new
+      object on every render, so <ColumnSizer>'s `useImperativeHandle` effect
+      re-runs `registerChild` every commit, which calls `recomputeGridSize()`,
+      which calls `setRenderCounter` -- and the render it schedules builds another
+      handle. That loop is what "Maximum update depth exceeded" was.
+
+      Both closures only capture `setRenderCounter`, whose identity is stable.
+    */
+  useImperativeHandle(ref, () => {
+    return {
+      recomputeGridSize: () => setRenderCounter(value => value + 1),
+      forceUpdate: () => setRenderCounter(value => value + 1),
+    }
+  }, [])
+
+  useEffect(() => {
+    const {scrollLeft = 0, scrollTop = 0} = props
+
+    if (scrollLeft > 0 || scrollTop > 0) {
+      const newState: Partial<State> = {}
+
+      if (scrollLeft > 0) {
+        newState.scrollLeft = scrollLeft
+      }
+
+      if (scrollTop > 0) {
+        newState.scrollTop = scrollTop
+      }
+
+      setState(state => ({...state, ...newState}))
+    }
+  }, [])
+
+  // Keep the hovered row/column in view inside the scroll window.
+  useEffect(() => {
+    if (scrollToRow < 0 && scrollToColumn < 0) {
+      return
     }
 
-    const [state, setState] = useState<State>({
-      scrollLeft: 0,
-      scrollTop: 0,
-      scrollbarSize: 0,
-      showHorizontalScrollbar: false,
-      showVerticalScrollbar: false,
-      leftGridWidth: 0,
-      topGridHeight: 0,
-      bottomRightGridStyle: {
-        position: 'absolute',
-      },
-      topRightGridStyle: {
-        overflowX: 'hidden',
-        overflowY: 'hidden',
-        position: 'absolute',
-        top: 0,
-      },
-      containerTopStyle: null,
-      containerBottomStyle: null,
-      containerOuterStyle: null,
-      bottomLeftGridStyle: {
-        left: 0,
-        overflowY: 'hidden',
-        overflowX: 'hidden',
-        position: 'absolute',
-      },
-      topLeftGridStyle: {
-        left: 0,
-        overflowX: 'hidden',
-        overflowY: 'hidden',
-        position: 'absolute',
-        top: 0,
-      },
-    })
-
-    const [, setRenderCounter] = useState(0)
-
-    useImperativeHandle(ref, () => {
-      return {
-        recomputeGridSize: () => setRenderCounter(value => value + 1),
-        forceUpdate: () => setRenderCounter(value => value + 1),
-      }
-    })
-
-    useEffect(() => {
-      const {scrollLeft, scrollTop} = props
-
-      if (scrollLeft > 0 || scrollTop > 0) {
-        const newState: Partial<State> = {}
-
-        if (scrollLeft > 0) {
-          newState.scrollLeft = scrollLeft
-        }
-
-        if (scrollTop > 0) {
-          newState.scrollTop = scrollTop
-        }
-
-        setState(state => ({...state, ...newState}))
-      }
-    }, [])
-
-    // Keep the hovered row/column in view inside the scroll window.
-    useEffect(() => {
-      if (scrollToRow < 0 && scrollToColumn < 0) {
-        return
-      }
-
-      const viewHeight = getBottomGridHeight(state, props)
-      const viewWidth = getRightGridWidth(state, props)
-      const bodyRows = Math.max(
-        0,
-        (restWithDefault.rowCount ?? 0) - restWithDefault.fixedRowCount,
-      )
-      const bodyColumns = Math.max(
-        0,
-        (restWithDefault.columnCount ?? 0) - restWithDefault.fixedColumnCount,
-      )
-      const rowSize = ({index}: {index: number}) =>
-        rowHeightBottomGrid(state, restWithDefault as PropsMultiGrid, {index})
-      const columnSize = ({index}: {index: number}) =>
-        columnWidthRightGrid(state, restWithDefault as PropsMultiGrid, {
-          index,
-        })
-
-      let nextScrollTop = state.scrollTop
-      let nextScrollLeft = state.scrollLeft
-
-      if (scrollToRow >= 0) {
-        const index = Math.max(0, scrollToRow - restWithDefault.fixedRowCount)
-        const top = getItemOffset(rowSize, bodyRows, index)
-        const bottom = top + getItemSize(rowSize, index)
-        if (top < state.scrollTop || bottom > state.scrollTop + viewHeight) {
-          nextScrollTop =
-            top < state.scrollTop ? top : Math.max(0, bottom - viewHeight)
-        }
-      }
-
-      if (scrollToColumn >= 0) {
-        const index = Math.max(
-          0,
-          scrollToColumn - restWithDefault.fixedColumnCount,
-        )
-        const left = getItemOffset(columnSize, bodyColumns, index)
-        const right = left + getItemSize(columnSize, index)
-        if (left < state.scrollLeft || right > state.scrollLeft + viewWidth) {
-          nextScrollLeft =
-            left < state.scrollLeft ? left : Math.max(0, right - viewWidth)
-        }
-      }
-
-      if (
-        nextScrollTop !== state.scrollTop ||
-        nextScrollLeft !== state.scrollLeft
-      ) {
-        setState(prevState => ({
-          ...prevState,
-          scrollTop: nextScrollTop,
-          scrollLeft: nextScrollLeft,
-        }))
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [scrollToRow, scrollToColumn])
-
-    const topLeftGridRef = useRef<WindowGridHandle | null>(null)
-    const topRightGridRef = useRef<WindowGridHandle | null>(null)
-    const bottomLeftGridRef = useRef<WindowGridHandle | null>(null)
-    const bottomRightGridRef = useRef<WindowGridHandle | null>(null)
-
-    // Don't render any of our Grids if there are no cells.
-    if (props.width === 0 || props.height === 0) {
-      return null
-    }
-
-    const {scrollLeft, scrollTop} = state
-
-    return (
-      <div style={state.containerOuterStyle}>
-        <div style={state.containerTopStyle}>
-          {renderTopLeftGrid(
-            state,
-            restWithDefault as PropsMultiGrid,
-            topLeftGridRef,
-          )}
-          {renderTopRightGrid(
-            state,
-            {
-              ...restWithDefault,
-              ...onScroll,
-              scrollLeft,
-            } as PropsMultiGrid,
-            topRightGridRef,
-          )}
-        </div>
-        <div style={state.containerBottomStyle}>
-          {renderBottomLeftGrid(
-            state,
-            {
-              ...restWithDefault,
-              scrollTop,
-            } as PropsMultiGrid,
-            bottomLeftGridRef,
-          )}
-          {renderBottomRightGrid(
-            state,
-            setState,
-            {
-              ...restWithDefault,
-              scrollLeft,
-              scrollTop,
-              scrollToColumn,
-              scrollToRow,
-            },
-            bottomRightGridRef,
-          )}
-        </div>
-      </div>
+    const viewHeight = getBottomGridHeight(state, restWithDefault)
+    const viewWidth = getRightGridWidth(state, restWithDefault)
+    const bodyRows = Math.max(
+      0,
+      (restWithDefault.rowCount ?? 0) - restWithDefault.fixedRowCount,
     )
+    const bodyColumns = Math.max(
+      0,
+      (restWithDefault.columnCount ?? 0) - restWithDefault.fixedColumnCount,
+    )
+    const rowSize = ({index}: {index: number}) =>
+      rowHeightBottomGrid(state, restWithDefault, {index})
+    const columnSize = ({index}: {index: number}) =>
+      columnWidthRightGrid(state, restWithDefault, {
+        index,
+      })
+
+    let nextScrollTop = state.scrollTop
+    let nextScrollLeft = state.scrollLeft
+
+    if (scrollToRow >= 0) {
+      const index = Math.max(0, scrollToRow - restWithDefault.fixedRowCount)
+      const top = getItemOffset(rowSize, bodyRows, index)
+      const bottom = top + getItemSize(rowSize, index)
+      if (top < state.scrollTop || bottom > state.scrollTop + viewHeight) {
+        nextScrollTop =
+          top < state.scrollTop ? top : Math.max(0, bottom - viewHeight)
+      }
+    }
+
+    if (scrollToColumn >= 0) {
+      const index = Math.max(
+        0,
+        scrollToColumn - restWithDefault.fixedColumnCount,
+      )
+      const left = getItemOffset(columnSize, bodyColumns, index)
+      const right = left + getItemSize(columnSize, index)
+      if (left < state.scrollLeft || right > state.scrollLeft + viewWidth) {
+        nextScrollLeft =
+          left < state.scrollLeft ? left : Math.max(0, right - viewWidth)
+      }
+    }
+
+    if (
+      nextScrollTop !== state.scrollTop ||
+      nextScrollLeft !== state.scrollLeft
+    ) {
+      setState(prevState => ({
+        ...prevState,
+        scrollTop: nextScrollTop,
+        scrollLeft: nextScrollLeft,
+      }))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scrollToRow, scrollToColumn])
+
+  const topLeftGridRef = useRef<WindowGridHandle | null>(null)
+  const topRightGridRef = useRef<WindowGridHandle | null>(null)
+  const bottomLeftGridRef = useRef<WindowGridHandle | null>(null)
+  const bottomRightGridRef = useRef<WindowGridHandle | null>(null)
+
+  // Don't render any of our Grids if there are no cells.
+  if (props.width === 0 || props.height === 0) {
+    return null
   }
+
+  const {scrollLeft, scrollTop} = state
+
+  return (
+    <div style={state.containerOuterStyle ?? undefined}>
+      <div style={state.containerTopStyle ?? undefined}>
+        {renderTopLeftGrid(state, restWithDefault, topLeftGridRef)}
+        {renderTopRightGrid(
+          state,
+          {
+            ...restWithDefault,
+            ...onScroll,
+            scrollLeft,
+          },
+          topRightGridRef,
+        )}
+      </div>
+      <div style={state.containerBottomStyle ?? undefined}>
+        {renderBottomLeftGrid(
+          state,
+          {
+            ...restWithDefault,
+            scrollTop,
+          },
+          bottomLeftGridRef,
+        )}
+        {renderBottomRightGrid(
+          state,
+          setState,
+          {
+            ...restWithDefault,
+            scrollLeft,
+            scrollTop,
+            scrollToColumn,
+            scrollToRow,
+          },
+          bottomRightGridRef,
+        )}
+      </div>
+    </div>
+  )
+}

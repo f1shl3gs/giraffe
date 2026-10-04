@@ -1,22 +1,22 @@
 // Libraries
-import {FunctionComponent, useEffect, useMemo} from 'react'
-import L from 'leaflet'
 
+import L from 'leaflet'
+import {FunctionComponent, useEffect, useMemo} from 'react'
 // Components
 import {AnimatedPath} from './AnimatedPath'
-
 // Utils
 import {useGeoMap} from './GeoMapContext'
-
+import type {GeoTooltipConfig} from './GeoTooltip'
+import {GeoTrackMapViewLayer} from './geoTypes'
 // Types
 import {GeoTable} from './processing/GeoTable'
-import {GeoTrackMapViewLayer} from 'types/geo'
-import {Config} from 'types'
 
 interface Props {
   table: GeoTable
   properties: GeoTrackMapViewLayer
-  stylingConfig: Partial<Config>
+  tooltipConfig: GeoTooltipConfig
+  width: number
+  height: number
 }
 
 const DEFAULT_TRACK_COLOR = [{hex: '#FFunctionComponent400'}, {hex: '#F90A13'}]
@@ -31,8 +31,10 @@ const DEFAULT_TRACK_PALETTE = [
 ]
 const DEFAULT_END_MARKER_RADIUS = 4
 
-export const TrackMapLayer: FunctionComponent<Props> = props => {
-  const {table, properties} = props
+export const TrackMapLayer: FunctionComponent<Props> = ({
+  table,
+  properties,
+}) => {
   const map = useGeoMap()
   const endStopMarkers =
     properties.endStopMarkers === undefined || properties.endStopMarkers

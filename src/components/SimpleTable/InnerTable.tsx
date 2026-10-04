@@ -1,6 +1,8 @@
 // Libraries
 import {FunctionComponent, RefObject} from 'react'
-
+// Types
+import {ComponentSize, VerticalAlignment} from 'types'
+import type {SubsetTable} from './SimpleTable'
 // Components
 import {
   Table,
@@ -10,19 +12,15 @@ import {
   TableHeaderCell,
   TableRow,
 } from './Table'
-import {SubsetTable} from './SimpleTableGraph'
-
-// Types
-import {ComponentSize, VerticalAlignment} from 'types'
 
 // Styles
-import './SimpleTableGraph.scss'
+import './SimpleTable.scss'
 
 interface InnerProps {
   table: SubsetTable
   pagedTableRefs: {
-    pagedTableHeaderRef: RefObject<HTMLTableSectionElement>
-    pagedTableBodyRef: RefObject<HTMLTableSectionElement>
+    pagedTableHeaderRef: RefObject<HTMLTableSectionElement | null>
+    pagedTableBodyRef: RefObject<HTMLTableSectionElement | null>
   }
 }
 

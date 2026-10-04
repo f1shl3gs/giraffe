@@ -1,6 +1,7 @@
 // Libraries
-import {RefObject, MouseEvent, FunctionComponent} from 'react'
+
 import classnames from 'classnames'
+import {FunctionComponent, MouseEvent, RefObject} from 'react'
 
 // Types
 import {

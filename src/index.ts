@@ -1,66 +1,44 @@
 // Fonts must be declared exactly once (see src/style/fonts.scss)
 import './style/fonts.scss'
 
-// Components
-export {Plot} from './components/Plot'
-export {HoverTimeProvider} from './components/Table'
+/*
+  The public entry point: components, the types their configs are built from,
+  and the handful of functions needed to get data in.
 
-// Utils
-export {fromFlux} from './utils/fromFlux'
-export type {FromFluxResult} from './utils/fromFlux'
-export {fromRows} from './utils/fromRows'
-export {newTable} from './utils/newTable'
-export {
-  binaryPrefixFormatter,
-  siPrefixFormatter,
-  timeFormatter,
-} from './utils/formatters'
-export type {TimeFormatterFactoryOptions} from './utils/formatters'
-export {getDomainDataFromLines} from './utils/lineData'
+  Nothing inside src/ imports from this file -- components, stories and helpers
+  import the owning module directly ('utils/newTable', 'types', 'constants/x'),
+  so that this barrel stays a leaf and the build can be split into per-component
+  entries later without touching call sites.
 
-export {exportImage} from './utils/exportImage'
+  <Geo> is deliberately absent: it imports leaflet, which must not be dragged
+  into every consumer's bundle. It is reachable only via
+  'src/components/Geo' (see that directory's barrel for why).
+*/
 
-export {getLatestValues} from './utils/getLatestValues'
-export {formatStatValue} from './utils/formatStatValue'
-
-// Transforms
-export {createGroupIDColumn, getNominalColorScale} from './transforms'
-export {lineTransform} from './transforms/line'
-
-// Constants
-export * from './constants/colorSchemes'
-export * from './constants/columnKeys'
-export * from './style/gaugeStyles'
-export * from './style/singleStatStyles'
-export {DEFAULT_TABLE_COLORS} from './constants/tableGraph'
-
-// Types
+export * from './components/Annotation'
+export * from './components/Band'
+export * from './components/CustomLayer'
+export * from './components/Gauge'
+export * from './components/Geo'
+export * from './components/Heatmap'
+export * from './components/Histogram'
+export * from './components/Line'
+export * from './components/Plot'
+export * from './components/Table'
+// Types the above are written in terms of
 export type {
-  AnnotationLayerConfig,
-  BandLayerConfig,
   ColumnData,
   ColumnType,
-  Config,
   FluxDataType,
   Formatter,
-  GaugeLayerConfig,
-  GaugeTheme,
-  GeoLayerConfig,
   GetColumn,
-  HistogramLayerConfig,
-  HistogramPosition,
-  InteractionHandlerArguments,
-  LayerConfig,
-  LineInterpolation,
-  LineLayerConfig,
-  LinePosition,
-  Margins,
   NumericColumnData,
   Scale,
-  SimpleTableLayerConfig,
-  SingleStatLayerConfig,
-  StaticLegend,
   Table,
-  TableGraphLayerConfig,
 } from './types'
-export {DomainLabel, LayerTypes} from './types'
+export {DomainLabel} from './types'
+export * from './utils/formatters'
+export * from './utils/fromFlux'
+export {fromRows} from './utils/fromRows'
+// Getting data in
+export {newTable} from './utils/newTable'

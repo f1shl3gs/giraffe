@@ -1,23 +1,46 @@
+// Libraries
 import {FunctionComponent, useLayoutEffect, useState} from 'react'
+
+// Components
 import {Tooltip} from '../Tooltip'
 
 // Utils
 import {defineToolTipEffect} from './processing/toolTips'
 
-// Types
-import {Config} from 'types'
-import {GeoTable} from './processing/GeoTable'
-import {GeoCircleViewLayer, GeoPointMapViewLayer} from 'types/geo'
+/*
+  Geo's styling surface. Geo owns a leaflet viewport rather than a plot's x/y
+  coordinate system, so it has no PlotConfig — but its tooltips render through
+  the shared <Tooltip>/<Legend>, which still speak the flat, pre-LegendConfig
+  `legend*` names and need the container's dimensions to decide row layout.
+
+  These are the only fields Geo actually forwards.
+*/
+export interface GeoTooltipConfig {
+  backgroundColor?: string
+  border?: string
+  colorizeRows?: boolean
+  columns?: string[]
+  font?: string
+  fontBrightColor?: string
+  fontColor?: string
+  hide?: boolean
+  opacity?: number
+  orientationThreshold?: number
+}
 
 interface Props {
-  stylingConfig: Partial<Config>
-  properties: GeoPointMapViewLayer | GeoCircleViewLayer
-  table: GeoTable
+  config: GeoTooltipConfig
+  width: number
+  height: number
   tooltips: Array<{markerRef; rowInfo}>
 }
 
-export const GeoTooltip: FunctionComponent<Props> = props => {
-  const {stylingConfig, tooltips} = props
+export const GeoTooltip: FunctionComponent<Props> = ({
+  width,
+  height,
+  config,
+  tooltips,
+}) => {
   const [tooltipData, setTooltipData] = useState(null)
   useLayoutEffect(defineToolTipEffect(tooltips, setTooltipData), [tooltips])
 
@@ -26,9 +49,9 @@ export const GeoTooltip: FunctionComponent<Props> = props => {
       {tooltipData && (
         <Tooltip
           data={tooltipData}
-          config={{
-            ...(stylingConfig as Config),
-          }}
+          config={config}
+          width={width}
+          height={height}
         />
       )}
     </>

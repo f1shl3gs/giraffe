@@ -47,7 +47,7 @@ describe('AutoSizer', () => {
   it('observes its parent element on mount', () => {
     const {container} = render(
       <AutoSizer className='test-sizer'>
-        {size => <Child {...size} />}
+        {(width, height) => <Child width={width} height={height} />}
       </AutoSizer>,
     )
 
@@ -56,7 +56,9 @@ describe('AutoSizer', () => {
 
   it('renders nothing before the first measurement', () => {
     const {queryByTestId} = render(
-      <AutoSizer>{size => <Child {...size} />}</AutoSizer>,
+      <AutoSizer>
+        {(width, height) => <Child width={width} height={height} />}
+      </AutoSizer>,
     )
 
     expect(queryByTestId('child')).toBeNull()
@@ -64,7 +66,9 @@ describe('AutoSizer', () => {
 
   it('renders children with the measured size', async () => {
     const {getByTestId} = render(
-      <AutoSizer>{size => <Child {...size} />}</AutoSizer>,
+      <AutoSizer>
+        {(width, height) => <Child width={width} height={height} />}
+      </AutoSizer>,
     )
 
     lastInstance().trigger(320, 240)
@@ -75,7 +79,9 @@ describe('AutoSizer', () => {
 
   it('updates children when the size changes', async () => {
     const {getByTestId} = render(
-      <AutoSizer>{size => <Child {...size} />}</AutoSizer>,
+      <AutoSizer>
+        {(width, height) => <Child width={width} height={height} />}
+      </AutoSizer>,
     )
 
     lastInstance().trigger(320, 240)
@@ -88,7 +94,11 @@ describe('AutoSizer', () => {
   })
 
   it('does not re-render children when the size is unchanged', async () => {
-    render(<AutoSizer>{size => <Child {...size} />}</AutoSizer>)
+    render(
+      <AutoSizer>
+        {(width, height) => <Child width={width} height={height} />}
+      </AutoSizer>,
+    )
 
     lastInstance().trigger(320, 240)
     await act(flushFrame)
@@ -101,7 +111,9 @@ describe('AutoSizer', () => {
 
   it('disconnects the observer on unmount', () => {
     const {unmount} = render(
-      <AutoSizer>{size => <Child {...size} />}</AutoSizer>,
+      <AutoSizer>
+        {(width, height) => <Child width={width} height={height} />}
+      </AutoSizer>,
     )
 
     unmount()
@@ -112,7 +124,7 @@ describe('AutoSizer', () => {
   it('applies className to the wrapper element', async () => {
     const {container, queryByTestId} = render(
       <AutoSizer className='giraffe-autosizer'>
-        {size => <Child {...size} />}
+        {(width, height) => <Child width={width} height={height} />}
       </AutoSizer>,
     )
 

@@ -1,14 +1,13 @@
 // Libraries
-import {FunctionComponent, ChangeEvent, useState} from 'react'
-import classnames from 'classnames'
 
+import classnames from 'classnames'
+import {ChangeEvent, FunctionComponent, useState} from 'react'
+// Types
+import {FluxTable, IconFont, Theme} from 'types'
 // Components
 import {DapperScrollbars} from '../DapperScrollbars'
 import {Input} from '../Input'
 import {TableSidebarItem} from './TableSidebarItem'
-
-// Types
-import {IconFont, FluxTable, Theme} from 'types'
 
 // Styles
 import './TableGraphs.scss'

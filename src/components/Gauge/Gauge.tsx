@@ -1,23 +1,29 @@
 // Libraries
-import {FunctionComponent, useRef, useEffect, RefObject} from 'react'
 import {range} from 'd3-array'
-
-// Utils
-import {formatStatValue, MAX_DECIMAL_PLACES} from 'utils/formatStatValue'
-
+import {FunctionComponent, RefObject, useEffect, useRef} from 'react'
 // Styles
 import {
-  COLOR_TYPE_MIN,
   COLOR_TYPE_MAX,
-  DEFAULT_VALUE_MIN,
+  COLOR_TYPE_MIN,
   DEFAULT_VALUE_MAX,
+  DEFAULT_VALUE_MIN,
+  GAUGE_THEME_DARK,
   MIN_THRESHOLDS,
 } from 'style/gaugeStyles'
 
 // Types
-import {Color, DecimalPlaces, GaugeTheme} from 'types'
+import type {Color, DecimalPlaces, GaugeTheme} from 'types'
 
-interface Props {
+// Utils
+import {formatStatValue, MAX_DECIMAL_PLACES} from 'utils/formatStatValue'
+// Components
+import {AutoSizer} from '../AutoSizer'
+
+/* ---------------------------------------------------------------------
+   The canvas gauge: draws the arc, ticks, labels, needle and value.
+   ------------------------------------------------------------------- */
+
+interface GaugeCanvasProps {
   width: number
   height: number
   gaugePosition: number
@@ -53,7 +59,7 @@ const resetCanvas = (
 
 const updateCanvas = (
   canvasRef: RefObject<HTMLCanvasElement>,
-  props: Props,
+  props: GaugeCanvasProps,
 ): void => {
   const {width, height, colors, theme, gaugeSize} = props
   resetCanvas(canvasRef, width, height)
@@ -289,7 +295,7 @@ const drawGaugeLabels = (
   gradientThickness: number,
   minValue: number,
   maxValue: number,
-  props: Props,
+  props: GaugeCanvasProps,
 ): void => {
   const {tickPrefix, tickSuffix, decimalPlaces, gaugeSize} = props
   const {lineCount, labelColor, labelFontSize} = props.theme
@@ -345,7 +351,7 @@ const drawGaugeValue = (
   ctx: CanvasRenderingContext2D,
   radius: number,
   labelValueFontSize: number,
-  props: Props,
+  props: GaugeCanvasProps,
 ): void => {
   const {gaugePosition, prefix, suffix, decimalPlaces} = props
   const {valueColor, valuePositionYOffset, valuePositionXOffset} = props.theme
@@ -371,7 +377,7 @@ const drawNeedle = (
   radius: number,
   minValue: number,
   maxValue: number,
-  props: Props,
+  props: GaugeCanvasProps,
 ): void => {
   const {gaugePosition, gaugeSize, decimalPlaces} = props
   const {needleColor0, needleColor1, overflowDelta} = props.theme
@@ -413,7 +419,9 @@ const drawNeedle = (
   ctx.fill()
 }
 
-export const Gauge: FunctionComponent<Props> = (props: Props) => {
+const GaugeCanvas: FunctionComponent<GaugeCanvasProps> = (
+  props: GaugeCanvasProps,
+) => {
   const {width, height} = props
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -429,4 +437,75 @@ export const Gauge: FunctionComponent<Props> = (props: Props) => {
       ref={canvasRef}
     />
   )
+}
+
+export interface GaugeProps {
+  value: number
+  config: GaugeConfig
+}
+
+/*
+  Gauge is standalone: it is an AutoSizer plus a canvas and needs no shared
+  coordinate system, so it renders without a <Plot> wrapper.
+*/
+export const Gauge: FunctionComponent<GaugeProps> = ({value, config}) => {
+  const {
+    prefix = '',
+    suffix = '',
+    tickPrefix = '',
+    tickSuffix = '',
+    decimalPlaces = {},
+    gaugeColors,
+    gaugeSize = Math.PI,
+    gaugeTheme = {},
+  } = config
+
+  const MAX_PI_DECIMALS = 3 // values above 3 distort Gauge styling
+
+  /* 
+    Gauge size is measured in radians https://www.mathsisfun.com/geometry/radians.html
+      minimum: pi (half a circle)
+      maximum: 2 * pi (whole circle)
+  */
+  const validGaugeSize = Number(
+    Math.min(Math.max(gaugeSize, Math.PI), 2 * Math.PI).toFixed(
+      MAX_PI_DECIMALS,
+    ),
+  )
+
+  return (
+    <AutoSizer className='giraffe-autosizer'>
+      {(width, height) => (
+        <div
+          className='giraffe-layer giraffe-layer-gauge'
+          data-testid='giraffe-layer-gauge'
+        >
+          <GaugeCanvas
+            width={width}
+            height={height}
+            colors={gaugeColors}
+            prefix={prefix}
+            tickPrefix={tickPrefix}
+            suffix={suffix}
+            tickSuffix={tickSuffix}
+            gaugePosition={value}
+            decimalPlaces={decimalPlaces}
+            gaugeSize={validGaugeSize}
+            theme={{...GAUGE_THEME_DARK, ...gaugeTheme}}
+          />
+        </div>
+      )}
+    </AutoSizer>
+  )
+}
+
+export interface GaugeConfig {
+  prefix?: string
+  suffix?: string
+  tickPrefix?: string
+  tickSuffix?: string
+  decimalPlaces?: DecimalPlaces
+  gaugeColors: Color[]
+  gaugeSize?: number
+  gaugeTheme?: Partial<GaugeTheme>
 }

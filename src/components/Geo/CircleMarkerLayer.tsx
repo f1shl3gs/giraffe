@@ -1,21 +1,20 @@
 // Libraries
-import {FunctionComponent, useEffect, useMemo} from 'react'
-import L from 'leaflet'
 
+import L from 'leaflet'
+import {FunctionComponent, useEffect, useMemo} from 'react'
+import {formatCircleMarkerRowInfo} from 'utils/geo'
 // Utils
 import {
   calculateMinAndMax,
   getColor,
   normalizeValue,
 } from './dimensionCalculations'
-import {formatCircleMarkerRowInfo} from 'utils/geo'
-import {GeoTooltip} from './GeoTooltip'
 import {useGeoMap} from './GeoMapContext'
-
+import type {GeoTooltipConfig} from './GeoTooltip'
+import {GeoTooltip} from './GeoTooltip'
+import {GeoCircleViewLayer} from './geoTypes'
 // Types
 import {GeoTable} from './processing/GeoTable'
-import {Config} from 'types'
-import {GeoCircleViewLayer} from 'types/geo'
 
 const DEFAULT_RADIUS = 50
 
@@ -24,12 +23,20 @@ interface Props {
   colorFieldName: string
   table: GeoTable
   properties: GeoCircleViewLayer
-  stylingConfig: Partial<Config>
+  tooltipConfig: GeoTooltipConfig
+  width: number
+  height: number
 }
 
-export const CircleMarkerLayer: FunctionComponent<Props> = props => {
-  const {table, radiusFieldName, colorFieldName, stylingConfig, properties} =
-    props
+export const CircleMarkerLayer: FunctionComponent<Props> = ({
+  table,
+  radiusFieldName,
+  colorFieldName,
+  properties,
+  tooltipConfig,
+  width,
+  height,
+}) => {
   const map = useGeoMap()
 
   const {bounds} = properties.radiusDimension
@@ -82,9 +89,9 @@ export const CircleMarkerLayer: FunctionComponent<Props> = props => {
 
   return (
     <GeoTooltip
-      stylingConfig={stylingConfig}
-      properties={properties}
-      table={table}
+      config={tooltipConfig}
+      width={width}
+      height={height}
       tooltips={tooltips}
     />
   )

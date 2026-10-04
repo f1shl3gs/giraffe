@@ -1,6 +1,7 @@
 // Libraries
-import {FunctionComponent, RefObject} from 'react'
+
 import classnames from 'classnames'
+import {FunctionComponent, RefObject} from 'react'
 
 // Types
 import {BorderType, ComponentSize, StandardFunctionProps} from 'types'

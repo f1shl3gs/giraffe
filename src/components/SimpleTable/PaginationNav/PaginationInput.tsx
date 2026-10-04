@@ -1,10 +1,8 @@
 // Libraries
-import {RefObject, ChangeEvent, MouseEvent, FunctionComponent} from 'react'
 
 // Components
 import {Input} from 'components/Input'
-import {Index} from './Button'
-
+import {ChangeEvent, FunctionComponent, MouseEvent, RefObject} from 'react'
 // Types
 import {
   ComponentColor,
@@ -13,6 +11,7 @@ import {
   InputType,
   StandardFunctionProps,
 } from 'types'
+import {Index} from './Button'
 
 // Styles
 import './Pagination.scss'

@@ -12,8 +12,8 @@ export interface Size {
 }
 
 interface Props {
-  children: (size: Size) => ReactElement
   className?: string
+  children: (width: number, height: number) => ReactElement
 }
 
 export const AutoSizer: FunctionComponent<Props> = ({children, className}) => {
@@ -53,7 +53,7 @@ export const AutoSizer: FunctionComponent<Props> = ({children, className}) => {
       ref={wrapperRef}
       style={{height: '100%', width: '100%'}}
     >
-      {size ? children(size) : null}
+      {size ? children(size.width, size.height) : null}
     </div>
   )
 }

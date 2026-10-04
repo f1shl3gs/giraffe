@@ -19,15 +19,11 @@ const buildColumnData = (
   const {rowLines} = bandLineMap
 
   rowLines.forEach(rowIndex => {
-    if (isDefined(rowIndex)) {
-      hoverableColumnData.xs = [
-        ...hoverableColumnData.xs,
-        ...lineData[rowIndex].xs,
-      ]
-      hoverableColumnData.ys = [
-        ...hoverableColumnData.ys,
-        ...lineData[rowIndex].ys,
-      ]
+    const series = isDefined(rowIndex) ? lineData.get(rowIndex) : undefined
+
+    if (series) {
+      hoverableColumnData.xs = [...hoverableColumnData.xs, ...series.xs]
+      hoverableColumnData.ys = [...hoverableColumnData.ys, ...series.ys]
       hoverableColumnData.groupColData = [
         ...hoverableColumnData.groupColData,
         ...Array.from(groupColData).filter(index => index === rowIndex),

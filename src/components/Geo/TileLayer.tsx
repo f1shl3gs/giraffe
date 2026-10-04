@@ -1,6 +1,6 @@
+import L from 'leaflet'
 import {FunctionComponent, useEffect} from 'react'
 import {useGeoMap} from './GeoMapContext'
-import L from 'leaflet'
 
 interface Props {
   url: string

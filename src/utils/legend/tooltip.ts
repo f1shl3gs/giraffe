@@ -1,23 +1,17 @@
+import {BandLayerSpec} from 'components/Band/transform'
+import {FILL, TIME, VALUE} from 'constants/columnKeys'
+
+// Types
 import {
-  BandLayerSpec,
   BandLineMap,
   ColumnGroupMap,
   DomainLabel,
   LatestIndexMap,
   LegendColumn,
   LegendData,
-  LinePosition,
-  NumericColumnData,
   Scale,
   Table,
 } from 'types'
-import {
-  FILL,
-  LINE_COUNT,
-  STACKED_LINE_CUMULATIVE,
-  TIME,
-  VALUE,
-} from 'constants/columnKeys'
 
 import {isVoid} from '../isVoid'
 import {createLatestBandIndices, getTooltipBandGroupColumns} from './band'
@@ -80,16 +74,11 @@ export const getPointsTooltipData = (
   getValueFormatter: (colKey: string) => (x: any) => string,
   fillColKeys: string[],
   fillScale: Scale<number, string>,
-  position?: LinePosition,
-  stackedDomainValueColumn?: NumericColumnData,
   colorMapping?: ColumnGroupMap,
 ): LegendData => {
   const lineValues =
     xColKey === VALUE ? table.getColumn(xColKey) : table.getColumn(yColKey)
-  const sortOrder = sortIndicesByValueColumn(
-    position === 'stacked' ? stackedDomainValueColumn : lineValues,
-    hoveredRowIndices,
-  )
+  const sortOrder = sortIndicesByValueColumn(lineValues, hoveredRowIndices)
   const xColData = table.getColumn(xColKey, 'number')
   const yColData = table.getColumn(yColKey, 'number')
   const groupColData = table.getColumn(groupColKey, 'number')
@@ -128,41 +117,6 @@ export const getPointsTooltipData = (
   }
 
   const tooltipAdditionalColumns = []
-  if (position === 'stacked') {
-    const stackedDomainValues = stackedDomainValueColumn
-      ? stackedDomainValueColumn
-      : []
-    tooltipAdditionalColumns.push({
-      key: `_${STACKED_LINE_CUMULATIVE}`,
-      name: STACKED_LINE_CUMULATIVE,
-      type: table.getColumnType(yColKey),
-      colors,
-      values: orderDataByValue(
-        hoveredRowIndices,
-        sortOrder,
-        hoveredRowIndices.map(i => yFormatter(stackedDomainValues[i])),
-      ),
-    })
-
-    const lineCountByGroupId = {}
-    hoveredRowIndices
-      .map(hoveredRowIndex => groupColData[hoveredRowIndex])
-      .sort()
-      .forEach((groupId, key) => (lineCountByGroupId[groupId] = key + 1))
-    tooltipAdditionalColumns.push({
-      key: `_${LINE_COUNT}`,
-      name: LINE_COUNT,
-      type: table.getColumnType(FILL),
-      colors,
-      values: orderDataByValue(
-        hoveredRowIndices,
-        sortOrder,
-        hoveredRowIndices.map(
-          hoveredRowIndex => lineCountByGroupId[groupColData[hoveredRowIndex]],
-        ),
-      ),
-    })
-  }
 
   const fillColumns = getTooltipGroupColumns(
     table,
@@ -216,7 +170,8 @@ export const getBandTooltipData = (
     lowerLines: sortedLowerLines,
   } = sortedBandLineMap
 
-  const colors = sortedRowLines.map(line => lineData[line].fill)
+  // rowLines come from bandLineMap, which is built from this same lineData
+  const colors = sortedRowLines.map(line => lineData.get(line)!.fill)
 
   const xColumnName =
     xColKey === VALUE ? `${xColKey}:${bandName}` : table.getColumnName(xColKey)

@@ -1,11 +1,16 @@
-import {useLayoutStyle} from '../useLayoutStyle'
-import {useRefMousePos} from '../useMousePos'
+// Types
+import {AnnotationTooltipOptions} from 'types'
+
+// Utils
+import {useLayoutStyle} from 'utils/useLayoutStyle'
+import {useRefMousePos} from 'utils/useMousePos'
+
+// Constants
 import {
   ANNOTATION_DEFAULT_MAX_WIDTH,
   CLOCKFACE_Z_INDEX,
   LEAFLET_Z_INDEX,
-} from 'constants'
-import {AnnotationTooltipOptions} from 'types'
+} from 'constants/index'
 
 const MARGIN_X = 30
 
