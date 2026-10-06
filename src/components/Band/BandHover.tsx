@@ -127,8 +127,8 @@ export const BandHover: FunctionComponent<Props> = ({
 
       drawLineHoverData(
         ctx,
-        width,
-        height,
+        env.innerWidth,
+        env.innerHeight,
         crosshairX,
         crosshairY,
         crosshairColor,
