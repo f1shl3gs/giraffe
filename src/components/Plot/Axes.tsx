@@ -223,8 +223,16 @@ export const Axes: FunctionComponent<Props> = ({
 }) => {
   // valueFormatters is optional, and an absent one has to fall back to the
   // column's type -- the same resolution <Plot> does for everything else.
-  const xTickFormatter = getFormatterForColumn(config, table, config.xColumn)
-  const yTickFormatter = getFormatterForColumn(config, table, config.yColumn)
+  const xTickFormatter = getFormatterForColumn(
+    table,
+    config.xColumn,
+    config.valueFormatters,
+  )
+  const yTickFormatter = getFormatterForColumn(
+    table,
+    config.yColumn,
+    config.valueFormatters,
+  )
 
   // Axes owns its canvas: nothing else draws into it.
   const canvasRef = useRef<HTMLCanvasElement>(null)

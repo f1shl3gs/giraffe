@@ -1,5 +1,5 @@
 // Types
-import type {ColumnType, Formatter, InteractionHandlers} from 'types'
+import type {ColumnType, InteractionHandlers, ValueFormatters} from 'types'
 import type {LegendConfig} from 'components/Legend/LegendConfig'
 import {StaticLegendConfig} from 'components/StaticLegend/StaticLegend'
 
@@ -47,7 +47,7 @@ export interface PlotConfig {
   tickFontColor?: string
   // Tagging a formatter with a FormatterType lets giraffe pick nicer ticks —
   // formatting x as times means a 2:00 PM tick is fine and 2:37:43 PM is not.
-  valueFormatters?: {[colKey: string]: Formatter}
+  valueFormatters?: ValueFormatters
 
   // Pixels of inset at each end of the value axis, so a thick line is not
   // clipped by the plot edge. It replaces a scan for the widest lineWidth

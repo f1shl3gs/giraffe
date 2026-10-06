@@ -63,7 +63,7 @@ export const Scatter: FunctionComponent<ScatterProps> = ({config}) => {
   )
 
   const columnFormatter = (colKey: string) =>
-    getFormatterForColumn(env.config, table, colKey)
+    getFormatterForColumn(table, colKey, env.config.valueFormatters)
 
   const xColData = spec.table.getColumn(xColumnKey, 'number') || []
   const yColData = spec.table.getColumn(yColumnKey, 'number') || []

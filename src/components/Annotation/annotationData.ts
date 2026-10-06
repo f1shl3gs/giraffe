@@ -4,6 +4,57 @@ import {AnnotationMark, LineHoverDimension, Scale} from 'types'
 // Constants
 import {ANNOTATION_DEFAULT_OVERLAP_HOVER_MARGIN} from 'constants/index'
 
+/*
+  Which annotations are visible, given the domains the plot is currently
+  showing. The domains come from <Plot> rather than a fresh scan of the table,
+  so brushing narrows the visible annotations along with everything else, and
+  nothing has to walk the data a second time to decide.
+
+  Two jobs, both order-sensitive:
+
+  - Drop annotations that fall outside the domain on their own axis.
+  - Keep only the first of several annotations sharing a dimension and range.
+    An annotation rejected for being out of domain does not claim its key, so a
+    later one in the same slot can still take it.
+*/
+export const getVisibleAnnotations = (
+  annotations: AnnotationMark[],
+  xDomain: number[],
+  yDomain: number[],
+): AnnotationMark[] => {
+  if (!Array.isArray(annotations)) {
+    return []
+  }
+
+  const [xMin, xMax] = xDomain
+  const [yMin, yMax] = yDomain
+  const seen = new Set<string>()
+  const visible: AnnotationMark[] = []
+
+  for (const annotation of annotations) {
+    const {dimension, startValue, stopValue} = annotation
+    const key = `${dimension}-${startValue}-${stopValue}`
+
+    if (seen.has(key)) {
+      continue
+    }
+
+    const inDomain =
+      dimension === 'y'
+        ? yMin <= startValue && stopValue <= yMax
+        : dimension === 'x'
+          ? xMin <= startValue && stopValue <= xMax
+          : false
+
+    if (inDomain) {
+      seen.add(key)
+      visible.push(annotation)
+    }
+  }
+
+  return visible
+}
+
 export const getAnnotationsPositions = (
   annotationData: AnnotationMark[],
   xScale: Scale,
@@ -135,8 +186,8 @@ export const getAnnotationHoverIndices = (
   hoverDimension: LineHoverDimension,
   hoverMargin: number,
   annotationData: AnnotationMark[],
-  hoverX: number,
-  hoverY: number,
+  hoverX: number | null,
+  hoverY: number | null,
 ): number[] => {
   return Array.isArray(annotationData)
     ? annotationData.reduce((result, annotation, i) => {

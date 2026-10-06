@@ -109,7 +109,7 @@ export const StaticLegend: FunctionComponent<StaticLegendProps> = ({
   const legendData = useMemo(
     () =>
       getLegendData(table, staticLegend, valueColumnKey, colKey =>
-        getFormatterForColumn(config, table, colKey),
+        getFormatterForColumn(table, colKey, config.valueFormatters),
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [table, config, valueColumnKey, staticLegend.fill, staticLegend.colors],

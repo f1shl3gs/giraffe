@@ -13,7 +13,7 @@ import {getFormatterForColumn} from 'components/Plot/PlotEnv'
 import {Rect} from 'components/Rect/Rect'
 import type {RectSpec} from 'components/Rect/transform'
 import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
-import type {Formatter, Table} from 'types'
+import type {Table, ValueFormatters} from 'types'
 import {useMousePos} from 'utils/useMousePos'
 
 export interface HeatmapConfig {
@@ -28,7 +28,7 @@ export interface HeatmapConfig {
   strokeWidth?: number
   strokePadding?: number
   /* See the note on ScatterConfig.valueFormatters. */
-  valueFormatters?: {[columnKey: string]: Formatter}
+  valueFormatters?: ValueFormatters
   showAxes?: boolean
 }
 
@@ -124,7 +124,7 @@ const HeatmapSized: FunctionComponent<HeatmapSizedProps> = ({
   const {margins, xScale, yScale} = env
 
   const columnFormatter = (colKey: string) =>
-    getFormatterForColumn(plotConfig, table, colKey)
+    getFormatterForColumn(table, colKey, plotConfig.valueFormatters)
 
   return (
     <div

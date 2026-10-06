@@ -148,7 +148,7 @@ const MosaicSized: FunctionComponent<MosaicSizedProps> = ({
   const {margins, xScale, yScale} = env
 
   const columnFormatter = (colKey: string) =>
-    getFormatterForColumn(plotConfig, table, colKey)
+    getFormatterForColumn(table, colKey, plotConfig.valueFormatters)
 
   const hoveredRowIndices = findHoveredBoxes(
     hoverDimension,

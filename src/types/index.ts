@@ -69,6 +69,12 @@ export interface Formatter {
   readonly _GIRAFFE_FORMATTER_TYPE?: FormatterType
 }
 
+// Per-column overrides, keyed by column name. A column with no entry falls back
+// to the default formatting for its type.
+export interface ValueFormatters {
+  [colKey: string]: Formatter
+}
+
 export interface Table {
   getColumn: GetColumn
   getColumnName: (columnKey: string) => string | null // null if the column is not available

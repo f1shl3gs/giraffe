@@ -137,7 +137,7 @@ export const Line: FunctionComponent<LineProps> = ({config}) => {
       {hasHoverData && (
         <LineHover
           columnFormatter={(colKey: string) =>
-            getFormatterForColumn(env.config, env.table, colKey)
+            getFormatterForColumn(env.table, colKey, env.config.valueFormatters)
           }
           config={config}
           height={height}

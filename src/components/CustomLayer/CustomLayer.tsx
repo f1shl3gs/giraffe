@@ -61,6 +61,6 @@ export const CustomLayer: FunctionComponent<CustomLayerProps> = ({
     innerHeight: env.innerHeight,
     yColumnType: env.yColumnType,
     columnFormatter: (columnKey: string) =>
-      getFormatterForColumn(env.config, env.table, columnKey),
+      getFormatterForColumn(env.table, columnKey, env.config.valueFormatters),
   })
 }

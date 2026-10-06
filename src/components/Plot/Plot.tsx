@@ -18,7 +18,7 @@ import {getHorizontalTicks, getVerticalTicks} from 'utils/getTicks'
 import {resizePlotWithStaticLegend} from './resizePlot'
 import {resolveDomain} from 'utils/resolveDomain'
 import {withPlotDefaults} from './PlotDefaults'
-import {PlotEnv, DEFAULT_TIME_FORMATTER, DEFAULT_FORMATTER} from './PlotEnv'
+import {getFormatterForColumn, PlotEnv} from './PlotEnv'
 
 // Constants
 import {DEFAULT_RANGE_PADDING} from 'constants/index'
@@ -36,31 +36,17 @@ const areDomainsStale = (
   prev.xColumn !== next.xColumn ||
   prev.yColumn !== next.yColumn
 
-export const getFormatterForColumn = (
-  config: PlotConfig,
-  table: Table,
-  colKey: string,
-): Formatter => {
-  const preferredFormatter = config.valueFormatters?.[colKey]
-
-  if (preferredFormatter) {
-    return preferredFormatter
-  }
-
-  return table.getColumnType(colKey) === 'time'
-    ? DEFAULT_TIME_FORMATTER
-    : DEFAULT_FORMATTER
-}
-
 export const getXTickFormatter = (
   config: PlotConfig,
   table: Table,
-): Formatter => getFormatterForColumn(config, table, config.xColumn)
+): Formatter =>
+  getFormatterForColumn(table, config.xColumn, config.valueFormatters)
 
 export const getYTickFormatter = (
   config: PlotConfig,
   table: Table,
-): Formatter => getFormatterForColumn(config, table, config.yColumn)
+): Formatter =>
+  getFormatterForColumn(table, config.yColumn, config.valueFormatters)
 
 export const getYColumnType = (config: PlotConfig): ColumnType =>
   config.yColumnType ?? 'number'

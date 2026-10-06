@@ -2,7 +2,14 @@
 import {createContext, useContext} from 'react'
 
 // Types
-import {ColumnType, Formatter, Margins, Scale, Table} from 'types'
+import {
+  ColumnType,
+  Formatter,
+  Margins,
+  Scale,
+  Table,
+  ValueFormatters,
+} from 'types'
 import {PlotConfig} from './PlotConfig'
 
 // Utils
@@ -46,12 +53,11 @@ export const usePlot = (): PlotEnv => {
 }
 
 export const getFormatterForColumn = (
-  config: PlotConfig,
   table: Table,
   colKey: string,
+  valueFormatters?: ValueFormatters,
 ): Formatter => {
-  const preferredFormatter = config.valueFormatters?.[colKey]
-
+  const preferredFormatter = valueFormatters?.[colKey]
   if (preferredFormatter) {
     return preferredFormatter
   }

@@ -198,7 +198,7 @@ export const Band: FunctionComponent<BandProps> = ({config}) => {
         <BandHover
           bandHoverIndices={bandHoverIndices}
           columnFormatter={(colKey: string) =>
-            getFormatterForColumn(env.config, env.table, colKey)
+            getFormatterForColumn(env.table, colKey, env.config.valueFormatters)
           }
           config={config}
           dimension={hoverDimension}

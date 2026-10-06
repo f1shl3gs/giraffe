@@ -12,16 +12,21 @@ import type {AnnotationMark, LineHoverDimension, SVGAttributes} from 'types'
 import {
   getAnnotationHoverIndices,
   getAnnotationsPositions,
+  getVisibleAnnotations,
 } from './annotationData'
 
 // Constants
 import {ANNOTATION_DEFAULT_HOVER_MARGIN} from 'constants/index'
-import {annotationTransform} from './transform'
 
 export interface AnnotationConfig {
   x: string
   y: string
   annotations: AnnotationMark[]
+  /*
+    Accepted and ignored. It used to group rows into a FILL column inside the
+    layer transform, but nothing ever read that column -- each mark carries its
+    own `color`. Kept because it is part of the published config.
+  */
   fill: string[]
   hoverDimension?: LineHoverDimension | 'auto'
   hoverMargin?: number
@@ -42,32 +47,18 @@ const ANNOTATION_OVERLAY_DEFAULT_STYLE = {
 export const Annotation: FunctionComponent<AnnotationProps> = ({config}) => {
   const env = usePlot()
   const {hoverX, hoverY} = usePlotInteraction()
-  const {table, width, height, xScale, yScale} = env
+  const {width, height, xScale, yScale, xDomain, yDomain} = env
 
-  const spec = useMemo(
-    () =>
-      annotationTransform(
-        table,
-        config.annotations,
-        env.config.xColumn,
-        env.config.yColumn,
-        config.fill,
-      ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      table,
-      config.annotations,
-      config.fill,
-      env.config.xColumn,
-      env.config.yColumn,
-    ],
+  const annotationData = useMemo(
+    () => getVisibleAnnotations(config.annotations, xDomain, yDomain),
+    [config.annotations, xDomain, yDomain],
   )
 
   const onHover = () => {}
   const lineWidth = config.lineWidth || 2
   const annotationsPositions = useMemo(
-    () => getAnnotationsPositions(spec.annotationData, xScale, yScale),
-    [spec.annotationData, xScale, yScale],
+    () => getAnnotationsPositions(annotationData, xScale, yScale),
+    [annotationData, xScale, yScale],
   )
   const svgRef = useRef<SVGSVGElement>(null)
 
