@@ -1,5 +1,5 @@
 /*
-  This module contains utilites for formatting values in visualizations.
+  This module contains utilities for formatting values in visualizations.
 
   A `Formatter` takes a value in a table and formats it as a user-facing
   string. A formatter factory creates a `Formatter`. Here we define several

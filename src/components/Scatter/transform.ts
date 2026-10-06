@@ -24,8 +24,7 @@ import {FILL, SYMBOL} from 'constants/columnKeys'
 export interface ScatterSpec {
   inputTable: Table
   table: Table // has `FILL` and `SYMBOL` columns added
-  xDomain: number[]
-  yDomain: number[]
+
   xColumnKey: string
   yColumnKey: string
   xColumnType: ColumnType
@@ -62,22 +61,12 @@ export const scatterTransform = (
     .addColumn(FILL, 'system', 'number', fillColumn)
     .addColumn(SYMBOL, 'system', 'number', symbolColumn)
 
-  const xCol = table.getColumn(xColumnKey, 'number') || []
-  const yCol = table.getColumn(yColumnKey, 'number') || []
   const fillScale = getNominalColorScale(fillColumnMap, colors)
   const symbolScale = getSymbolScale(symbolColumnMap)
 
   return {
     inputTable,
     table,
-    xDomain: ([...xCol] as number[]).reduce<[number, number]>(
-      ([min, max], v) => [Math.min(min, v), Math.max(max, v)],
-      [0, 0],
-    ),
-    yDomain: ([...yCol] as number[]).reduce<[number, number]>(
-      ([min, max], v) => [Math.min(min, v), Math.max(max, v)],
-      [Infinity, -Infinity],
-    ),
     xColumnKey,
     yColumnKey,
     xColumnType: inputTable.getColumnType(xColumnKey),

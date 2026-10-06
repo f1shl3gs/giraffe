@@ -1,7 +1,14 @@
-import {DISPLAY_NAME, FILL, SERIES, X_MAX, X_MIN} from 'constants/columnKeys'
+// Libraries
 import {range} from 'd3-array'
+
+// Types
 import {ColumnGroupMap, LegendColumn, LegendData, Scale, Table} from 'types'
-import {getRangeLabel} from './tooltip'
+
+// Utils
+import {getRangeLabel} from 'utils/legend/tooltip'
+
+// Constants
+import {DISPLAY_NAME, FILL, SERIES, X_MAX, X_MIN} from 'constants/columnKeys'
 
 export const findHoveredBoxes = (
   hoverDimension: string,
@@ -15,7 +22,7 @@ export const findHoveredBoxes = (
   width: number,
   height: number,
 ): number[] => {
-  const isActive =
+  const active =
     hoverX !== undefined &&
     hoverX !== null &&
     hoverX >= 0 &&
@@ -25,7 +32,7 @@ export const findHoveredBoxes = (
     hoverY >= 0 &&
     hoverY <= height
 
-  if (!isActive) {
+  if (!active) {
     return []
   }
 
@@ -136,11 +143,6 @@ export const getMosaicTooltipData = (
       values: hoveredBoxRows.map(i => valFormatter(valCol[i])),
     })
   }
-  const tooltipColumns = [
-    xTooltipColumn,
-    ...fillColumns,
-    yTooltipColumn,
-    durationTooltipColumn,
-  ]
-  return tooltipColumns
+
+  return [xTooltipColumn, ...fillColumns, yTooltipColumn, durationTooltipColumn]
 }

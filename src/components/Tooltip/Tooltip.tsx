@@ -10,7 +10,7 @@ import type {LegendConfig} from 'components/Legend/LegendConfig'
 import type {LegendData} from 'types'
 
 // Hooks
-import {useLegendElement} from 'utils/legend/useTooltipElement'
+import {useLegendElement} from './useLegendElement'
 
 // Constants
 import {TOOLTIP_MAXIMUM_OPACITY, TOOLTIP_MINIMUM_OPACITY} from 'constants/index'

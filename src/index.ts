@@ -1,34 +1,6 @@
 // Fonts must be declared exactly once (see src/style/fonts.scss)
 import './style/fonts.scss'
 
-/*
-  The public entry point: components, the types their configs are built from,
-  and the handful of functions needed to get data in.
-
-  Nothing inside src/ imports from this file -- components, stories and helpers
-  import the owning module directly ('utils/newTable', 'types', 'constants/x'),
-  so that this barrel stays a leaf and the build can be split into per-component
-  entries later without touching call sites.
-
-  Every export below is named rather than re-exported with `export *`. That is
-  what lets a consumer's bundler drop the components they never render: with a
-  wildcard the bundler cannot always trace which names come from which module,
-  and `export * from './components/Plot'` alone leaked thirteen internal helpers
-  (`createPlotEnv`, `getXScale`, `areDomainsStale`, ...). The package is already
-  marked side-effect free (see "sideEffects" in package.json), so an unused
-  export and everything it reaches is shaken out of the build.
-
-  <Geo> stays reachable as `import {Geo} from '@influxdata/giraffe'`. It pulls in
-  leaflet, so leaflet has to resolve even for consumers who never render <Geo> --
-  bundlers resolve the import graph before they tree-shake. See the "sideEffects"
-  and dependencies notes in package.json.
-
-  <Table> is not exported here yet. Its name would collide with the `Table` type
-  below, and until that is resolved the type keeps the name at the top level, as
-  it did before. The component and its config are reachable through
-  'src/components/Table'.
-*/
-
 // Components
 export {Annotation} from './components/Annotation'
 export type {

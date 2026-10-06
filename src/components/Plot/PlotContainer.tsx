@@ -1,10 +1,4 @@
 // Libraries
-
-// Components
-import {Axes} from 'components/Plot/Axes'
-import {Brush} from 'components/Plot/Brush'
-import type {PlotEnv} from 'components/Plot/PlotEnv'
-import {PlotInteractionContext} from 'components/Plot/PlotInteractionContext'
 import {
   CSSProperties,
   FunctionComponent,
@@ -12,8 +6,15 @@ import {
   useCallback,
   useMemo,
 } from 'react'
+
+// Components
+import {Axes} from 'components/Plot/Axes'
+import {Brush} from 'components/Plot/Brush'
+import {PlotInteractionContext} from 'components/Plot/PlotInteractionContext'
+
 // Types
 import {InteractionHandlerArguments, Scale} from 'types'
+import type {PlotEnv} from 'components/Plot/PlotEnv'
 
 // Utils
 import {nearestTimestamp} from 'utils/nearestTimestamp'
@@ -55,10 +56,10 @@ export const PlotContainer: FunctionComponent<Props> = ({
     table,
   } = plot
 
-  const [hoverEvent, hoverTargetProps] = useMousePos()
-  const [dragEvent, dragTargetProps] = useDragEvent()
-  const hoverX = dragEvent ? null : hoverEvent.x
-  const hoverY = dragEvent ? null : hoverEvent.y
+  const {position, onMouseMove, onMouseLeave} = useMousePos()
+  const {dragEvent, onMouseDown} = useDragEvent()
+  const hoverX = dragEvent ? null : position.x
+  const hoverY = dragEvent ? null : position.y
 
   const nearestX = useCallback(
     (pixelX: number) =>
@@ -80,11 +81,11 @@ export const PlotContainer: FunctionComponent<Props> = ({
 
   const onResetDomains = useCallback(() => onBrushChange(null), [onBrushChange])
   const plotInteraction: InteractionHandlerArguments = {
-    clampedValueX: nearestX(hoverEvent.x),
-    hoverX: hoverEvent.x,
-    hoverY: hoverEvent.y,
-    valueX: xScale.invert(hoverEvent.x),
-    valueY: yScale.invert(hoverEvent.y),
+    clampedValueX: nearestX(position.x),
+    hoverX: position.x,
+    hoverY: position.y,
+    valueX: xScale.invert(position.x),
+    valueY: yScale.invert(position.y),
     xDomain,
     yDomain,
     resetDomains: onResetDomains,
@@ -112,7 +113,7 @@ export const PlotContainer: FunctionComponent<Props> = ({
 
   config.interactionHandlers?.hover?.(plotInteraction)
 
-  const interation = useMemo(
+  const interaction = useMemo(
     () => (config.legend ? {hoverX, hoverY} : null),
     [config.legend, hoverX, hoverY],
   )
@@ -126,7 +127,7 @@ export const PlotContainer: FunctionComponent<Props> = ({
   }
 
   return (
-    <PlotInteractionContext value={interation}>
+    <PlotInteractionContext value={interaction}>
       <div
         className={'giraffe-plot'}
         style={{
@@ -148,8 +149,9 @@ export const PlotContainer: FunctionComponent<Props> = ({
             cursor: `${config.cursor || (!config.legend && 'crosshair') || 'auto'}`,
           }}
           onDoubleClick={onResetDomains}
-          {...hoverTargetProps}
-          {...dragTargetProps}
+          onMouseMove={onMouseMove}
+          onMouseLeave={onMouseLeave}
+          onMouseDown={onMouseDown}
         >
           <div className={'giraffe-layers'} style={fullSizeStyle}>
             {children}

@@ -67,12 +67,8 @@ export interface DragEvent {
   isShiftDown?: boolean
 }
 
-interface UseDragEventProps {
-  onMouseDown: (e: MouseEvent<Element>) => any
-}
-
-export const useDragEvent = (): [DragEvent | null, UseDragEventProps] => {
-  const dragEventRef = useRef<DragEvent | null>(null)
+export const useDragEvent = () => {
+  const ref = useRef<DragEvent | null>(null)
   const forceUpdate = useForceUpdate()
 
   const onMouseDown = useCallback((mouseDownEvent: MouseEvent<Element>) => {
@@ -89,8 +85,8 @@ export const useDragEvent = (): [DragEvent | null, UseDragEventProps] => {
     const onMouseMove = mouseMoveEvent => {
       const [x, y] = getXYCoords(mouseMoveEvent)
 
-      const {initialX, initialY} = dragEventRef.current
-      let {direction} = dragEventRef.current
+      const {initialX, initialY} = ref.current
+      let {direction} = ref.current
 
       if (!direction) {
         const dx = Math.abs(x - initialX)
@@ -103,8 +99,8 @@ export const useDragEvent = (): [DragEvent | null, UseDragEventProps] => {
         }
       }
 
-      dragEventRef.current = {
-        ...dragEventRef.current,
+      ref.current = {
+        ...ref.current,
         type: 'drag',
         direction,
         x,
@@ -122,12 +118,12 @@ export const useDragEvent = (): [DragEvent | null, UseDragEventProps] => {
 
       let mouseActionState = null
 
-      if (dragEventRef?.current?.mouseActionState === 'mouseDownHappened') {
+      if (ref?.current?.mouseActionState === 'mouseDownHappened') {
         mouseActionState = 'mouseUpHappened'
       }
 
-      dragEventRef.current = {
-        ...dragEventRef.current,
+      ref.current = {
+        ...ref.current,
         type: 'dragend',
         mouseActionState,
         x,
@@ -145,9 +141,9 @@ export const useDragEvent = (): [DragEvent | null, UseDragEventProps] => {
     const isShiftDown = mouseDownEvent.getModifierState('Shift')
 
     // TODO:  even though the 'isShiftDown' gets reset with each mousedown,
-    // incase other mouse events/triggers/callbacks want to use the shift key, make sure to set
+    // in case other mouse events/triggers/callbacks want to use the shift key, make sure to set
     // it to false in all the other places where events are emitted to reset it properly!
-    dragEventRef.current = {
+    ref.current = {
       type: 'drag',
       initialX: x,
       initialY: y,
@@ -161,14 +157,16 @@ export const useDragEvent = (): [DragEvent | null, UseDragEventProps] => {
     forceUpdate()
   }, [])
 
-  const {current: dragEvent} = dragEventRef
-
+  const {current: dragEvent} = ref
   if (dragEvent && dragEvent.type === 'dragend') {
     // 'dragEnd' events should be emitted exactly once at the end of a drag
-    dragEventRef.current = null
+    ref.current = null
   }
 
-  return [dragEvent, {onMouseDown}]
+  return {
+    dragEvent,
+    onMouseDown,
+  }
 }
 
 const useForceUpdate = () => {

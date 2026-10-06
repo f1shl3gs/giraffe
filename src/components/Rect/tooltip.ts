@@ -5,7 +5,7 @@ import {range} from 'd3-array'
 import {ColumnGroupMap, LegendColumn, LegendData, Scale, Table} from 'types'
 
 // Utils
-import {getRangeLabel} from './tooltip'
+import {getRangeLabel} from 'utils/legend/tooltip'
 
 // Constants
 import {COUNT, FILL, X_MAX, X_MIN, Y_MAX, Y_MIN} from 'constants/columnKeys'
@@ -39,10 +39,8 @@ export const findHoveredRects = (
   } else if (binDimension === 'x') {
     return xIndices
   }
-  const xyIndices = xIndices.filter(
-    i => yMinData[i] <= dataY && yMaxData[i] > dataY,
-  )
-  return xyIndices
+
+  return xIndices.filter(i => yMinData[i] <= dataY && yMaxData[i] > dataY)
 }
 
 export const get1DTooltipData = (
@@ -90,13 +88,7 @@ export const get1DTooltipData = (
     ),
   }))
 
-  const tooltipColumns = [
-    xTooltipColumn,
-    countTooltipColumn,
-    ...groupTooltipColumns,
-  ]
-
-  return tooltipColumns
+  return [xTooltipColumn, countTooltipColumn, ...groupTooltipColumns]
 }
 
 export const get2DTooltipData = (
@@ -144,7 +136,5 @@ export const get2DTooltipData = (
     ),
   }
 
-  const tooltipColumns = [xTooltipColumn, yTooltipColumn, countTooltipColumn]
-
-  return tooltipColumns
+  return [xTooltipColumn, yTooltipColumn, countTooltipColumn]
 }

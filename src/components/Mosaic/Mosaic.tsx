@@ -6,6 +6,7 @@ import {FunctionComponent, useMemo} from 'react'
 // Components
 import {AutoSizer} from 'components/AutoSizer'
 import {Axes} from 'components/Plot/Axes'
+import {Tooltip} from 'components/Tooltip'
 
 // Types
 import type {MosaicLayerSpec} from 'components/Mosaic/transform'
@@ -14,18 +15,16 @@ import {createPlotEnv} from 'components/Plot/Plot'
 import type {PlotConfig} from 'components/Plot/PlotConfig'
 import {PLOT_DEFAULTS} from 'components/Plot/PlotDefaults'
 import {getFormatterForColumn} from 'components/Plot/PlotEnv'
-import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
 import {LegendData, MosaicHoverDimension, Scale, Table} from 'types'
 
 // Utils
-import {
-  findHoveredBoxes,
-  getMosaicTooltipData,
-} from 'utils/legend/mosaicTooltip'
+import {findHoveredBoxes, getMosaicTooltipData} from './tooltip'
 import {resolveDomain} from 'utils/resolveDomain'
 import {useCanvas} from 'utils/useCanvas'
 import {useMousePos} from 'utils/useMousePos'
-import {Tooltip} from '../Tooltip'
+
+// Constants
+import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
 import {FILL, SERIES, X_MAX, X_MIN} from 'constants/columnKeys'
 
 export interface MosaicConfig {
@@ -110,9 +109,7 @@ const MosaicSized: FunctionComponent<MosaicSizedProps> = ({
     yLabelColumns = y,
   } = config
 
-  const [hoverEvent, hoverTargetProps] = useMousePos()
-  const hoverX = hoverEvent.x
-  const hoverY = hoverEvent.y
+  const {position, onMouseMove, onMouseLeave} = useMousePos()
 
   const xColumn = table.getColumn(x, 'number')
   const xDomain = useMemo(
@@ -155,8 +152,8 @@ const MosaicSized: FunctionComponent<MosaicSizedProps> = ({
 
   const hoveredRowIndices = findHoveredBoxes(
     hoverDimension,
-    hoverX,
-    hoverY,
+    position.x,
+    position.y,
     spec.table,
     xScale,
     yScale,
@@ -229,7 +226,8 @@ const MosaicSized: FunctionComponent<MosaicSizedProps> = ({
           bottom: `${margins.bottom}px`,
           left: `${margins.left}px`,
         }}
-        {...hoverTargetProps}
+        onMouseMove={onMouseMove}
+        onMouseLeave={onMouseLeave}
       >
         <div className='giraffe-layers' style={FULL_SIZE_STYLE}>
           <canvas

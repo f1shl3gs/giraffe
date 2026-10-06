@@ -54,9 +54,7 @@ export const Scatter: FunctionComponent<ScatterProps> = ({config}) => {
   */
   const {xColumn: xColumnKey, yColumn: yColumnKey} = env.config
 
-  const [hoverEvent, hoverTargetProps] = useMousePos()
-  const hoverX = hoverEvent.x
-  const hoverY = hoverEvent.y
+  const {position, onMouseMove, onMouseLeave} = useMousePos()
 
   const spec: ScatterSpec = useMemo(
     () => scatterTransform(table, xColumnKey, yColumnKey, fill, symbol, colors),
@@ -97,7 +95,8 @@ export const Scatter: FunctionComponent<ScatterProps> = ({config}) => {
     <div
       className='giraffe-layers'
       style={FULL_SIZE_STYLE}
-      {...hoverTargetProps}
+      onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
     >
       <canvas
         className='giraffe-layer scatter'
@@ -111,8 +110,8 @@ export const Scatter: FunctionComponent<ScatterProps> = ({config}) => {
         columnFormatter={columnFormatter}
         yColumnType={env.yColumnType}
         plotConfig={env.config}
-        hoverX={hoverX}
-        hoverY={hoverY}
+        hoverX={position.x}
+        hoverY={position.y}
         legendHide={env.config.legend?.hide ?? false}
         width={width}
         height={height}

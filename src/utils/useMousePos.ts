@@ -1,44 +1,38 @@
+// Libraries
 import {MouseEvent, useEffect, useMemo, useState} from 'react'
 
-export interface MousePosition {
+export interface Position {
   x: number | null
   y: number | null
 }
 
-interface UseMousePosProps {
-  onMouseEnter: (e: MouseEvent<HTMLDivElement>) => void
-  onMouseMove: (e: MouseEvent<HTMLDivElement>) => void
-  onMouseLeave: (e: MouseEvent<HTMLDivElement>) => void
-}
+export const useMousePos = () => {
+  const [position, setPosition] = useState<Position>({x: null, y: null})
 
-const mousePositionFromEvent = (e: MouseEvent<HTMLDivElement>) => {
-  const {top, left} = e.currentTarget.getBoundingClientRect()
-
-  return {x: e.clientX - left, y: e.clientY - top}
-}
-
-export const useMousePos = (): [MousePosition, UseMousePosProps] => {
-  const [state, setState] = useState<MousePosition>({x: null, y: null})
-
-  const eventProps = useMemo(
+  const callbacks = useMemo(
     () => ({
-      onMouseEnter(e) {
-        setState(mousePositionFromEvent(e))
-      },
-      onMouseMove(e) {
-        setState(mousePositionFromEvent(e))
+      onMouseMove(ev: MouseEvent<HTMLDivElement>) {
+        const {top, left} = ev.currentTarget.getBoundingClientRect()
+
+        setPosition({
+          x: ev.clientX - left,
+          y: ev.clientY - top,
+        })
       },
       onMouseLeave() {
-        setState({x: null, y: null})
+        setPosition({x: null, y: null})
       },
     }),
     [],
   )
 
-  return [state, eventProps]
+  return {
+    position,
+    ...callbacks,
+  }
 }
 
-export const useRefMousePos = (el: Element): MousePosition => {
+export const useRefMousePos = (el: Element): Position => {
   const [state, setState] = useState({x: 0, y: 0})
 
   useEffect(() => {
@@ -49,24 +43,18 @@ export const useRefMousePos = (el: Element): MousePosition => {
       return
     }
 
-    const onMouseEnter = e => {
-      setState({x: e.x, y: e.y})
-    }
-
     const onMouseMove = e => {
-      onMouseEnter(e)
+      setState({x: e.x, y: e.y})
     }
 
     const onMouseLeave = () => {
       setState({x: null, y: null})
     }
 
-    el.addEventListener('mouseenter', onMouseEnter)
     el.addEventListener('mousemove', onMouseMove)
     el.addEventListener('mouseleave', onMouseLeave)
 
     return () => {
-      el.removeEventListener('mouseenter', onMouseEnter)
       el.removeEventListener('mousemove', onMouseMove)
       el.removeEventListener('mouseleave', onMouseLeave)
     }

@@ -1,15 +1,18 @@
-import type {LegendConfig} from 'components/Legend/LegendConfig'
-import {Tooltip} from 'components/Tooltip'
+// Libraries
 import {FunctionComponent} from 'react'
+
+// Components
+import {Tooltip} from 'components/Tooltip'
+
+// Types
+import type {LegendConfig} from 'components/Legend/LegendConfig'
 import type {Formatter, Scale} from 'types'
-import {drawRects} from 'utils/drawRects'
-import {
-  findHoveredRects,
-  get1DTooltipData,
-  get2DTooltipData,
-} from 'utils/legend/rectTooltip'
-import {useCanvas} from 'utils/useCanvas'
 import type {RectSpec} from './transform'
+
+// Utils
+import {findHoveredRects, get1DTooltipData, get2DTooltipData} from './tooltip'
+import {drawRects} from 'utils/drawRects'
+import {useCanvas} from 'utils/useCanvas'
 
 /*
   The rect body, shared by <Heatmap> and <Histogram>.

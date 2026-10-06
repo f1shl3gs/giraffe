@@ -12,14 +12,13 @@ import {ColumnType, Formatter, Scale, Table} from 'types'
 import {PlotConfig} from './PlotConfig'
 
 // Utils
-import {timeFormatter} from 'utils/formatters'
 import {getMargins} from 'utils/getMargins'
 import {getScale} from 'utils/getScale'
 import {getHorizontalTicks, getVerticalTicks} from 'utils/getTicks'
 import {resizePlotWithStaticLegend} from './resizePlot'
 import {resolveDomain} from 'utils/resolveDomain'
 import {withPlotDefaults} from './PlotDefaults'
-import {PlotEnv} from './PlotEnv'
+import {PlotEnv, DEFAULT_TIME_FORMATTER, DEFAULT_FORMATTER} from './PlotEnv'
 
 // Constants
 import {DEFAULT_RANGE_PADDING} from 'constants/index'
@@ -28,16 +27,14 @@ export type AxisScale = 'linear' | 'logarithmic'
 
 const DEFAULT_X_DOMAIN: [number, number] = [0, 1]
 const DEFAULT_Y_DOMAIN: [number, number] = [0, 1]
-const DEFAULT_TIME_FORMATTER = timeFormatter()
-export const DEFAULT_FORMATTER: Formatter = x => String(x)
 
-export const areDomainsStale = (
-  next: {table: Table; xColumn: string; yColumn: string},
+const areDomainsStale = (
   prev: {table: Table; xColumn: string; yColumn: string},
+  next: {table: Table; xColumn: string; yColumn: string},
 ): boolean =>
-  next.table !== prev.table ||
-  next.xColumn !== prev.xColumn ||
-  next.yColumn !== prev.yColumn
+  prev.table !== next.table ||
+  prev.xColumn !== next.xColumn ||
+  prev.yColumn !== next.yColumn
 
 export const getFormatterForColumn = (
   config: PlotConfig,

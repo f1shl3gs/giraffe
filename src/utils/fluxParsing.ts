@@ -1,7 +1,6 @@
 import {FluxTable} from 'types'
 import parseCSV from './csv'
 import {escapeCSVFieldWithSpecialCharacters} from './escapeCSVFieldWithSpecialCharacters'
-import {groupBy} from './groupBy'
 
 /*
   A Flux CSV response can contain multiple CSV files each joined by a newline.
@@ -40,6 +39,19 @@ export const parseResponse = (resp: string): FluxTable[] => {
   return chunks.reduce((acc, chunk) => {
     return [...acc, ...parseTables(chunk)]
   }, [])
+}
+
+const groupBy = (data: Array<any>, fn: (value: any) => string) => {
+  const result = {}
+
+  data.forEach(value => {
+    const index = fn(value)
+    if (!Array.isArray(result[index])) {
+      result[index] = []
+    }
+    result[index].push(value)
+  })
+  return result
 }
 
 export const parseTables = (input: string): FluxTable[] => {

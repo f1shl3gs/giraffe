@@ -92,9 +92,7 @@ const HeatmapSized: FunctionComponent<HeatmapSizedProps> = ({
     showAxes = true,
   } = config
 
-  const [hoverEvent, hoverTargetProps] = useMousePos()
-  const hoverX = hoverEvent.x
-  const hoverY = hoverEvent.y
+  const {position, onMouseMove, onMouseLeave} = useMousePos()
 
   const spec: RectSpec = useMemo(
     () =>
@@ -148,7 +146,8 @@ const HeatmapSized: FunctionComponent<HeatmapSizedProps> = ({
           bottom: `${margins.bottom}px`,
           left: `${margins.left}px`,
         }}
-        {...hoverTargetProps}
+        onMouseMove={onMouseMove}
+        onMouseLeave={onMouseLeave}
       >
         <div className='giraffe-layers' style={FULL_SIZE_STYLE}>
           <Rect
@@ -165,8 +164,8 @@ const HeatmapSized: FunctionComponent<HeatmapSizedProps> = ({
             height={height}
             xScale={xScale}
             yScale={yScale}
-            hoverX={hoverX}
-            hoverY={hoverY}
+            hoverX={position.x}
+            hoverY={position.y}
           />
         </div>
       </div>

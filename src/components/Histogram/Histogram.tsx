@@ -93,9 +93,11 @@ const HistogramSized: FunctionComponent<HistogramSizedProps> = ({
     showAxes = true,
   } = config
 
-  const [hoverEvent, hoverTargetProps] = useMousePos()
-  const hoverX = hoverEvent.x
-  const hoverY = hoverEvent.y
+  const {
+    position: {x: hoverX, y: hoverY},
+    onMouseMove,
+    onMouseLeave,
+  } = useMousePos()
 
   const spec: RectSpec = useMemo(
     () =>
@@ -149,7 +151,8 @@ const HistogramSized: FunctionComponent<HistogramSizedProps> = ({
           bottom: `${margins.bottom}px`,
           left: `${margins.left}px`,
         }}
-        {...hoverTargetProps}
+        onMouseMove={onMouseMove}
+        onMouseLeave={onMouseLeave}
       >
         <div className='giraffe-layers' style={FULL_SIZE_STYLE}>
           <Rect

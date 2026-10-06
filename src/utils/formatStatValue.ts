@@ -1,8 +1,6 @@
 // Types
 import {DecimalPlaces} from 'types'
 
-import {preventNegativeZero} from './preventNegativeZero'
-
 export const MAX_DECIMAL_PLACES = 10
 
 interface FormatStatValueOptions {
@@ -49,4 +47,11 @@ export const formatStatValue = (
   localeFormattedValue = preventNegativeZero(localeFormattedValue)
 
   return `${prefix || ''}${localeFormattedValue}${suffix || ''}`
+}
+
+const preventNegativeZero = (value: number | string): number | string => {
+  if (Number(value) === 0) {
+    return typeof value === 'number' ? 0 : value.replace(/-/g, '')
+  }
+  return value
 }
