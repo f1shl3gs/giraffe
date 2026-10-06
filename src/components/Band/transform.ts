@@ -9,21 +9,17 @@ import {
   LineData,
   Scale,
   Table,
+  DomainLabel,
 } from 'types'
-import {DomainLabel} from 'types'
 
 // Utils
-import {
-  createGroupIDColumn,
-  crea,
-  createNominalColorScale,
-} from 'utils/transform'
+import {createGroupIDColumn, createNominalColorScale} from 'utils/transform'
+import {scalePoints} from 'utils/lineData'
+import {isSortable, sortIndicesByValueColumn} from 'utils/legend/sort'
 
 // Constants
 import {FILL, LOWER, RESULT, TIME, UPPER} from 'constants/columnKeys'
 import {BAND_COLOR_SCALE_CONSTANT} from 'constants/index'
-import {scalePoints} from 'utils/lineData'
-import {isSortable, sortIndicesByValueColumn} from 'utils/legend/sort'
 
 /* The transform's output, consumed only by Band and BandHover. */
 export interface BandLayerSpec {
@@ -666,9 +662,3 @@ export const sortBandLines = (
 
   return bandLineMap
 }
-
-const getBandColorScale = (
-  lineCount: number,
-  colors: string[],
-): Scale<number, string> =>
-  createNominalColorScale(lineCount * BAND_COLOR_SCALE_CONSTANT, colors)

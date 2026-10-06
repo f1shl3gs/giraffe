@@ -1,20 +1,11 @@
+// Libraries
 import {color} from 'd3-color'
 
+// Types
 import {Scale, Table} from 'types'
-import {COUNT, FILL, X_MAX, X_MIN, Y_MAX, Y_MIN} from 'constants/columnKeys'
 
-interface DrawRectsOptions {
-  context: CanvasRenderingContext2D
-  table: Table
-  xScale: Scale<number, number>
-  yScale: Scale<number, number>
-  fillScale: Scale<number, string>
-  hoveredRowIndices: number[] | null
-  strokeWidth: number
-  strokePadding: number
-  strokeOpacity: number
-  fillOpacity: number
-}
+// Constants
+import {COUNT, FILL, X_MAX, X_MIN, Y_MAX, Y_MIN} from 'constants/columnKeys'
 
 export const drawRects = (
   ctx: CanvasRenderingContext2D,

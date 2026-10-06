@@ -105,8 +105,6 @@ export const getPointsTooltipData = (
     ),
   }
 
-  const tooltipAdditionalColumns = []
-
   const fillColumns = getTooltipGroupColumns(
     table,
     sortOrder,
@@ -115,5 +113,5 @@ export const getPointsTooltipData = (
     colors,
   )
 
-  return [tooltipXCol, tooltipYCol, ...tooltipAdditionalColumns, ...fillColumns]
+  return [tooltipXCol, tooltipYCol, ...fillColumns]
 }
