@@ -4,6 +4,7 @@ import {DependencyList, RefObject, useLayoutEffect, useRef} from 'react'
 // Utils
 import {clearCanvas} from './clearCanvas'
 
+// height and width is added to useMemo automatically
 export const useCanvas = (
   width: number,
   height: number,

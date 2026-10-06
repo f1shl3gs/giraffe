@@ -1,4 +1,4 @@
-import type {LineData} from '../types'
+import type {LineData} from 'types'
 
 import {getBandHoverIndices, getLineLengths} from './bandHover'
 

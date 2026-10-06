@@ -1,5 +1,6 @@
 import type {ArgTypes, Meta, StoryObj} from '@storybook/react'
 import type {ScatterConfig} from 'components/Scatter'
+import {Plot} from 'components/Plot'
 import {Scatter} from 'components/Scatter'
 import {
   COLOR_SCHEME_OPTIONS,
@@ -60,18 +61,24 @@ const render = (args: ScatterArgs) => {
   const {colorScheme, x, y, fill, symbol, valueAxisSuffix, showAxes} = args
 
   const config: ScatterConfig = {
-    x,
-    y,
     fill,
     symbol,
     colors: COLOR_SCHEME_OPTIONS[colorScheme],
-    valueFormatters: {_value: val => `${Math.round(val)}${valueAxisSuffix}`},
-    showAxes,
   }
 
   return (
     <StoryFrame>
-      <Scatter table={cpuTable} config={config} />
+      <Plot
+        table={cpuTable}
+        config={{
+          xColumn: x,
+          yColumn: y,
+          showAxes,
+          valueFormatters: {_value: val => `${Math.round(val)}${valueAxisSuffix}`},
+        }}
+      >
+        <Scatter config={config} />
+      </Plot>
     </StoryFrame>
   )
 }
@@ -121,20 +128,26 @@ const renderCustomCSV = (args: ScatterArgs) => {
   const table = fromFlux(csv).table
 
   const config: ScatterConfig = {
-    x,
-    y,
     fill: findStringColumns(table),
     colors: COLOR_SCHEME_OPTIONS[colorScheme],
-    valueFormatters: {
-      _time: timeFormatter({timeZone, format: timeFormat}),
-      _value: val => `${Math.round(val)}${valueAxisSuffix}`,
-    },
-    showAxes,
   }
 
   return (
     <StoryFrame>
-      <Scatter table={table} config={config} />
+      <Plot
+        table={table}
+        config={{
+          xColumn: x,
+          yColumn: y,
+          showAxes,
+          valueFormatters: {
+            _time: timeFormatter({timeZone, format: timeFormat}),
+            _value: val => `${Math.round(val)}${valueAxisSuffix}`,
+          },
+        }}
+      >
+        <Scatter config={config} />
+      </Plot>
     </StoryFrame>
   )
 }

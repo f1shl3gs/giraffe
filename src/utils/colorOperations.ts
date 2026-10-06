@@ -92,15 +92,11 @@ const findNearestCrossedThreshold = (colors: Color[], lastValue) => {
   return sortedColors.filter(color => lastValue >= color.value).pop()
 }
 
-export const generateThresholdsListHexs = ({
-  colors,
-  lastValue,
-  cellType = 'line',
-}: {
-  colors: Color[]
-  lastValue: string | number | null
-  cellType: string
-}) => {
+export const generateThresholdsListHexs = (
+  colors: Color[],
+  lastValue: string | number | null,
+  cellType: string = 'line',
+) => {
   const defaultColoring = {
     bgColor: null,
     textColor: cellType === 'table' ? '#BEC2CC' : THRESHOLD_COLORS[11].hex,

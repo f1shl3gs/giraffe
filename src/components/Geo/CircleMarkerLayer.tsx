@@ -1,9 +1,13 @@
 // Libraries
-
 import L from 'leaflet'
 import {FunctionComponent, useEffect, useMemo} from 'react'
-import {formatCircleMarkerRowInfo} from 'utils/geo'
+
+// Types
+import {GeoTable} from './processing/GeoTable'
+import {GeoCircleViewLayer} from './geoTypes'
+
 // Utils
+import {formatCircleMarkerRowInfo} from './geo'
 import {
   calculateMinAndMax,
   getColor,
@@ -12,9 +16,6 @@ import {
 import {useGeoMap} from './GeoMapContext'
 import type {GeoTooltipConfig} from './GeoTooltip'
 import {GeoTooltip} from './GeoTooltip'
-import {GeoCircleViewLayer} from './geoTypes'
-// Types
-import {GeoTable} from './processing/GeoTable'
 
 const DEFAULT_RADIUS = 50
 

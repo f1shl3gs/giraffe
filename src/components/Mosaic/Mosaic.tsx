@@ -5,10 +5,11 @@ import {FunctionComponent, useMemo} from 'react'
 
 // Components
 import {AutoSizer} from 'components/AutoSizer'
+import {Axes} from 'components/Plot/Axes'
+
 // Types
 import type {MosaicLayerSpec} from 'components/Mosaic/transform'
 import {mosaicTransform} from 'components/Mosaic/transform'
-import {Axes} from 'components/Plot/Axes'
 import {createPlotEnv} from 'components/Plot/Plot'
 import type {PlotConfig} from 'components/Plot/PlotConfig'
 import {PLOT_DEFAULTS} from 'components/Plot/PlotDefaults'

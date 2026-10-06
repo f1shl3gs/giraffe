@@ -1,6 +1,4 @@
 // Libraries
-import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
 import {
   FunctionComponent,
   memo,
@@ -9,15 +7,9 @@ import {
   useRef,
   useState,
 } from 'react'
-// Types
-import type {Table} from 'types'
-// Utils
-import {
-  calculateVariableAssignment,
-  getMinZoom,
-  getRowLimit,
-  ZOOM_FRACTION,
-} from 'utils/geo'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
+
 // Components
 import {AutoSizer} from '../AutoSizer'
 import {BingMap} from './bing-maps/BingMap'
@@ -33,6 +25,17 @@ import {LayerSwitcher} from './LayerSwitcher'
 import {preprocessData} from './processing/tableProcessing'
 import TileLayer from './TileLayer'
 import ViewportObserver from './ViewportObserver'
+
+// Types
+import type {Table} from 'types'
+
+// Utils
+import {
+  calculateVariableAssignment,
+  getMinZoom,
+  getRowLimit,
+  ZOOM_FRACTION,
+} from './geo'
 
 /*
   Geo is standalone: it owns a leaflet viewport rather than the plot's x/y

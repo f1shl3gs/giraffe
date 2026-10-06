@@ -309,8 +309,6 @@ export const LineGraphWithRandomFillColumnNames: Story = {
     }
 
     const lineConfig: LineConfig = {
-      x,
-      y,
       fill,
       interpolation,
       colors,
@@ -456,8 +454,6 @@ export const LineGraphWithRandomCustomFillColumns: Story = {
     }
 
     const lineConfig: LineConfig = {
-      x,
-      y,
       fill,
       interpolation,
       colors,
@@ -739,8 +735,6 @@ export const ColumnAlignment: Story = {
     }
 
     const lineConfig: LineConfig = {
-      x,
-      y,
       fill,
       interpolation,
       colors,
@@ -881,8 +875,6 @@ export const CustomCSV: Story = {
     }
 
     const lineConfig: LineConfig = {
-      x,
-      y,
       fill,
       interpolation,
       colors,
@@ -1042,8 +1034,6 @@ export const RenderEffect: Story = {
     }
 
     const lineConfig: LineConfig = {
-      x,
-      y,
       fill,
       interpolation,
       colors,

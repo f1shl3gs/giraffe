@@ -1,6 +1,8 @@
+// Libraries
+import {useMemo} from 'react'
+
+// Types
 import {BandLineMap, LineData, NumericColumnData} from 'types'
-import {isDefined} from './isDefined'
-import {useLazyMemo} from './useLazyMemo'
 
 const buildColumnData = (
   lineData: LineData,
@@ -16,10 +18,9 @@ const buildColumnData = (
     ys: [],
     groupColData: [],
   }
-  const {rowLines} = bandLineMap
 
-  rowLines.forEach(rowIndex => {
-    const series = isDefined(rowIndex) ? lineData.get(rowIndex) : undefined
+  bandLineMap.rowLines.forEach(rowIndex => {
+    const series = lineData.get(rowIndex)
 
     if (series) {
       hoverableColumnData.xs = [...hoverableColumnData.xs, ...series.xs]
@@ -30,6 +31,7 @@ const buildColumnData = (
       ]
     }
   })
+
   return hoverableColumnData
 }
 
@@ -42,7 +44,7 @@ export const useBandHoverColumns = (
   width: number,
   height: number,
 ) => {
-  const isActive =
+  const active =
     mouseX !== undefined &&
     mouseX !== null &&
     mouseX >= 0 &&
@@ -52,17 +54,17 @@ export const useBandHoverColumns = (
     mouseY >= 0 &&
     mouseY < height
 
-  const result = useLazyMemo(
-    () => buildColumnData(lineData, groupColData, bandLineMap),
-    [lineData, groupColData, bandLineMap, width, height],
-    isActive,
+  const result = useMemo(
+    () =>
+      active ? buildColumnData(lineData, groupColData, bandLineMap) : null,
+    [active, lineData, groupColData, bandLineMap],
   )
 
-  return !result
-    ? {
-        xs: [],
-        ys: [],
-        groupColData: [],
-      }
-    : result
+  return (
+    result ?? {
+      xs: [],
+      ys: [],
+      groupColData: [],
+    }
+  )
 }

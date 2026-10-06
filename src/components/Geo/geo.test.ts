@@ -8,7 +8,7 @@ import {
 import {geoCSV} from 'components/Geo/processing/data/geo'
 import {preprocessData} from 'components/Geo/processing/tableProcessing'
 import {InfluxColors} from 'constants/colorSchemes'
-import {fromFlux} from './fromFlux'
+import {fromFlux} from 'utils/fromFlux'
 import {
   calculateVariableAssignment,
   formatCircleMarkerRowInfo,

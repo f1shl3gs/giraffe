@@ -1,8 +1,8 @@
 // Libraries
+import type {FunctionComponent, ReactElement} from 'react'
 
 // Components
 import {getFormatterForColumn, usePlot} from 'components/Plot/PlotEnv'
-import type {FunctionComponent, ReactElement} from 'react'
 
 // Types
 import type {ColumnType, Formatter, Scale} from 'types'

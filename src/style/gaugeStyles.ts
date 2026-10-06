@@ -1,4 +1,5 @@
 import {Color, GaugeTheme} from 'types'
+
 export const MIN_THRESHOLDS = 2
 
 export const COLOR_TYPE_MIN = 'min'
@@ -6,21 +7,21 @@ export const COLOR_TYPE_MAX = 'max'
 export const DEFAULT_VALUE_MIN = 0
 export const DEFAULT_VALUE_MAX = 100
 
-export const DEFAULT_GAUGE_COLORS = [
+export const DEFAULT_GAUGE_COLORS: Color[] = [
   {
     id: '0',
     type: COLOR_TYPE_MIN,
     hex: '#00C9FF',
     name: 'laser',
     value: DEFAULT_VALUE_MIN,
-  } as Color,
+  },
   {
     id: '1',
     type: COLOR_TYPE_MAX,
     hex: '#9394FF',
     name: 'comet',
     value: DEFAULT_VALUE_MAX,
-  } as Color,
+  },
 ]
 
 export const GAUGE_THEME_LIGHT: GaugeTheme = {

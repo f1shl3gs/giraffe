@@ -2,7 +2,7 @@
 import {FunctionComponent, useMemo} from 'react'
 
 // Components
-import {LineHover} from './LineHover'
+import {LineHover} from 'components/Line/LineHover'
 
 // Utils
 import {getFormatterForColumn, usePlot} from 'components/Plot/PlotEnv'
@@ -25,8 +25,6 @@ export interface LineProps {
 }
 
 export interface LineConfig {
-  x: string
-  y: string
   fill?: string[]
   hoverDimension?: LineHoverDimension | 'auto'
   maxTooltipRows?: number
@@ -71,15 +69,6 @@ export const Line: FunctionComponent<LineProps> = ({config}) => {
     [spec.lineData, xScale, yScale],
   )
 
-  const drawLinesOptions = {
-    lineData: simplifiedLineData,
-    interpolation: config.interpolation,
-    lineWidth: config.lineWidth,
-    shadeBelow: config.shadeBelow,
-    shadeBelowOpacity: config.shadeBelowOpacity,
-    shadeAboveY: height,
-  }
-
   if (config.colorMapping && config.colorMappingCallback) {
     config.colorMappingCallback(config.colorMapping)
   }
@@ -87,8 +76,23 @@ export const Line: FunctionComponent<LineProps> = ({config}) => {
   const canvasRef = useCanvas(
     width,
     height,
-    context => drawLines({context, ...drawLinesOptions}),
-    Object.values(drawLinesOptions),
+    ctx =>
+      drawLines(
+        ctx,
+        config.interpolation,
+        simplifiedLineData,
+        config.lineWidth,
+        config.shadeBelow,
+        config.shadeBelowOpacity,
+        height,
+      ),
+    [
+      config.interpolation,
+      simplifiedLineData,
+      config.lineWidth,
+      config.shadeBelow,
+      config.shadeBelowOpacity,
+    ],
   )
 
   let hoverDimension: 'x' | 'y' | 'xy'
@@ -102,12 +106,12 @@ export const Line: FunctionComponent<LineProps> = ({config}) => {
     hoverDimension = config.hoverDimension
   }
 
-  const hoverYColumnData = spec.table.getColumn(config.y, 'number')
+  const hoverYColumnData = spec.table.getColumn(env.config.yColumn, 'number')
   const hoverRowIndices = useHoverPointIndices(
     hoverDimension,
     hoverX,
     hoverY,
-    spec.table.getColumn(config.x, 'number'),
+    spec.table.getColumn(env.config.xColumn, 'number'),
     hoverYColumnData,
     spec.table.getColumn(FILL, 'number'),
     xScale,

@@ -1,25 +1,17 @@
 // Libraries
-
-import {TICK_COUNT_LIMIT} from 'constants/index'
 import {ticks} from 'd3-array'
 import {utcTicks} from 'd3-time'
 import memoizeOne from 'memoize-one'
+
 // Types
 import {AxisTicks, Formatter, FormatterType} from 'types'
-// Constants
-import {TIME, VALUE} from 'constants/columnKeys'
+
 // Utils
 import {getTextMetrics} from './textMetrics'
 
-/*
-  Guards the optional tick parameters, which arrive as null, undefined or NaN
-  whenever the axis config leaves them unset. Each of those satisfies a bare
-  `Math.abs(value) !== Infinity`, so the type check and the NaN check both have
-  to stay -- dropping either one leaves `step` null and the axis renders no
-  ticks at all.
-*/
-const isFiniteTickValue = (value: unknown): boolean =>
-  typeof value === 'number' && value === value && Math.abs(value) !== Infinity
+// Constants
+import {TICK_COUNT_LIMIT} from 'constants/index'
+import {TIME, VALUE} from 'constants/columnKeys'
 
 /*
   Minimum spacing defined as:
@@ -46,13 +38,11 @@ const hasMinimumSpacing = (
     return totalLength < rangeLength - padding
   } else if (ticks.length <= 10) {
     return totalLength < rangeLength - timeTickLength
-  } else if (
-    totalLength <
-    rangeLength - Math.ceil(ticks.length / 10) * timeTickLength
-  ) {
-    return true
   }
-  return false
+
+  return (
+    totalLength < rangeLength - Math.ceil(ticks.length / 10) * timeTickLength
+  )
 }
 
 /*
@@ -115,7 +105,7 @@ export const calculateTicks = (
 
 /*
   generateTicks gives control to the user over placement, number, and interval of ticks
-    defers to the user's judgement on spacing (tick labels may overlap)
+    defers to the user's judgment on spacing (tick labels may overlap)
 */
 export const generateTicks = (
   domain: number[],
@@ -126,26 +116,38 @@ export const generateTicks = (
 ): number[] => {
   const generated: number[] = []
   const [start = 0, end = 0] = domain
-  const stepStart = isFiniteTickValue(tickStart) ? tickStart : start
 
-  let step = tickStep
-  if (!isFiniteTickValue(tickStep)) {
-    const parts =
-      isFiniteTickValue(totalTicks) && totalTicks !== 0 ? totalTicks : 1
-    step = (end - stepStart) / (isFiniteTickValue(tickStart) ? parts : parts + 1)
-  }
+  /*
+    These three reach us straight from config, so they arrive as null or NaN
+    whenever they were left unset. Each is resolved once here, and `undefined`
+    then means "not given" -- which is not the same as 0, since a step of 0 is a
+    real instruction to draw nothing.
+  */
+  const givenTicks = Number.isFinite(totalTicks) ? totalTicks : undefined
+  const givenStart = Number.isFinite(tickStart) ? tickStart : undefined
+  const givenStep = Number.isFinite(tickStep) ? tickStep : undefined
 
-  const tickCountLimit = isFiniteTickValue(totalTicks)
-    ? Math.min(totalTicks, TICK_COUNT_LIMIT)
-    : TICK_COUNT_LIMIT
+  const stepStart = givenStart ?? start
+  const parts = givenTicks === undefined || givenTicks === 0 ? 1 : givenTicks
 
-  let counter = isFiniteTickValue(tickStart) ? 0 : 1
+  /*
+    With no step given, spread what is left of the domain over `parts`
+    intervals. A start of its own means the first tick lands on it, leaving one
+    interval fewer to divide into.
+  */
+  const step =
+    givenStep ??
+    (end - stepStart) / (givenStart === undefined ? parts + 1 : parts)
+
+  const tickCountLimit =
+    givenTicks === undefined
+      ? TICK_COUNT_LIMIT
+      : Math.min(givenTicks, TICK_COUNT_LIMIT)
+
+  let counter = givenStart === undefined ? 1 : 0
   let generatedTick = stepStart + step * counter
 
-  if (
-    tickStep !== 0 &&
-    (isFiniteTickValue(totalTicks) || isFiniteTickValue(tickStep))
-  ) {
+  if (tickStep !== 0 && (givenTicks !== undefined || givenStep !== undefined)) {
     /*
       - When 'step' marks the ticks to the right (or up) on the axis
         it is a positive number and should stop at 'end'
@@ -187,10 +189,11 @@ const getTicks = (
   tickStep?: number,
 ) => {
   const [start = 0, end = 0] = domain
-  if (isFiniteTickValue(totalTicks) || isFiniteTickValue(tickStep)) {
+  if (Number.isFinite(totalTicks) || Number.isFinite(tickStep)) {
     return generateTicks(domain, columnKey, totalTicks, tickStart, tickStep)
   }
-  if (isFiniteTickValue(tickStart)) {
+
+  if (Number.isFinite(tickStart)) {
     const specifiedTickStart = Math.min(Math.max(tickStart, start), end)
     return calculateTicks(
       [specifiedTickStart, end],
@@ -207,6 +210,7 @@ const getTicks = (
     keep this separate from a memoized horizontal version
 */
 const getMemoizedVerticalTicks = memoizeOne(getTicks)
+
 export const getVerticalTicks = memoizeOne(
   (
     domain: number[],

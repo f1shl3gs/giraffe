@@ -1,38 +1,21 @@
 // Libraries
 import classnames from 'classnames'
-import {CSSProperties, FunctionComponent, MouseEvent} from 'react'
-
-// Constants
-import {ASCENDING, DEFAULT_TIME_FIELD} from 'constants/tableGraph'
+import {Component, CSSProperties, FunctionComponent, MouseEvent} from 'react'
 
 // Types
 import {RenamableField, SortOptions, TableViewProperties} from 'types'
 import {CellRendererProps} from './TableGraphTable'
+import {MultiGridProps} from 'components/Table/MultiGrid'
 
 // Utils
 import {generateThresholdsListHexs} from 'utils/colorOperations'
-import {defaultTo} from 'utils/defaultTo'
 import {formatStatValue} from 'utils/formatStatValue'
-import {isString} from 'utils/isString'
+
+// Constants
+import {ASCENDING, DEFAULT_TIME_FIELD} from 'constants/tableGraph'
 
 // Styles
 import './TableGraphs.scss'
-
-interface Props extends CellRendererProps {
-  sortOptions: SortOptions
-  data: string
-  dataType: string
-  properties: TableViewProperties
-  hoveredRowIndex: number
-  hoveredColumnIndex: number
-  isTimeVisible: boolean
-  isVerticalTimeAxis: boolean
-  isFirstColumnFixed: boolean
-  onClickFieldName: (data: string) => void
-  onHover: (e: MouseEvent<HTMLElement>) => void
-  resolvedRenamableFields: RenamableField[]
-  timeFormatter: (time: string) => string
-}
 
 const URL_REGEXP = /((http|https)?:\/\/[^\s]+)/g
 
@@ -72,23 +55,31 @@ const asLink = (str: string) => {
   return out
 }
 
-const getStyle = (props: Props) => {
-  const {
-    style,
-    properties,
-    data,
-    dataType,
-    isFirstColumnFixed,
-    rowIndex,
-    columnIndex,
-  } = props
+const getStyle = (
+  properties: TableViewProperties,
+  data: string,
+  dataType: string,
+  isTimeVisible: boolean,
+  isVerticalTimeAxis: boolean,
+  isFirstColumnFixed: boolean,
+  resolvedRenamableFields: RenamableField[],
+  columnIndex: number,
+  rowIndex: number,
+  style: CSSProperties,
+) => {
   const {colors} = properties
 
   if (
     isFixed(isFirstColumnFixed, rowIndex, columnIndex) ||
-    isTimeData(props) ||
+    isTimeData(
+      rowIndex,
+      columnIndex,
+      resolvedRenamableFields,
+      isTimeVisible,
+      isVerticalTimeAxis,
+    ) ||
     isTimestamp(dataType) ||
-    isNaN(Number(data)) ||
+    Number.isNaN(data) ||
     dataType.includes('string')
   ) {
     return style
@@ -103,20 +94,18 @@ const getStyle = (props: Props) => {
   }
 }
 
-const getClassName = (props: Props): string => {
-  const {
-    parent,
-    sortOptions,
-    data,
-    isVerticalTimeAxis,
-    isFirstColumnFixed,
-    rowIndex,
-    columnIndex,
-    hoveredRowIndex,
-    hoveredColumnIndex,
-    dataType,
-  } = props
-
+const getClassName = (
+  data: string,
+  dataType: string,
+  sortOptions: SortOptions,
+  hoveredRowIndex: number,
+  hoveredColumnIndex: number,
+  isVerticalTimeAxis: boolean,
+  isFirstColumnFixed: boolean,
+  rowIndex: number,
+  columnIndex: number,
+  parent: {current: Component<MultiGridProps> | null} | null,
+): string => {
   return classnames('table-graph-cell', {
     'table-graph-cell__fixed-row': isFixedRow(rowIndex, columnIndex),
     'table-graph-cell__fixed-column': isFixedColumn(
@@ -135,7 +124,7 @@ const getClassName = (props: Props): string => {
       hoveredColumnIndex,
     ),
     'table-graph-cell__numerical':
-      !isNaN(Number(data)) && !dataType.includes('string'),
+      !Number.isNaN(Number(data)) && !dataType.includes('string'),
     'table-graph-cell__field-name': isFieldName(
       isVerticalTimeAxis,
       rowIndex,
@@ -157,19 +146,19 @@ function isBlank(pString: string) {
   return !/[^\s]+/.test(pString)
 }
 
-export const getContents = (props: Props): string => {
-  const {
-    properties,
-    data,
-    dataType,
-    timeFormatter,
-    isVerticalTimeAxis,
-    rowIndex,
-    columnIndex,
-  } = props
+export const getContents = (
+  properties: TableViewProperties,
+  data: string,
+  dataType: string,
+  isVerticalTimeAxis: boolean,
+  timeFormatter: (time: string) => string,
+  rowIndex: number,
+  columnIndex: number,
+  resolvedRenamableFields: RenamableField[],
+): string => {
   const {decimalPlaces} = properties
 
-  if (!data || (isString(data) && isBlank(data))) {
+  if (!data || (typeof data === 'string' && isBlank(data))) {
     return String(data)
   }
 
@@ -177,28 +166,33 @@ export const getContents = (props: Props): string => {
     return timeFormatter(data)
   }
   if (
-    isString(data) &&
+    typeof data === 'string' &&
     isFieldName(isVerticalTimeAxis, rowIndex, columnIndex)
   ) {
-    return defaultTo(getFieldName(props), '').toString()
+    return getFieldName(
+      data,
+      isVerticalTimeAxis,
+      resolvedRenamableFields,
+      columnIndex,
+      rowIndex,
+    )
   }
 
-  if (!isNaN(+data) && !dataType.includes('string')) {
+  if (!Number.isNaN(+data) && !dataType.includes('string')) {
     // method needs the first arg to be a number to work properly
     return formatStatValue(+data, {decimalPlaces})
   }
 
-  return defaultTo(data, '').toString()
+  return data
 }
 
-const getFieldName = (props: Props): string => {
-  const {
-    data,
-    resolvedRenamableFields = [DEFAULT_TIME_FIELD],
-    isVerticalTimeAxis,
-    rowIndex,
-    columnIndex,
-  } = props
+const getFieldName = (
+  data: string,
+  isVerticalTimeAxis: boolean,
+  resolvedRenamableFields: RenamableField[],
+  columnIndex: number,
+  rowIndex: number,
+): string => {
   const foundField =
     isFieldName(isVerticalTimeAxis, rowIndex, columnIndex) &&
     resolvedRenamableFields.find(({internalName}) => internalName === data)
@@ -212,10 +206,11 @@ const isFieldName = (
   isVerticalTimeAxis: boolean,
   rowIndex: number,
   columnIndex: number,
-): boolean => (isVerticalTimeAxis ? isFirstRow(rowIndex) : isFirstCol(columnIndex))
+): boolean =>
+  isVerticalTimeAxis ? isFirstRow(rowIndex) : isFirstCol(columnIndex)
 
 const isHighlightedRow = (
-  parent: Props['parent'],
+  parent: {current: Component<MultiGridProps> | null} | null,
   rowIndex: number,
   hoveredRowIndex: number,
 ): boolean => {
@@ -230,14 +225,13 @@ const isHighlightedColumn = (
   hoveredColumnIndex: number,
 ): boolean => columnIndex === hoveredColumnIndex && hoveredColumnIndex > 0
 
-const isTimeData = (props: Props): boolean => {
-  const {
-    isTimeVisible,
-    isVerticalTimeAxis,
-    resolvedRenamableFields,
-    rowIndex,
-    columnIndex,
-  } = props
+const isTimeData = (
+  rowIndex: number,
+  columnIndex: number,
+  resolvedRenamableFields: RenamableField[],
+  isTimeVisible: boolean,
+  isVerticalTimeAxis: boolean,
+): boolean => {
   return (
     isTimeVisible &&
     (isVerticalTimeAxis
@@ -289,7 +283,9 @@ const isFixed = (
   )
 }
 
-const getTimeFieldIndex = (resolvedRenamableFields: RenamableField[]): number => {
+const getTimeFieldIndex = (
+  resolvedRenamableFields: RenamableField[],
+): number => {
   let hiddenBeforeTime = 0
   const timeIndex = resolvedRenamableFields.findIndex(
     ({internalName, visible}) => {
@@ -303,9 +299,13 @@ const getTimeFieldIndex = (resolvedRenamableFields: RenamableField[]): number =>
   return timeIndex - hiddenBeforeTime
 }
 
-const getCellIdString = (props: Props): string => {
-  const {isVerticalTimeAxis, rowIndex, columnIndex, sortOptions, data} = props
-
+const getCellIdString = (
+  data: string,
+  sortOptions: SortOptions,
+  rowIndex: number,
+  columnIndex: number,
+  isVerticalTimeAxis: boolean,
+): string => {
   if (
     isFieldName(isVerticalTimeAxis, rowIndex, columnIndex) &&
     isSorted(sortOptions, data) &&
@@ -323,50 +323,121 @@ const getCellIdString = (props: Props): string => {
   }
 }
 
-export const TableCell: FunctionComponent<Props> = (props: Props) => {
-  const {
-    data,
-    rowIndex,
-    columnIndex,
-    onHover,
-    isVerticalTimeAxis,
-    onClickFieldName,
-  } = props
+interface Props extends CellRendererProps {
+  sortOptions: SortOptions
+  data: string
+  dataType: string
+  properties: TableViewProperties
+  hoveredRowIndex: number
+  hoveredColumnIndex: number
+  isTimeVisible: boolean
+  isVerticalTimeAxis: boolean
+  isFirstColumnFixed: boolean
+  onClickFieldName: (data: string) => void
+  onHover: (e: MouseEvent<HTMLElement>) => void
+  resolvedRenamableFields: RenamableField[]
+  timeFormatter: (time: string) => string
+}
 
+export const TableCell: FunctionComponent<Props> = ({
+  data,
+  dataType,
+  sortOptions,
+  rowIndex,
+  columnIndex,
+  onHover,
+  onClickFieldName,
+  properties,
+  resolvedRenamableFields,
+  timeFormatter,
+  isFirstColumnFixed,
+  isTimeVisible,
+  isVerticalTimeAxis,
+  hoveredRowIndex,
+  hoveredColumnIndex,
+  style,
+  parent,
+}) => {
   const handleClick = () => {
     return isFieldName(isVerticalTimeAxis, rowIndex, columnIndex) &&
-      isString(data)
+      typeof data === 'string'
       ? onClickFieldName(data)
       : null
   }
 
+  const cellStyle = getStyle(
+    properties,
+    data,
+    dataType,
+    isTimeVisible,
+    isVerticalTimeAxis,
+    isFirstColumnFixed,
+    resolvedRenamableFields,
+    columnIndex,
+    rowIndex,
+    style,
+  )
+
+  const content = getContents(
+    properties,
+    data,
+    dataType,
+    isVerticalTimeAxis,
+    timeFormatter,
+    rowIndex,
+    columnIndex,
+    resolvedRenamableFields,
+  )
+
+  const className = getClassName(
+    data,
+    dataType,
+    sortOptions,
+    hoveredRowIndex,
+    hoveredColumnIndex,
+    isVerticalTimeAxis,
+    isFirstColumnFixed,
+    rowIndex,
+    columnIndex,
+    parent,
+  )
+
   if (rowIndex === 0) {
+    const cellIdString = getCellIdString(
+      data,
+      sortOptions,
+      rowIndex,
+      columnIndex,
+      isVerticalTimeAxis,
+    )
+
     return (
       <button
-        style={getStyle(props)}
-        className={getClassName(props)}
+        style={cellStyle}
+        className={className}
         onClick={handleClick}
         data-column-index={columnIndex}
         data-row-index={rowIndex}
-        data-testid={`${data}-table-header ${getCellIdString(props)}`}
+        data-testid={`${data}-table-header ${cellIdString}`}
         onMouseOver={onHover}
-        title={getContents(props)}
+        title={content}
       >
-        {getContents(props)}
+        {content}
       </button>
     )
   }
+
   return (
     <div
-      style={getStyle(props)}
-      className={getClassName(props)}
+      style={cellStyle}
+      className={className}
       onClick={handleClick}
       data-column-index={columnIndex}
       data-row-index={rowIndex}
       onMouseOver={onHover}
-      title={getContents(props)}
+      title={content}
     >
-      {asLink(getContents(props))}
+      {asLink(content)}
     </div>
   )
 }

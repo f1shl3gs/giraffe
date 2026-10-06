@@ -1,17 +1,23 @@
 // Libraries
 import {FunctionComponent} from 'react'
 
-import {FILL, SYMBOL} from 'constants/columnKeys'
-import {SCATTER_HOVER_POINT_SIZE} from 'constants/index'
+// Components
 import {Tooltip} from '../Tooltip'
-import type {ScatterSpec} from './transform'
 
+// Types
+import type {ScatterSpec} from './transform'
+import type {PlotConfig} from 'components/Plot'
+import type {ColumnType, Scale} from 'types'
+
+// Utils
 import {drawPoints} from 'utils/drawPoints'
 import {getPointsTooltipData} from 'utils/legend/tooltip'
 import {useCanvas} from 'utils/useCanvas'
 import {useHoverPointIndices} from 'utils/useHoverPointIndices'
-import type {ColumnType, Scale} from 'types'
-import type {PlotConfig} from 'components/Plot'
+
+// Constants
+import {FILL, SYMBOL} from 'constants/columnKeys'
+import {SCATTER_HOVER_POINT_SIZE} from 'constants/index'
 
 interface Props {
   columnFormatter: (colKey: string) => (x: any) => string
@@ -25,8 +31,6 @@ interface Props {
   xScale: Scale<number, number>
   yScale: Scale<number, number>
 
-  x: string
-  y: string
   fill: string[]
   symbol: string[]
 
@@ -34,8 +38,6 @@ interface Props {
 }
 
 export const ScatterHover: FunctionComponent<Props> = ({
-  x,
-  y,
   fill,
   symbol,
   spec,
@@ -48,8 +50,8 @@ export const ScatterHover: FunctionComponent<Props> = ({
   hoverY,
   columnFormatter,
 }) => {
-  const xColData = spec.table.getColumn(x, 'number')
-  const yColData = spec.table.getColumn(y, 'number')
+  const xColData = spec.table.getColumn(plotConfig.xColumn, 'number')
+  const yColData = spec.table.getColumn(plotConfig.yColumn, 'number')
   const fillColData = spec.table.getColumn(FILL, 'number')
   const symbolColData = spec.table.getColumn(SYMBOL, 'number')
   const fillScale = spec.scales.fill
@@ -115,8 +117,8 @@ export const ScatterHover: FunctionComponent<Props> = ({
   const tooltipData = getPointsTooltipData(
     rowIndices,
     spec.table,
-    x,
-    y,
+    plotConfig.xColumn,
+    plotConfig.yColumn,
     FILL,
     columnFormatter,
     [...new Set([...fill, ...symbol])],

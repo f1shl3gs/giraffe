@@ -33,8 +33,8 @@ export interface HeatmapConfig {
 }
 
 export interface HeatmapProps {
-  table: Table
   config: HeatmapConfig
+  table: Table
 }
 
 const FULL_SIZE_STYLE: CSSProperties = {
@@ -45,26 +45,20 @@ const FULL_SIZE_STYLE: CSSProperties = {
   bottom: 0,
 }
 
-/*
-  Heatmap is standalone and is not a <Plot> layer (D14): the binned rectangles
-  and their tooltip are heatmap's own content. It is one of the two components
-  built on the shared internal <Rect>.
-
-  It builds a PlotEnv for the same reason Mosaic does -- <Axes> and the shared
-  tooltip want one -- and hands the transform its own domains as the overrides.
-*/
-export const Heatmap: FunctionComponent<HeatmapProps> = ({table, config}) => (
-  <AutoSizer>
-    {(width, height) => (
-      <HeatmapSized
-        table={table}
-        config={config}
-        width={width}
-        height={height}
-      />
-    )}
-  </AutoSizer>
-)
+export const Heatmap: FunctionComponent<HeatmapProps> = ({table, config}) => {
+  return (
+    <AutoSizer>
+      {(width, height) => (
+        <HeatmapSized
+          table={table}
+          config={config}
+          width={width}
+          height={height}
+        />
+      )}
+    </AutoSizer>
+  )
+}
 
 interface HeatmapSizedProps extends HeatmapProps {
   width: number

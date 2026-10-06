@@ -10,7 +10,7 @@ const isPlottable = (v: unknown): boolean =>
   far outside the plot whenever the domain does not contain 0, so the point is
   dropped instead and the line joins its neighbours.
 */
-const scalePoints = (
+export const scalePoints = (
   xs: Array<number | null>,
   ys: Array<number | null>,
   xScale: Scale<number, number>,
@@ -52,22 +52,6 @@ export const simplifyLineData = (
       ys: Array.from(simplifiedYs),
       fill,
     })
-  }
-
-  return result
-}
-
-export const simplifyBandData = (
-  lineData: LineData,
-  xScale: Scale<number, number>,
-  yScale: Scale<number, number>,
-): LineData => {
-  const result: LineData = new Map()
-
-  for (const [groupID, {xs, ys, fill}] of lineData) {
-    const [{xs: scaledXs, ys: scaledYs}] = scalePoints(xs, ys, xScale, yScale)
-
-    result.set(groupID, {xs: scaledXs, ys: scaledYs, fill})
   }
 
   return result

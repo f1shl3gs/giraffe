@@ -1,19 +1,51 @@
-import {DISPLAY_NAME, FILL, SERIES, X_MAX, X_MIN} from 'constants/columnKeys'
+// Libraries
 import memoizeOne from 'memoize-one'
-import {createGroupIDColumn, getNominalColorScale} from 'utils/transform'
+
+// Types
 import type {ColumnGroupMap, ColumnType, Scale, Table} from 'types'
-import {isEqual} from 'utils/isEqual'
+
+// Utils
+import {createGroupIDColumn, getNominalColorScale} from 'utils/transform'
 import {newTable} from 'utils/newTable'
 import {resolveDomain} from 'utils/resolveDomain'
 
+// Constants
+import {DISPLAY_NAME, FILL, SERIES, X_MAX, X_MIN} from 'constants/columnKeys'
+
+/*
+  memoize-one hands its comparator the argument list, so this sees
+  [[...timeStamps]] rather than [...timeStamps] and has to look one level in.
+
+  Both callers spread a fresh array on every call, so comparing by reference
+  would never match and the memo would recompute every time.
+*/
+const sameKeys = (next: unknown[], last: unknown[]): boolean => {
+  if (next.length !== last.length) {
+    return false
+  }
+
+  return next.every((argument, i) => {
+    const previous = last[i]
+
+    if (Array.isArray(argument) && Array.isArray(previous)) {
+      return (
+        argument.length === previous.length &&
+        argument.every((key, j) => key === previous[j])
+      )
+    }
+
+    return argument === previous
+  })
+}
+
 const memoizedSortTimeStamps = memoizeOne(
   (timeStamps: Iterable<number>) => [...timeStamps].sort(),
-  isEqual,
+  sameKeys,
 )
 
 const memoizedSortDataMapKeys = memoizeOne(
   (dataMapKeys: Iterable<string>) => [...dataMapKeys].sort(),
-  isEqual,
+  sameKeys,
 )
 
 export const mosaicTransform = (

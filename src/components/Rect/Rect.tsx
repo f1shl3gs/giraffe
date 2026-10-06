@@ -68,23 +68,33 @@ export const Rect: FunctionComponent<RectProps> = ({
     spec.binDimension,
   )
 
-  const drawRectsOptions = {
-    table: spec.table,
-    xScale,
-    yScale,
-    fillScale: spec.scales.fill,
-    hoveredRowIndices,
-    strokeWidth,
-    strokePadding,
-    strokeOpacity,
-    fillOpacity,
-  }
-
   const canvasRef = useCanvas(
     width,
     height,
-    context => drawRects({context, ...drawRectsOptions}),
-    Object.values(drawRectsOptions),
+    ctx =>
+      drawRects(
+        ctx,
+        spec.table,
+        xScale,
+        yScale,
+        spec.scales.fill,
+        hoveredRowIndices,
+        strokeWidth,
+        strokePadding,
+        strokeOpacity,
+        fillOpacity,
+      ),
+    [
+      spec.table,
+      xScale,
+      yScale,
+      spec.scales.fill,
+      hoveredRowIndices,
+      strokeWidth,
+      strokePadding,
+      strokeOpacity,
+      fillOpacity,
+    ],
   )
 
   let tooltipData = []

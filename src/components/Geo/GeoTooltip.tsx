@@ -2,7 +2,7 @@
 import {FunctionComponent, useLayoutEffect, useState} from 'react'
 
 // Components
-import {Tooltip} from '../Tooltip'
+import {Tooltip} from 'components/Tooltip'
 
 // Utils
 import {defineToolTipEffect} from './processing/toolTips'

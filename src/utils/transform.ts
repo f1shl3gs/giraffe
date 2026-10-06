@@ -1,20 +1,10 @@
 // Libraries
 import {range} from 'd3-array'
 import {interpolateRgbBasis} from 'd3-interpolate'
-import {scaleOrdinal, scaleSequential} from 'd3-scale'
+import {scaleOrdinal} from 'd3-scale'
 
 // Types
-import {
-  BandLineMap,
-  ColumnGroupMap,
-  NumericColumnData,
-  Scale,
-  SymbolType,
-  Table,
-} from 'types'
-
-// Constants
-import {ALL_SYMBOL_TYPES, BAND_COLOR_SCALE_CONSTANT} from 'constants/index'
+import {ColumnGroupMap, NumericColumnData, Scale, Table} from 'types'
 
 export const createGroupIDColumn = (
   table: Table,
@@ -54,7 +44,7 @@ export const createGroupIDColumn = (
   return [groupIDColumn, columnGroupMap]
 }
 
-const createNominalColorScale = (
+export const createNominalColorScale = (
   length: number,
   colors: string[],
 ): Scale<number, string> => {
@@ -80,9 +70,7 @@ const createNominalColorScale = (
     )
   }
 
-  const scale = scaleOrdinal<number, string>().domain(domain).range(scaleRange)
-
-  return scale
+  return scaleOrdinal<number, string>().domain(domain).range(scaleRange)
 }
 
 export const getNominalColorScale = (
@@ -90,29 +78,3 @@ export const getNominalColorScale = (
   colors: string[],
 ): Scale<number, string> =>
   createNominalColorScale(groupMap.mappings.length, colors)
-
-export const getBandColorScale = (
-  bandLineMap: BandLineMap,
-  colors: string[],
-): Scale<number, string> =>
-  createNominalColorScale(
-    bandLineMap.rowLines.length * BAND_COLOR_SCALE_CONSTANT,
-    colors,
-  )
-
-export const getContinuousColorScale = (
-  domain: [number, number],
-  colors: string[],
-): Scale<number, string> => {
-  return scaleSequential(interpolateRgbBasis(colors)).domain(domain)
-}
-
-export const getSymbolScale = (
-  columnGroupMap: ColumnGroupMap,
-): Scale<number, SymbolType> => {
-  const domain = range(columnGroupMap.mappings.length)
-
-  return scaleOrdinal<number, SymbolType>()
-    .domain(domain)
-    .range(ALL_SYMBOL_TYPES)
-}

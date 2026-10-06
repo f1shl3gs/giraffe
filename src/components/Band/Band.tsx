@@ -8,15 +8,13 @@ import {
   bandTransform,
   getBands,
   groupLineIndicesIntoBands,
+  simplifyBandData,
 } from 'components/Band/transform'
 import {getFormatterForColumn, usePlot} from 'components/Plot/PlotEnv'
 import {usePlotInteraction} from 'components/Plot/PlotInteractionContext'
 
-// Constants
-import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
-import {FILL, LOWER, UPPER} from 'constants/columnKeys'
-import {CURVES} from 'constants/index'
-import type {
+// Types
+import {
   BandLineMap,
   LineData,
   LineHoverDimension,
@@ -24,10 +22,14 @@ import type {
   LinePosition,
 } from 'types'
 
+// Constants
+import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
+import {FILL, LOWER, UPPER} from 'constants/columnKeys'
+import {CURVES} from 'constants/index'
+
 // Utils
-import {getBandHoverIndices, getLineLengths} from 'utils/bandHover'
-import {simplifyBandData} from 'utils/lineData'
-import {useBandHoverColumns} from 'utils/useBandHover'
+import {getBandHoverIndices, getLineLengths} from './bandHover'
+import {useBandHoverColumns} from './useBandHover'
 import {useCanvas} from 'utils/useCanvas'
 import {useHoverPointIndices} from 'utils/useHoverPointIndices'
 
@@ -235,7 +237,9 @@ function draw(
         .x1((i: number) => band.xs[i])
         .x0((i: number) => xs_min[i])
         .context(ctx)
-        .defined((i: number) => (xs_min[i] !== undefined && ys_min[i] !== undefined))
+        .defined(
+          (i: number) => xs_min[i] !== undefined && ys_min[i] !== undefined,
+        )
         .curve(CURVES[interpolation] || curveLinear)
 
       ctx.fillStyle = lower.fill
@@ -253,7 +257,9 @@ function draw(
         .x1((i: number) => xs_max[i])
         .x0((i: number) => band.xs[i])
         .context(ctx)
-        .defined((i: number) => (xs_max[i] !== undefined && ys_max[i] !== undefined))
+        .defined(
+          (i: number) => xs_max[i] !== undefined && ys_max[i] !== undefined,
+        )
         .curve(CURVES[interpolation] || curveLinear)
 
       ctx.fillStyle = upper.fill
@@ -274,7 +280,7 @@ function draw(
       .y((i: number) => ys[i])
       .x((i: number) => xs[i])
       .context(ctx)
-      .defined((i: number) => (xs[i] !== undefined && ys[i] !== undefined))
+      .defined((i: number) => xs[i] !== undefined && ys[i] !== undefined)
       .curve(CURVES[interpolation] || curveLinear)
 
     ctx.strokeStyle = fill

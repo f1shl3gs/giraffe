@@ -22,7 +22,7 @@ import './TableGraphs.scss'
 const SCROLLBAR_SIZE_BUFFER = 20
 type HeightWidthFunction = (arg: {index: number}) => number
 
-export interface PropsMultiGrid {
+export interface MultiGridProps {
   width: number
   height: number
   /*
@@ -101,7 +101,7 @@ export interface PropsMultiGrid {
   Naming the two apart is also what keeps the defaults honest: adding a field
   here that nothing defaults would be a lie TS cannot catch.
 */
-export interface ResolvedMultiGridProps extends PropsMultiGrid {
+export interface ResolvedMultiGridProps extends MultiGridProps {
   classNameBottomLeftGrid: string
   classNameBottomRightGrid: string
   classNameTopLeftGrid: string
@@ -493,7 +493,7 @@ const gridDefaults = {
   styleTopRightGrid: {},
 }
 
-export const MultiGrid = (props: PropsMultiGrid) => {
+export const MultiGrid = (props: MultiGridProps) => {
   const {scrollToRow = -1, scrollToColumn = -1, ref, ...rest} = props
   /*
     Merged rather than written as one literal: inline, each of these keys is a

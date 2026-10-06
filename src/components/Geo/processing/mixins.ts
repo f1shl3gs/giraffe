@@ -1,4 +1,4 @@
-import {HEX_DIGIT_NUM} from 'utils/geo'
+import {HEX_DIGIT_NUM} from '../geo'
 import {CoordinateEncoding, Coordinates} from './GeoTable'
 import {s2IdToLatLng} from './s2IdToLatLng'
 

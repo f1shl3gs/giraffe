@@ -1,15 +1,5 @@
 // Libraries
 import classnames from 'classnames'
-// Components
-import {AutoSizer} from 'components/AutoSizer'
-import {ColumnSizer, SizedColumns} from 'components/ColumnSizer'
-// Constants
-import {
-  DEFAULT_FIX_FIRST_COLUMN,
-  DEFAULT_TIME_FIELD,
-  DEFAULT_VERTICAL_TIME_AXIS,
-  NULL_ARRAY_INDEX,
-} from 'constants/tableGraph'
 import {
   Component,
   CSSProperties,
@@ -19,6 +9,19 @@ import {
   useRef,
   useState,
 } from 'react'
+
+// Components
+import {AutoSizer} from 'components/AutoSizer'
+import {ColumnSizer, SizedColumns} from 'components/ColumnSizer'
+
+// Constants
+import {
+  DEFAULT_FIX_FIRST_COLUMN,
+  DEFAULT_TIME_FIELD,
+  DEFAULT_VERTICAL_TIME_AXIS,
+  NULL_ARRAY_INDEX,
+} from 'constants/tableGraph'
+
 // Types
 import {
   TableViewProperties,
@@ -26,11 +29,12 @@ import {
   TimeZone,
   TransformTableDataReturnType,
 } from 'types'
+
 // Utils
 import {timeFormatter} from 'utils/formatters'
 import {findHoverTimeIndex, resolveTimeFormat} from 'utils/tableGraph'
 import {useHoverTime} from './hoverTime'
-import {MultiGrid, MultiGridInputHandles, PropsMultiGrid} from './MultiGrid'
+import {MultiGrid, MultiGridInputHandles, MultiGridProps} from './MultiGrid'
 import {TableCell} from './TableCell'
 
 const COLUMN_MIN_WIDTH = 100
@@ -48,7 +52,7 @@ export interface CellRendererProps {
   columnIndex: number
   rowIndex: number
   key: string
-  parent: {current: Component<PropsMultiGrid> | null} | null
+  parent: {current: Component<MultiGridProps> | null} | null
   style: CSSProperties
 }
 

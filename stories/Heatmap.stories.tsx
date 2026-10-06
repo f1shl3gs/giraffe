@@ -40,12 +40,13 @@ export const Example: Story = {
       binSize,
       showAxes,
       fillOpacity,
-      strokeOpacity
+      strokeOpacity,
+      valueFormatters: {_value: val => `${Math.round(val)}%`},
     }
 
     return (
       <StoryFrame>
-        <Heatmap table={TABLE} config={config} />
+        <Heatmap config={config} table={TABLE}/>
       </StoryFrame>
     )
   },

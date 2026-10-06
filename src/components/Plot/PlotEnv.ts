@@ -1,10 +1,12 @@
 // Libraries
 import {createContext, useContext} from 'react'
+
+// Types
 import {ColumnType, Formatter, Margins, Scale, Table} from 'types'
+import {PlotConfig} from './PlotConfig'
+
 // Utils
 import {timeFormatter} from 'utils/formatters'
-// Types
-import {PlotConfig} from './PlotConfig'
 
 const DEFAULT_FORMATTER: Formatter = x => String(x)
 const DEFAULT_TIME_FORMATTER = timeFormatter()

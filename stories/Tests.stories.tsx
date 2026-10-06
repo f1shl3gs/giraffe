@@ -56,8 +56,6 @@ export const SnapshotWithMultipleMinimumValues: Story = {
     }
 
     const lineConfig: LineConfig = {
-      x: '_time',
-      y: '_value',
     }
 
     return (
@@ -78,8 +76,6 @@ export const SnapshotLineLayerWithShadedAreaAndStepInterpolation: Story = {
     }
 
     const lineConfig: LineConfig = {
-      x: '_time',
-      y: '_value',
       fill: ['cpu'],
       interpolation: 'step',
       shadeBelow: true,
@@ -103,8 +99,6 @@ export const SnapshotTimeZoneSupport: Story = {
     }
 
     const lineConfig: LineConfig = {
-      x: '_time',
-      y: '_value',
       fill: ['cpu'],
     }
 
@@ -177,8 +171,6 @@ export const SnapshotBinaryPrefixFormatting: Story = {
     }
 
     const lineConfig: LineConfig = {
-      x: 'time',
-      y: 'bytes',
     }
 
     return (
@@ -215,19 +207,13 @@ export const SnapshotWithFromRowsAdapter: Story = {
       {x: 0.19812217061286364, y: 0.6097573428446372},
     ])
 
-    const config: ScatterConfig = {
-      x: 'x',
-      y: 'y',
-    }
+    const config: ScatterConfig = {}
 
-    /*
-      <Scatter> sizes itself, so it does not go inside a <Plot> -- it would only
-      be handed a second AutoSizer and a pair of axes it did not ask for. The
-      fixed 600x400 is a div, because this story exists to be snapshotted.
-    */
     return (
       <div style={{width: 600, height: 400}}>
-        <Scatter table={table} config={config} />
+        <Plot table={table} config={{xColumn: 'x', yColumn: 'y'}}>
+          <Scatter config={config} />
+        </Plot>
       </div>
     )
   },
@@ -244,8 +230,6 @@ export const SnapshotCustomYTicks: Story = {
     }
 
     const lineConfig: LineConfig = {
-      x: '_time',
-      y: '_value',
       fill: ['cpu'],
     }
 
@@ -302,8 +286,6 @@ export const StressTestLine: Story = {
     }
 
     const lineConfig: LineConfig = {
-      x: 'x',
-      y: 'y',
       fill: ['tag'],
     }
 

@@ -1,10 +1,44 @@
-import {FILL, SYMBOL} from 'constants/columnKeys'
-import {
-  createGroupIDColumn,
-  getNominalColorScale,
-  getSymbolScale,
-} from 'utils/transform'
+// Libraries
+import {range} from 'd3-array'
+import {scaleOrdinal} from 'd3-scale'
+
+// Types
 import type {ColumnGroupMap, ColumnType, Scale, SymbolType, Table} from 'types'
+
+// Utils
+import {createGroupIDColumn, getNominalColorScale} from 'utils/transform'
+
+// Constants
+import {ALL_SYMBOL_TYPES} from 'constants/index'
+import {FILL, SYMBOL} from 'constants/columnKeys'
+
+/*
+  The transform's output, consumed only by Scatter. There is no `type`
+  discriminator: <Scatter> is the type.
+
+  xDomain and yDomain are what the transform measured, kept for callers that
+  want them. <Scatter> itself does not use them -- it lets <Plot> resolve both
+  axes from xColumn / yColumn, because the two reduces below do not agree on how
+  to seed a minimum and so cannot both be what the axes should show.
+*/
+export interface ScatterSpec {
+  inputTable: Table
+  table: Table // has `FILL` and `SYMBOL` columns added
+  xDomain: number[]
+  yDomain: number[]
+  xColumnKey: string
+  yColumnKey: string
+  xColumnType: ColumnType
+  yColumnType: ColumnType
+  scales: {
+    fill: Scale<number, string>
+    symbol: Scale<number, SymbolType>
+  }
+  columnGroupMaps: {
+    fill: ColumnGroupMap
+    symbol: ColumnGroupMap
+  }
+}
 
 export const scatterTransform = (
   inputTable: Table,
@@ -53,30 +87,12 @@ export const scatterTransform = (
   }
 }
 
-/*
-  The transform's output, consumed only by Scatter. There is no `type`
-  discriminator: <Scatter> is the type.
+const getSymbolScale = (
+  columnGroupMap: ColumnGroupMap,
+): Scale<number, SymbolType> => {
+  const domain = range(columnGroupMap.mappings.length)
 
-  xDomain and yDomain are what the transform measured, kept for callers that
-  want them. <Scatter> itself does not use them -- it lets <Plot> resolve both
-  axes from xColumn / yColumn, because the two reduces below do not agree on how
-  to seed a minimum and so cannot both be what the axes should show.
-*/
-export interface ScatterSpec {
-  inputTable: Table
-  table: Table // has `FILL` and `SYMBOL` columns added
-  xDomain: number[]
-  yDomain: number[]
-  xColumnKey: string
-  yColumnKey: string
-  xColumnType: ColumnType
-  yColumnType: ColumnType
-  scales: {
-    fill: Scale<number, string>
-    symbol: Scale<number, SymbolType>
-  }
-  columnGroupMaps: {
-    fill: ColumnGroupMap
-    symbol: ColumnGroupMap
-  }
+  return scaleOrdinal<number, SymbolType>()
+    .domain(domain)
+    .range(ALL_SYMBOL_TYPES)
 }

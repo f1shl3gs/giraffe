@@ -110,7 +110,7 @@ export const bin = (
     const shouldSkipPoint =
       x === undefined ||
       x === null ||
-      isNaN(x) ||
+      Number.isNaN(x) ||
       x < xDomain[0] ||
       x > xDomain[1]
 

@@ -1,6 +1,10 @@
-import type {StaticLegendConfig} from 'components/Plot/PlotConfig'
-import {STATIC_LEGEND_DEFAULTS} from 'components/Plot/StaticLegendDefaults'
+// Types
+import type {StaticLegendConfig} from 'components/StaticLegend/StaticLegend'
+
+// Constants
 import {
+  STATIC_LEGEND_DEFAULT_HEIGHT_RATIO,
+  STATIC_LEGEND_DEFAULT_WIDTH_RATIO,
   STATIC_LEGEND_MAXIMUM_HEIGHT_RATIO,
   STATIC_LEGEND_MAXIMUM_WIDTH_RATIO,
   STATIC_LEGEND_MINIMUM_HEIGHT_RATIO,
@@ -15,33 +19,33 @@ interface ResizedPlotDimensions {
 export const resizePlotWithStaticLegend = (
   height: number,
   width: number,
-  staticLegendProperties?: StaticLegendConfig,
+  staticLegendConfig?: StaticLegendConfig,
 ): ResizedPlotDimensions => {
-  const resizedPlotDimensions = {
+  const dimensions: ResizedPlotDimensions = {
     height: height || 0,
     width: width || 0,
-  } as ResizedPlotDimensions
+  }
 
-  if (staticLegendProperties && !staticLegendProperties.hide) {
+  if (staticLegendConfig && !staticLegendConfig.hide) {
     const {
-      heightRatio = STATIC_LEGEND_DEFAULTS.heightRatio,
-      widthRatio = STATIC_LEGEND_DEFAULTS.widthRatio,
-    } = staticLegendProperties
+      heightRatio = STATIC_LEGEND_DEFAULT_HEIGHT_RATIO,
+      widthRatio = STATIC_LEGEND_DEFAULT_WIDTH_RATIO,
+    } = staticLegendConfig
 
     if (
       heightRatio > STATIC_LEGEND_MINIMUM_HEIGHT_RATIO &&
       heightRatio < STATIC_LEGEND_MAXIMUM_HEIGHT_RATIO
     ) {
-      resizedPlotDimensions.height = height - heightRatio * height
+      dimensions.height = height - heightRatio * height
     }
 
     if (
       widthRatio > STATIC_LEGEND_MINIMUM_WIDTH_RATIO &&
       widthRatio < STATIC_LEGEND_MAXIMUM_WIDTH_RATIO
     ) {
-      resizedPlotDimensions.width = width - widthRatio * width
+      dimensions.width = width - widthRatio * width
     }
   }
 
-  return resizedPlotDimensions
+  return dimensions
 }

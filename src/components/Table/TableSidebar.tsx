@@ -12,13 +12,6 @@ import {TableSidebarItem} from './TableSidebarItem'
 // Styles
 import './TableGraphs.scss'
 
-interface Props {
-  data: FluxTable[]
-  selectedTableName: string
-  onSelectTable: (name: string) => void
-  theme?: Theme
-}
-
 const handleSearch = (
   event: ChangeEvent<HTMLInputElement>,
   setSearchTerm: Function,
@@ -31,9 +24,19 @@ const getFilteredData = (
   return data.filter(table => table.name.includes(searchTerm))
 }
 
-export const TableSidebar: FunctionComponent<Props> = (props: Props) => {
-  const {data, selectedTableName, onSelectTable, theme} = props
+interface Props {
+  data: FluxTable[]
+  selectedTableName: string
+  onSelectTable: (name: string) => void
+  theme?: Theme
+}
 
+export const TableSidebar: FunctionComponent<Props> = ({
+  data,
+  selectedTableName,
+  onSelectTable,
+  theme,
+}) => {
   const [searchTerm, setSearchTerm] = useState<string>('')
 
   const className = classnames('time-machine-sidebar', {

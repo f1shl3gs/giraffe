@@ -1,12 +1,19 @@
-import type {LegendConfig} from 'components/Legend/LegendConfig'
-import {CSSProperties, FunctionComponent} from 'react'
+// Libraries
+import {CSSProperties, FunctionComponent, useEffect, useRef} from 'react'
 import {createPortal} from 'react-dom'
-import type {AnnotationMark, TooltipPosition} from 'types'
-import {useAnnotationTooltipElement} from 'utils/legend/useTooltipElement'
+
+// Types
+import type {LegendConfig} from 'components/Legend/LegendConfig'
+import {AnnotationMark, AnnotationTooltipOptions, TooltipPosition} from 'types'
+
+// Constants
 import {
   ANNOTATION_DEFAULT_MAX_WIDTH,
   ANNOTATION_TOOLTIP_CONTAINER_NAME,
+  CLOCKFACE_Z_INDEX,
+  LEAFLET_Z_INDEX,
 } from 'constants/index'
+import {useLayoutStyle} from 'utils/useLayoutStyle'
 
 interface Props {
   boundingReference: DOMRect
@@ -138,4 +145,118 @@ export const AnnotationTooltip: FunctionComponent<Props> = ({
     </div>,
     annotationTooltipElement,
   )
+}
+
+const useAnnotationStyle = (
+  el: HTMLDivElement,
+  options: AnnotationTooltipOptions,
+) => {
+  const {dimension, position, xOffset, yOffset} = options || {}
+  const {x, y} = position || {x: null, y: null}
+
+  // Position the tooltip above the annotation for vertical annotations, like this:
+  //
+  //          ┌─────────────┐
+  //          │             │
+  //          │   tooltip   │
+  //          │             │
+  //          └─────────────┘
+  //                 |
+  //                 |
+  //                 |
+  //                 |
+  //
+  // Position the tooltip to the right of the annotation for horizontal annotations, like this:
+  //
+  //             ┌─────────────┐
+  //             │             │
+  //    ---------│   tooltip   │
+  //             │             │
+  //             └─────────────┘
+  //
+  // The positioning is subject to the following restrictions:
+  //
+  // - If the tooltip does not fit above a vertical annotation due to screen size,
+  //   shift it to overlay the top part of the annotation
+  //
+  // - If the tooltip does not fit to the right of a horizontal annotation due to screen size,
+  //   shift it to overlay the right part of the annotation
+  //
+  useLayoutStyle(
+    el,
+    ({offsetWidth: tooltipWidth, offsetHeight: tooltipHeight}) => {
+      if (x === null || y === null) {
+        return {
+          display: 'none',
+        }
+      }
+      // xOffset : start x-coordinate value of the plot layer
+      // yOffset : start y-coordinate value of the plot layer
+      // (xOffset, yOffset) is the origin of this plot
+      // dx      : the distance to the middle of the tooltip from the parent plot container left edge
+      let dx = xOffset - tooltipWidth / 2
+      if (dx + tooltipWidth > window.innerWidth) {
+        dx = 0 - tooltipWidth / 2 + window.innerWidth - (x + xOffset)
+      }
+      let dy = Math.max(yOffset - tooltipHeight, 0)
+
+      if (dimension === 'y') {
+        dx = xOffset
+        if (dx + x + tooltipWidth > window.innerWidth) {
+          dx = 0 - tooltipWidth + window.innerWidth - (dx + x)
+        }
+        dy = yOffset - tooltipHeight / 2
+        if (dy + y + tooltipHeight > window.innerHeight) {
+          dy = 0 - tooltipHeight + window.innerHeight - (dy + y)
+        }
+      }
+
+      let clampedX = Math.round(x + dx)
+      const clampedY = Math.round(dy + y)
+
+      // When the annotation is in the far edge of the screen, the position.left value
+      // overrides the width of the tooltip and makes its width smaller than its max-width.
+      // Position the left edge of the tooltip such that the tooltip occupies its max width.
+      if (
+        window.innerWidth - clampedX < ANNOTATION_DEFAULT_MAX_WIDTH &&
+        tooltipWidth >= ANNOTATION_DEFAULT_MAX_WIDTH
+      ) {
+        clampedX = window.innerWidth - ANNOTATION_DEFAULT_MAX_WIDTH
+      }
+
+      /* Geo widget maps are rendered with z-index: 399, we have to set it above
+       that so that tooltips are not rendered/are hidden below the map, */
+      return {
+        display: 'inline-block',
+        position: 'fixed',
+        left: `${clampedX}px`,
+        top: `${clampedY}px`,
+        zIndex: CLOCKFACE_Z_INDEX + LEAFLET_Z_INDEX + 1,
+      }
+    },
+  )
+}
+
+const useAnnotationTooltipElement = (
+  className: string,
+  options: AnnotationTooltipOptions,
+) => {
+  const ref = useRef<HTMLDivElement>(null)
+
+  if (ref.current === null) {
+    ref.current = document.createElement('div')
+    ref.current.classList.add(className)
+  }
+
+  useEffect(() => {
+    document.body.appendChild(ref.current)
+
+    return () => {
+      document.body.removeChild(ref.current)
+    }
+  }, [])
+
+  useAnnotationStyle(ref.current, options)
+
+  return ref.current
 }

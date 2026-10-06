@@ -1,8 +1,12 @@
 // Libraries
+import {CSSProperties, FunctionComponent, useMemo} from 'react'
 
-// Components
-import {LatestValueTransform} from 'components/LatestValueTransform'
-import type {CSSProperties, FunctionComponent} from 'react'
+// Types
+import type {DecimalPlaces, SVGAttributes, Table} from 'types'
+
+// Utils
+import {formatStatValue} from 'utils/formatStatValue'
+import {getLatestValues} from './getLatestValues'
 
 // Constants
 import {
@@ -13,14 +17,24 @@ import {
   SINGLE_STAT_SVG_TEXT_DEFAULT_STYLE,
 } from 'style/singleStatStyles'
 
-// Types
-import type {DecimalPlaces, SVGAttributes, Table} from 'types'
-
-// Utils
-import {formatStatValue} from 'utils/formatStatValue'
-
 // Styles
 import './SingleStat.scss'
+
+export interface SingleStatConfig {
+  prefix: string
+  suffix: string
+  decimalPlaces: DecimalPlaces
+  textColor: string
+  textOpacity?: number
+  backgroundColor?: string
+  testID?: string
+  style?: CSSProperties
+  resizerStyle?: CSSProperties
+  svgAttributes?: SVGAttributes
+  svgStyle?: CSSProperties
+  svgTextAttributes?: SVGAttributes
+  svgTextStyle?: CSSProperties
+}
 
 /*
   SingleStat is standalone (D13, same shape as Gauge and Geo). The number it
@@ -29,18 +43,25 @@ import './SingleStat.scss'
   it above a line -- because nothing here reads the environment.
 */
 export interface SingleStatProps {
-  table: Table
   config: SingleStatConfig
+  table: Table
 }
 
 export const SingleStat: FunctionComponent<SingleStatProps> = ({
-  table,
   config,
-}) => (
-  <LatestValueTransform table={table} allowString>
-    {stat => <SingleStatView stat={stat} config={config} />}
-  </LatestValueTransform>
-)
+  table,
+}) => {
+  const latestValues = useMemo(() => getLatestValues(table), [table])
+  if (latestValues.length === 0) {
+    return (
+      <div>
+        <h4>No latest value found</h4>
+      </div>
+    )
+  }
+
+  return <SingleStatView stat={latestValues[0]} config={config} />
+}
 
 interface SingleStatViewProps {
   stat: number
@@ -126,20 +147,4 @@ const SingleStatView: FunctionComponent<SingleStatViewProps> = ({
       </div>
     </div>
   )
-}
-
-export interface SingleStatConfig {
-  prefix: string
-  suffix: string
-  decimalPlaces: DecimalPlaces
-  textColor: string
-  textOpacity?: number
-  backgroundColor?: string
-  testID?: string
-  style?: CSSProperties
-  resizerStyle?: CSSProperties
-  svgAttributes?: SVGAttributes
-  svgStyle?: CSSProperties
-  svgTextAttributes?: SVGAttributes
-  svgTextStyle?: CSSProperties
 }

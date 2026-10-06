@@ -1,7 +1,8 @@
 // Types
-import type {
+import {
   Band,
   BandLineMap,
+  ColumnData,
   ColumnGroupMap,
   ColumnType,
   LatestIndexMap,
@@ -12,13 +13,17 @@ import type {
 import {DomainLabel} from 'types'
 
 // Utils
-import {isDefined} from 'utils/isDefined'
-import {createGroupIDColumn, getBandColorScale} from 'utils/transform'
-import {createLatestBandIndices} from 'utils/legend/band'
+import {
+  createGroupIDColumn,
+  crea,
+  createNominalColorScale,
+} from 'utils/transform'
 
 // Constants
 import {FILL, LOWER, RESULT, TIME, UPPER} from 'constants/columnKeys'
 import {BAND_COLOR_SCALE_CONSTANT} from 'constants/index'
+import {scalePoints} from 'utils/lineData'
+import {isSortable, sortIndicesByValueColumn} from 'utils/legend/sort'
 
 /* The transform's output, consumed only by Band and BandHover. */
 export interface BandLayerSpec {
@@ -35,9 +40,6 @@ export interface BandLayerSpec {
   yColumnKey: string
   xColumnType: ColumnType
   yColumnType: ColumnType
-  scales: {
-    fill: Scale<number, string>
-  }
   columnGroupMaps: {
     fill: ColumnGroupMap
     latestIndices: LatestIndexMap
@@ -59,10 +61,12 @@ export const getBands = (
       return
     }
     const upperIndex = upperLines[i]
-    const upper = Math.abs(upperIndex) !== Infinity ? lineData.get(upperIndex) : undefined
+    const upper =
+      Math.abs(upperIndex) !== Infinity ? lineData.get(upperIndex) : undefined
 
     const lowerIndex = lowerLines[i]
-    const lower = Math.abs(lowerIndex) === Infinity ? lineData.get(lowerIndex) : undefined
+    const lower =
+      Math.abs(lowerIndex) === Infinity ? lineData.get(lowerIndex) : undefined
 
     const row = lineData.get(rowIndex)
 
@@ -117,6 +121,62 @@ export const getBandLineMap = (
   }
 
   return bandIndices
+}
+
+export const createLatestBandIndices = (
+  lineData: LineData,
+  bandLineMap: BandLineMap,
+  bandDimension: DomainLabel,
+  hoveredLines?: LatestIndexMap,
+): LatestIndexMap => {
+  const latestIndices: LatestIndexMap = {}
+  const lineDataLastIndices: LatestIndexMap = {}
+
+  let counter = -1
+  for (const [lineNumber, series] of lineData) {
+    counter += series[bandDimension].length
+    lineDataLastIndices[lineNumber] = counter
+  }
+  const {upperLines, rowLines, lowerLines} = bandLineMap
+
+  rowLines.forEach((line, position) => {
+    /*
+      The ids come from bandLineMap, which is built from the same lineData, so
+      every lookup below was already assumed present before this became a Map.
+      `!` records that assumption instead of silently skipping a band.
+    */
+    const targetValues = lineData.get(line)![bandDimension]
+
+    let lastIndex = lineDataLastIndices[line]
+    let targetBandValue = targetValues[targetValues.length - 1]
+    if (hoveredLines) {
+      const offset = line === 0 ? 0 : lineDataLastIndices[line - 1] + 1
+      lastIndex = hoveredLines[line]
+      targetBandValue = targetValues[lastIndex - offset]
+    }
+    latestIndices[line] = lastIndex
+
+    const upperLine = upperLines[position]
+    const matchingUpperIndex = lineData
+      .get(upperLine)!
+      [bandDimension].findIndex(value => value === targetBandValue)
+    if (matchingUpperIndex > -1) {
+      const offset =
+        upperLine === 0 ? 0 : lineDataLastIndices[upperLine - 1] + 1
+      latestIndices[upperLine] = matchingUpperIndex + offset
+    }
+
+    const lowerLine = lowerLines[position]
+    const matchingLowerIndex = lineData
+      .get(lowerLine)!
+      [bandDimension].findIndex(value => value === targetBandValue)
+    if (matchingLowerIndex > -1) {
+      const offset =
+        lowerLine === 0 ? 0 : lineDataLastIndices[lowerLine - 1] + 1
+      latestIndices[lowerLine] = matchingLowerIndex + offset
+    }
+  })
+  return latestIndices
 }
 
 export const groupLineIndicesIntoBands = (
@@ -233,17 +293,17 @@ export const alignMinMaxWithBand = (
 
       // 1. All three are equal
       if (bandTime === upperTime && bandTime === lowerTime) {
-        if (isDefined(bandTime)) {
+        if (bandTime != null) {
           band.xs.push(bandTime)
           band.ys.push(bandValue)
           bandIterator += 1
         }
-        if (isDefined(upperTime)) {
+        if (upperTime != null) {
           upper.xs.push(upperTime)
           upper.ys.push(upperValue)
           upperIterator += 1
         }
-        if (isDefined(lowerTime)) {
+        if (lowerTime != null) {
           lower.xs.push(lowerTime)
           lower.ys.push(lowerValue)
           lowerIterator += 1
@@ -251,7 +311,7 @@ export const alignMinMaxWithBand = (
       }
       // 2. Lower is not equal to the other two
       else if (bandTime === upperTime) {
-        if (bandTime > lowerTime || !isDefined(bandTime)) {
+        if (bandTime > lowerTime || bandTime == null) {
           if (band) {
             band.xs.push(lowerTime)
             band.ys.push(lowerValue)
@@ -263,7 +323,7 @@ export const alignMinMaxWithBand = (
           lower.xs.push(lowerTime)
           lower.ys.push(lowerValue)
           lowerIterator += 1
-        } else if (bandTime < lowerTime || !isDefined(lowerTime)) {
+        } else if (bandTime < lowerTime || lowerTime == null) {
           band.xs.push(bandTime)
           band.ys.push(bandValue)
           upper.xs.push(upperTime)
@@ -278,7 +338,7 @@ export const alignMinMaxWithBand = (
       }
       // 3. Upper is not equal to the other two
       else if (bandTime === lowerTime) {
-        if (bandTime > upperTime || !isDefined(bandTime)) {
+        if (bandTime > upperTime || bandTime == null) {
           if (band) {
             band.xs.push(upperTime)
             band.ys.push(upperValue)
@@ -290,7 +350,7 @@ export const alignMinMaxWithBand = (
           upper.xs.push(upperTime)
           upper.ys.push(upperValue)
           upperIterator += 1
-        } else if (bandTime < upperTime || !isDefined(upperTime)) {
+        } else if (bandTime < upperTime || upperTime == null) {
           band.xs.push(bandTime)
           band.ys.push(bandValue)
           if (upper) {
@@ -305,7 +365,7 @@ export const alignMinMaxWithBand = (
       }
       // 4. Band is not equal to the other two
       else if (upperTime === lowerTime) {
-        if (upperTime > bandTime || !isDefined(upperTime)) {
+        if (upperTime > bandTime || upperTime == null) {
           band.xs.push(bandTime)
           band.ys.push(bandValue)
           if (upper) {
@@ -317,7 +377,7 @@ export const alignMinMaxWithBand = (
             lower.ys.push(bandValue)
           }
           bandIterator += 1
-        } else if (upperTime < bandTime || !isDefined(bandTime)) {
+        } else if (upperTime < bandTime || bandTime == null) {
           if (band) {
             band.xs.push(upperTime)
             band.ys.push(upperValue)
@@ -332,7 +392,7 @@ export const alignMinMaxWithBand = (
       }
       // 5. They are all different
       else {
-        if (!isDefined(bandTime)) {
+        if (bandTime == null) {
           if (upperTime > lowerTime) {
             if (band) {
               band.xs.push(lowerTime)
@@ -354,7 +414,7 @@ export const alignMinMaxWithBand = (
             lower.ys.push(upperValue)
             upperIterator += 1
           }
-        } else if (!isDefined(upperTime)) {
+        } else if (upperTime == null) {
           if (bandTime > lowerTime) {
             band.xs.push(lowerTime)
             band.ys.push(lowerValue)
@@ -376,7 +436,7 @@ export const alignMinMaxWithBand = (
             lower.ys.push(bandValue)
             bandIterator += 1
           }
-        } else if (!isDefined(lowerTime)) {
+        } else if (lowerTime == null) {
           if (bandTime > upperTime) {
             band.xs.push(upperTime)
             band.ys.push(upperValue)
@@ -458,8 +518,13 @@ export const bandTransform = (
     rowColumnName,
     upperColumnName,
   )
-  const fillScale = range =>
-    getBandColorScale(bandLineMap, colors)(range * BAND_COLOR_SCALE_CONSTANT)
+
+  const bandColorScale = createNominalColorScale(
+    bandLineMap.rowLines.length * BAND_COLOR_SCALE_CONSTANT,
+    colors,
+  )
+  const fillScale = (index: number) =>
+    bandColorScale(index * BAND_COLOR_SCALE_CONSTANT)
 
   const lineData: LineData = new Map()
 
@@ -524,7 +589,86 @@ export const bandTransform = (
     yColumnKey,
     xColumnType: table.getColumnType(xColumnKey),
     yColumnType: table.getColumnType(yColumnKey),
-    scales: {fill: fillScale},
     columnGroupMaps: {fill: fillColumnMap, latestIndices},
   }
 }
+
+export const simplifyBandData = (
+  lineData: LineData,
+  xScale: Scale<number, number>,
+  yScale: Scale<number, number>,
+): LineData => {
+  const result: LineData = new Map()
+
+  for (const [groupID, {xs, ys, fill}] of lineData) {
+    const [{xs: scaledXs, ys: scaledYs}] = scalePoints(xs, ys, xScale, yScale)
+
+    result.set(groupID, {xs: scaledXs, ys: scaledYs, fill})
+  }
+
+  return result
+}
+
+export const sortBandLines = (
+  bandValues: ColumnData,
+  bandLineMap: BandLineMap,
+  selectedLinesIndexMap: LatestIndexMap,
+): BandLineMap => {
+  const sortedBandLineMap: BandLineMap = {
+    upperLines: [],
+    rowLines: [],
+    lowerLines: [],
+  }
+
+  const {upperLines, rowLines, lowerLines} = bandLineMap
+
+  const indexToPreviousPositionMap: LatestIndexMap = {}
+  const rowIndices: number[] = []
+  const upperIndices: number[] = []
+  const lowerIndices: number[] = []
+  rowLines.forEach((line, position) => {
+    const index = selectedLinesIndexMap[line]
+    indexToPreviousPositionMap[index] = position
+    rowIndices.push(index)
+  })
+  upperLines.forEach((line, position) => {
+    const index = selectedLinesIndexMap[line]
+    indexToPreviousPositionMap[index] = position
+    upperIndices.push(index)
+  })
+  lowerLines.forEach((line, position) => {
+    const index = selectedLinesIndexMap[line]
+    indexToPreviousPositionMap[index] = position
+    lowerIndices.push(index)
+  })
+  const rowValues = rowIndices.map(index => bandValues[index])
+  const upperValues = upperIndices.map(index => bandValues[index])
+  const lowerValues = lowerIndices.map(index => bandValues[index])
+
+  let sortOrder
+  if (isSortable(rowValues)) {
+    sortOrder = sortIndicesByValueColumn(bandValues, rowIndices)
+  } else if (isSortable(upperValues)) {
+    sortOrder = sortIndicesByValueColumn(bandValues, upperIndices)
+  } else if (isSortable(lowerValues)) {
+    sortOrder = sortIndicesByValueColumn(bandValues, lowerIndices)
+  }
+
+  if (Array.isArray(sortOrder)) {
+    sortOrder.forEach(index => {
+      const previousPosition = indexToPreviousPositionMap[index]
+      sortedBandLineMap.rowLines.push(rowLines[previousPosition])
+      sortedBandLineMap.upperLines.push(upperLines[previousPosition])
+      sortedBandLineMap.lowerLines.push(lowerLines[previousPosition])
+    })
+    return sortedBandLineMap
+  }
+
+  return bandLineMap
+}
+
+const getBandColorScale = (
+  lineCount: number,
+  colors: string[],
+): Scale<number, string> =>
+  createNominalColorScale(lineCount * BAND_COLOR_SCALE_CONSTANT, colors)

@@ -1,11 +1,8 @@
 // Libraries
 import {useEffect, useRef} from 'react'
 
-// Types
-import {AnnotationTooltipOptions} from 'types'
-
 // Utils
-import {useAnnotationStyle, useTooltipStyle} from './useTooltipStyle'
+import {useTooltipStyle} from './useTooltipStyle'
 
 /*
   Returns a DOM node that a tooltip can be rendered inside.
@@ -33,33 +30,6 @@ export const useLegendElement = (className: string) => {
   }, [])
 
   useTooltipStyle(ref.current)
-
-  return ref.current
-}
-
-/*
-  Similar to useLegendElement but for Annotation tooltips
-*/
-export const useAnnotationTooltipElement = (
-  className: string,
-  options: AnnotationTooltipOptions,
-) => {
-  const ref = useRef<HTMLDivElement>(null)
-
-  if (ref.current === null) {
-    ref.current = document.createElement('div')
-    ref.current.classList.add(className)
-  }
-
-  useEffect(() => {
-    document.body.appendChild(ref.current)
-
-    return () => {
-      document.body.removeChild(ref.current)
-    }
-  }, [])
-
-  useAnnotationStyle(ref.current, options)
 
   return ref.current
 }

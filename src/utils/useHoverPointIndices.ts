@@ -1,9 +1,10 @@
+// Libraries
 import {range} from 'd3-array'
+import {useMemo} from 'react'
 
+// Types
 import {NumericColumnData, Scale} from 'types'
 import {minBy} from './extrema'
-import {isDefined} from './isDefined'
-import {useLazyMemo} from './useLazyMemo'
 
 export const useHoverPointIndices = (
   mode: 'x' | 'y' | 'xy',
@@ -17,7 +18,7 @@ export const useHoverPointIndices = (
   width: number,
   height: number,
 ): number[] => {
-  const isActive =
+  const active =
     mouseX !== undefined &&
     mouseX !== null &&
     mouseX >= 0 &&
@@ -30,20 +31,20 @@ export const useHoverPointIndices = (
   const xColData = xColumnData ? xColumnData : []
   const yColData = yColumnData ? yColumnData : []
 
-  const index = useLazyMemo(
-    () => buildIndex(xColData, yColData, xScale, yScale, width, height),
-    [xColData, yColData, xScale, yScale, width, height],
-    isActive,
+  const index = useMemo(
+    () =>
+      active
+        ? buildIndex(xColData, yColData, xScale, yScale, width, height)
+        : null,
+    [active, xColData, yColData, xScale, yScale, width, height],
   )
 
-  if (!isActive) {
-    return null
+  if (!index) {
+    return []
   }
 
-  let hoverLineIndices
-
   if (mode === 'x') {
-    hoverLineIndices = lookupIndex1D(
+    return lookupIndex1D(
       index.xBins,
       mouseX,
       xScale.invert(mouseX),
@@ -51,8 +52,10 @@ export const useHoverPointIndices = (
       groupColData,
       width,
     )
-  } else if (mode === 'y') {
-    hoverLineIndices = lookupIndex1D(
+  }
+
+  if (mode === 'y') {
+    return lookupIndex1D(
       index.yBins,
       mouseY,
       yScale.invert(mouseY),
@@ -60,21 +63,19 @@ export const useHoverPointIndices = (
       groupColData,
       height,
     )
-  } else {
-    hoverLineIndices = lookupIndex2D(
-      index.xyBins,
-      mouseX,
-      mouseY,
-      xScale.invert(mouseX),
-      yScale.invert(mouseY),
-      xColData,
-      yColData,
-      width,
-      height,
-    )
   }
 
-  return hoverLineIndices
+  return lookupIndex2D(
+    index.xyBins,
+    mouseX,
+    mouseY,
+    xScale.invert(mouseX),
+    yScale.invert(mouseY),
+    xColData,
+    yColData,
+    width,
+    height,
+  )
 }
 
 const INDEX_BIN_WIDTH = 30
@@ -125,7 +126,7 @@ const buildIndex = (
     const x = xScale(xColData[i])
     const y = yScale(yColData[i])
 
-    if (!isDefined(x) || !isDefined(y)) {
+    if (x == null || y == null) {
       continue
     }
 

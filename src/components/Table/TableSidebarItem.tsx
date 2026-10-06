@@ -10,14 +10,6 @@ interface GroupKey {
   [x: string]: string
 }
 
-interface Props {
-  name: string
-  id: string
-  isSelected: boolean
-  groupKey: GroupKey
-  onSelect: (name: string) => void
-}
-
 const getName = (groupKey: GroupKey): ReactElement[] => {
   const noNameKeys = ['_start', '_stop']
   return Object.entries(groupKey)
@@ -33,8 +25,20 @@ const getName = (groupKey: GroupKey): ReactElement[] => {
     })
 }
 
-export const TableSidebarItem: FunctionComponent<Props> = (props: Props) => {
-  const {name, isSelected, groupKey, onSelect} = props
+interface Props {
+  id: string
+  name: string
+  isSelected: boolean
+  groupKey: GroupKey
+  onSelect: (name: string) => void
+}
+
+export const TableSidebarItem: FunctionComponent<Props> = ({
+  name,
+  isSelected,
+  groupKey,
+  onSelect,
+}) => {
   const handleClick = () => onSelect(name)
 
   const className = classnames('time-machine-sidebar-item', {

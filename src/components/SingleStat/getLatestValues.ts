@@ -1,8 +1,6 @@
 import {range} from 'd3-array'
 import {NumericColumnData, Table} from 'types'
 
-import {isString} from './isString'
-
 /*
   Return a list of the maximum elements in `xs`, where the magnitude of each
   element is computed using the passed function `d`.
@@ -97,7 +95,7 @@ export const getLatestValues = (table: Table): number[] => {
     if (
       time &&
       valueColsData.some(colData => {
-        return Number.isFinite(colData[i]) || isString(colData[i])
+        return Number.isFinite(colData[i]) || typeof colData[i] === 'string'
       })
     ) {
       return time
@@ -113,5 +111,5 @@ export const getLatestValues = (table: Table): number[] => {
     valueColsData.map(colData => colData[i]),
   )
 
-  return latestValues.filter(x => Number.isFinite(x) || isString(x))
+  return latestValues.filter(x => Number.isFinite(x) || typeof x === 'string')
 }

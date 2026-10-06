@@ -68,7 +68,7 @@ const updateMaxWidths = (
       let colValue: string | number = `${col}`
       if (foundField && foundField.displayName) {
         colValue = foundField.displayName
-      } else if (!isNaN(+col) && decimalPlaces.isEnforced) {
+      } else if (!Number.isNaN(+col) && decimalPlaces.isEnforced) {
         colValue = (+col).toFixed(decimalPlaces.digits)
       }
 
@@ -213,8 +213,9 @@ export const sortTableData = (
   const dataValues = Array.isArray(data) ? data.slice(1) : [[]]
   const sortValue = (row: string[]): string | number => {
     const value = row[sortIndex]
-    return isNaN(Number(value)) ? value : Number(value)
+    return Number.isNaN(Number(value)) ? value : Number(value)
   }
+
   const sortedDataValues = dataValues
     .map((row, index) => ({row, index, value: sortValue(row)}))
     .sort((a, b) => {

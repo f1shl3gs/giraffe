@@ -1,7 +1,3 @@
-export * from './Plot'
-export type {
-  PlotConfig,
-  StaticLegendConfig,
-  StaticLegendRenderEffectOptions,
-} from './PlotConfig'
-export {PlotContainer} from './PlotContainer'
+export type {PlotConfig} from './PlotConfig'
+export {Plot} from './Plot'
+export type {PlotProps} from './Plot'

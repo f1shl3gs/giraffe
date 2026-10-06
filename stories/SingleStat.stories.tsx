@@ -249,8 +249,6 @@ export const SingleStatOnTopOfLineLayer: Story = {
       COLOR_SCHEME_OPTIONS[colorScheme as keyof typeof COLOR_SCHEME_OPTIONS]
 
     const lineConfig: LineConfig = {
-      x,
-      y,
       fill,
       interpolation,
       colors,

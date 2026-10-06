@@ -1,21 +1,23 @@
 // Libraries
-
-import {usePlot} from 'components/Plot/PlotEnv'
-// Constants
-import {FILL} from 'constants/columnKeys'
 import {FunctionComponent} from 'react'
+
+// Components
+import {Tooltip} from 'components/Tooltip'
+
 // Types
 import {ColumnGroupMap, LineData, LineHoverDimension, Scale} from 'types'
-import {drawLineHoverData} from 'utils/drawLineHoverData'
-import {drawLines} from 'utils/drawLines'
-// Utils
-import {getPointsTooltipData} from 'utils/legend/tooltip'
-
-import {useCanvas} from 'utils/useCanvas'
-// Components
-import {Tooltip} from '../Tooltip'
 import type {LineConfig} from './Line'
 import type {LineLayerSpec} from './transform'
+
+// Utils
+import {usePlot} from 'components/Plot/PlotEnv'
+import {getPointsTooltipData} from 'utils/legend/tooltip'
+import {useCanvas} from 'utils/useCanvas'
+import {drawLineHoverData} from 'utils/drawLineHoverData'
+import {drawLines} from 'utils/drawLines'
+
+// Constants
+import {FILL} from 'constants/columnKeys'
 
 interface Props {
   config: LineConfig
@@ -44,14 +46,15 @@ export const LineHover: FunctionComponent<Props> = ({
 }) => {
   const {
     interpolation,
-    x: xColKey,
-    y: yColKey,
     fill: fillColKeys,
     lineWidth,
     shadeBelow,
     shadeBelowOpacity,
     colorMapping,
   } = config
+
+  const env = usePlot()
+  const {xColumn: xColKey, yColumn: yColKey} = env.config
 
   const xColData = spec.table.getColumn(xColKey, 'number')
   const yColData = spec.table.getColumn(yColKey, 'number')
@@ -69,7 +72,6 @@ export const LineHover: FunctionComponent<Props> = ({
     colorMapping,
   )
 
-  const env = usePlot()
   const crosshairColor = env.config.legend?.crosshairColor
 
   const crosshairX =
@@ -85,7 +87,7 @@ export const LineHover: FunctionComponent<Props> = ({
   const canvasRef = useCanvas(
     width,
     height,
-    context => {
+    ctx => {
       if (dimension === 'xy') {
         const groupKey = groupColData[rowIndices[0]]
         const lineDatum = simplifiedLineData.get(groupKey)
@@ -95,27 +97,27 @@ export const LineHover: FunctionComponent<Props> = ({
         }
 
         // Highlight the line that the single hovered point belongs to
-        drawLines({
-          context,
-          lineData: new Map([[groupKey, lineDatum]]),
+        drawLines(
+          ctx,
           interpolation,
-          lineWidth: lineWidth * 2,
+          new Map([[groupKey, lineDatum]]),
+          2 * lineWidth,
           shadeBelow,
-          shadeBelowOpacity: shadeBelowOpacity * 1.5,
-          shadeAboveY: height,
-        })
+          shadeBelowOpacity * 1.5,
+          height,
+        )
       }
 
-      drawLineHoverData({
-        context,
+      drawLineHoverData(
+        ctx,
         width,
         height,
         crosshairX,
         crosshairY,
         crosshairColor,
         points,
-        radius: lineWidth * 2,
-      })
+        2 * lineWidth,
+      )
     },
     [
       dimension,
@@ -136,8 +138,8 @@ export const LineHover: FunctionComponent<Props> = ({
   const tooltipData = getPointsTooltipData(
     rowIndices,
     spec.table,
-    config.x,
-    config.y,
+    env.config.xColumn,
+    env.config.yColumn,
     FILL,
     columnFormatter,
     fillColKeys,

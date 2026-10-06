@@ -5,21 +5,24 @@ import {FunctionComponent, ReactNode, useCallback, useState} from 'react'
 import {AutoSizer} from 'components/AutoSizer'
 import {DomainOverride, PlotContainer} from 'components/Plot/PlotContainer'
 import {PlotEnvContext} from 'components/Plot/PlotEnv'
-import {StaticLegend} from 'components/Plot/StaticLegend'
-// Constants
-import {DEFAULT_RANGE_PADDING} from 'constants/index'
+import {StaticLegend} from 'components/StaticLegend'
+
 // Types
 import {ColumnType, Formatter, Scale, Table} from 'types'
+import {PlotConfig} from './PlotConfig'
+
 // Utils
 import {timeFormatter} from 'utils/formatters'
 import {getMargins} from 'utils/getMargins'
 import {getScale} from 'utils/getScale'
 import {getHorizontalTicks, getVerticalTicks} from 'utils/getTicks'
-import {resizePlotWithStaticLegend} from 'utils/legend/resizePlot'
+import {resizePlotWithStaticLegend} from './resizePlot'
 import {resolveDomain} from 'utils/resolveDomain'
-import {PlotConfig} from './PlotConfig'
 import {withPlotDefaults} from './PlotDefaults'
 import {PlotEnv} from './PlotEnv'
+
+// Constants
+import {DEFAULT_RANGE_PADDING} from 'constants/index'
 
 export type AxisScale = 'linear' | 'logarithmic'
 

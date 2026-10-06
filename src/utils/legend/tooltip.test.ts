@@ -9,8 +9,8 @@ import {
   createSampleTable,
   HOST_KEY,
   POINT_KEY,
-} from '../fixtures/randomTable'
-import {getLegendData} from './staticLegend'
+} from 'utils/fixtures/randomTable'
+import {getLegendData} from 'components/StaticLegend/convert'
 import {getPointsTooltipData} from './tooltip'
 
 describe('getPointsTooltipData', () => {

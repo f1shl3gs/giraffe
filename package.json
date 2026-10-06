@@ -5,9 +5,12 @@
   "module": "dist/index.js",
   "types": "./dist/index.d.ts",
   "license": "MIT",
+  "files": [
+    "dist"
+  ],
   "sideEffects": [
-    "*.scss",
-    "*.css"
+    "**/*.scss",
+    "**/*.css"
   ],
   "repository": {
     "type": "git",
@@ -15,8 +18,9 @@
     "directory": "giraffe"
   },
   "scripts": {
-    "build": "tsdown && tsc -p tsconfig.build.json --emitDeclarationOnly --declaration --outDir dist",
+    "build": "tsdown",
     "fmt": "biome format --write .",
+    "lint": "biome check .",
     "publish": "echo 'To publish giraffe, run ./publish $version'",
     "start": "tsdown --watch",
     "test": "vitest run",
@@ -24,7 +28,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit --pretty",
     "typecheck:watch": "tsc --noEmit --pretty --watch",
-    "prepack": "tsdown && tsc -p tsconfig.build.json --emitDeclarationOnly --declaration --outDir dist",
+    "prepack": "tsdown",
     "storybook": "storybook dev -p 50000",
     "storybook:build": "storybook build -o storybook-static"
   },
@@ -72,7 +76,6 @@
     "@vitest/coverage-v8": "^4.1.11",
     "classnames": "^2.2.3",
     "jsdom": "^30.0.1",
-    "leaflet.markercluster": "^1.4.1",
     "loader-utils": "^2.0.4",
     "memoize-one": "^6.0.0",
     "postcss": "^8.5.26",
@@ -99,6 +102,7 @@
     "d3-scale": "^4.0.2",
     "d3-shape": "^3.2.0",
     "d3-time": "^3.1.0",
-    "leaflet": "^1.9.4"
+    "leaflet": "^1.9.4",
+    "leaflet.markercluster": "^1.4.1"
   }
 }

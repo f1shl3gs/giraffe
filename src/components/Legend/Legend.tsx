@@ -1,9 +1,16 @@
-import type {LegendConfig} from 'components/Legend/LegendConfig'
+// Libraries
 import {FunctionComponent} from 'react'
-import {generateLegendStyles} from 'style/legend'
-import {LegendData, LegendType} from 'types'
+
+// Components
 import {LegendColumn} from './LegendColumn'
 import {LegendPillColumn} from './LegendPillColumn'
+
+// Types
+import {LegendData, LegendType} from 'types'
+import type {LegendConfig} from 'components/Legend/LegendConfig'
+
+// Utils
+import {generateLegendStyles} from 'style/legend'
 
 interface Props {
   type: LegendType

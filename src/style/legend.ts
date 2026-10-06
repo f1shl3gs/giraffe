@@ -1,11 +1,15 @@
-// Style Constants
+// Libraries
+import {CSSProperties} from 'react'
+
+// Types
+import {ColumnType, LegendData, LegendType} from 'types'
+
+// Constants
 import {
   STATIC_LEGEND_LINE_HEIGHT_RATIO,
   STATIC_LEGEND_LINE_SPACING_RATIO,
   STATIC_LEGEND_SCROLL_PADDING,
 } from 'constants/index'
-import {CSSProperties} from 'react'
-import {ColumnType, LegendData, LegendType} from 'types'
 
 const legendColumnGap = '12px'
 const legendTablePadding = '4px'

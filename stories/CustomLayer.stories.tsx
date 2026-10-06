@@ -24,8 +24,6 @@ const PLOT_CONFIG: PlotConfig = {
 }
 
 const LINE_CONFIG: LineConfig = {
-  x: '_time',
-  y: '_value',
   fill: ['cpu'],
 }
 

@@ -1,14 +1,13 @@
 // Libraries
+import {FunctionComponent, JSX, useMemo} from 'react'
 
-import memoizeOne from 'memoize-one'
-import {FunctionComponent, JSX} from 'react'
 // Types
 import {
   SortOptions,
   TableViewProperties,
   TransformTableDataReturnType,
 } from 'types'
-import {isEqual} from 'utils/isEqual'
+
 // Utils
 import {transformTableData} from 'utils/tableGraph'
 
@@ -20,25 +19,45 @@ interface Props {
   children: (transformedDataBundle: TransformTableDataReturnType) => JSX.Element
 }
 
-const memoizedTableTransform = memoizeOne(transformTableData, isEqual)
-
-export const TableGraphTransform: FunctionComponent<Props> = (props: Props) => {
-  const {properties, data, dataTypes, sortOptions} = props
+export const TableGraphTransform: FunctionComponent<Props> = ({
+  properties,
+  data,
+  dataTypes,
+  sortOptions,
+  children,
+}) => {
   const {tableOptions, timeFormat, decimalPlaces, fieldOptions} = properties
-  const fo =
-    fieldOptions &&
-    fieldOptions.map(opts => ({
-      ...opts,
-      dataType: dataTypes[opts.internalName],
-    }))
 
-  const transformedDataBundle = memoizedTableTransform(
-    data,
-    sortOptions,
-    fo,
-    tableOptions,
-    timeFormat,
-    decimalPlaces,
+  /*
+    Both memos need their inputs to keep their identity across renders, or they
+    recompute every time. `data`, `sortOptions` and `tableOptions` arrive as
+    props and state, which callers already hold stable -- the field options are
+    the one thing built here, so they have to be held still by hand.
+
+    useMemo, not a module-level memo: the comparison it does is per dependency
+    and shallow, which is enough once nothing is rebuilt behind its back.
+  */
+  const fields = useMemo(
+    () =>
+      fieldOptions.map(opts => ({
+        ...opts,
+        dataType: dataTypes[opts.internalName],
+      })),
+    [fieldOptions, dataTypes],
   )
-  return props.children(transformedDataBundle)
+
+  const transformedDataBundle = useMemo(
+    () =>
+      transformTableData(
+        data,
+        sortOptions,
+        fields,
+        tableOptions,
+        timeFormat,
+        decimalPlaces,
+      ),
+    [data, sortOptions, fields, tableOptions, timeFormat, decimalPlaces],
+  )
+
+  return children(transformedDataBundle)
 }

@@ -44,14 +44,21 @@ describe('AutoSizer', () => {
     vi.unstubAllGlobals()
   })
 
-  it('observes its parent element on mount', () => {
+  it('observes the element it renders', () => {
     const {container} = render(
       <AutoSizer className='test-sizer'>
         {(width, height) => <Child width={width} height={height} />}
       </AutoSizer>,
     )
 
-    expect(lastInstance().observe).toHaveBeenCalledWith(container)
+    /*
+      container is the div React Testing Library mounts into; the sizer's own
+      element is the one below it. The sizer observes itself, which is what
+      makes the measurement non-degenerate: its width and height are 100%, so
+      its content box follows whatever its parent is given.
+    */
+    expect(lastInstance().observe).toHaveBeenCalledWith(container.firstChild)
+    expect(container.firstChild).toHaveProperty('className', 'test-sizer')
   })
 
   it('renders nothing before the first measurement', () => {

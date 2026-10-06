@@ -1,10 +1,19 @@
-import type {LegendConfig} from 'components/Legend/LegendConfig'
-import {TOOLTIP_MAXIMUM_OPACITY, TOOLTIP_MINIMUM_OPACITY} from 'constants/index'
+// Libraries
 import {FunctionComponent, useMemo} from 'react'
 import {createPortal} from 'react-dom'
-import {LegendData} from 'types'
+
+// Components
+import {Legend} from 'components/Legend'
+
+// Types
+import type {LegendConfig} from 'components/Legend/LegendConfig'
+import type {LegendData} from 'types'
+
+// Hooks
 import {useLegendElement} from 'utils/legend/useTooltipElement'
-import {Legend} from './Legend'
+
+// Constants
+import {TOOLTIP_MAXIMUM_OPACITY, TOOLTIP_MINIMUM_OPACITY} from 'constants/index'
 
 interface Props {
   data: LegendData

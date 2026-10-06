@@ -1,3 +1,7 @@
+// Libraries
+import type {CSSProperties} from 'react'
+import {FunctionComponent, useMemo} from 'react'
+
 import {AutoSizer} from 'components/AutoSizer'
 import {histogramTransform} from 'components/Histogram/transform'
 import {Axes} from 'components/Plot/Axes'
@@ -9,14 +13,26 @@ import {Rect} from 'components/Rect/Rect'
 import type {RectSpec} from 'components/Rect/transform'
 import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
 import {COUNT} from 'constants/columnKeys'
-import type {CSSProperties} from 'react'
-import {FunctionComponent, useMemo} from 'react'
 import type {Table} from 'types'
 import {useMousePos} from 'utils/useMousePos'
 
+export interface HistogramConfig {
+  x: string
+  xDomain?: number[]
+  position?: 'overlaid' | 'stacked'
+  binCount?: number
+  fill?: string[]
+  colors?: string[]
+  fillOpacity?: number
+  strokeOpacity?: number
+  strokeWidth?: number
+  strokePadding?: number
+  showAxes?: boolean
+}
+
 export interface HistogramProps {
-  table: Table
   config: HistogramConfig
+  table: Table
 }
 
 const FULL_SIZE_STYLE: CSSProperties = {
@@ -157,18 +173,4 @@ const HistogramSized: FunctionComponent<HistogramSizedProps> = ({
       </div>
     </div>
   )
-}
-
-export interface HistogramConfig {
-  x: string
-  xDomain?: number[]
-  position?: 'overlaid' | 'stacked'
-  binCount?: number
-  fill?: string[]
-  colors?: string[]
-  fillOpacity?: number
-  strokeOpacity?: number
-  strokeWidth?: number
-  strokePadding?: number
-  showAxes?: boolean
 }

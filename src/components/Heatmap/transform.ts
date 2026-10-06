@@ -1,15 +1,18 @@
 // Libraries
 import {extent, range} from 'd3-array'
-
-import type {RectSpec} from 'components/Rect/transform'
-import {COUNT, X_MAX, X_MIN, Y_MAX, Y_MIN} from 'constants/columnKeys'
+import {scaleSequential} from 'd3-scale'
+import {interpolateRgbBasis} from 'd3-interpolate'
 
 // Types
-import {Table} from 'types'
+import {Scale, Table} from 'types'
+import type {RectSpec} from 'components/Rect/transform'
 
-import {getContinuousColorScale} from 'utils/transform'
+// Utils
 import {newTable} from 'utils/newTable'
 import {resolveDomain} from 'utils/resolveDomain'
+
+// Constants
+import {COUNT, X_MAX, X_MIN, Y_MAX, Y_MIN} from 'constants/columnKeys'
 
 export const heatmapTransform = (
   inputTable: Table,
@@ -149,14 +152,12 @@ export const bin2d = (
     }
   }
 
-  const heatmapTable = newTable(xMinData.length)
+  return newTable(xMinData.length)
     .addColumn(X_MIN, xOriginalColType, xColType, xMinData)
     .addColumn(X_MAX, xOriginalColType, xColType, xMaxData)
     .addColumn(Y_MIN, yOriginalColType, yColType, yMinData)
     .addColumn(Y_MAX, yOriginalColType, yColType, yMaxData)
     .addColumn(COUNT, 'system', 'number', countData)
-
-  return heatmapTable
 }
 
 const getBinIndex = (val: number, domain: number[], binCount: number) => {
@@ -171,4 +172,11 @@ const getBinIndex = (val: number, domain: number[], binCount: number) => {
   }
 
   return binIndex
+}
+
+const getContinuousColorScale = (
+  domain: [number, number],
+  colors: string[],
+): Scale<number, string> => {
+  return scaleSequential(interpolateRgbBasis(colors)).domain(domain)
 }

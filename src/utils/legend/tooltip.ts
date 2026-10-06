@@ -1,22 +1,9 @@
-import {BandLayerSpec} from 'components/Band/transform'
-import {FILL, TIME, VALUE} from 'constants/columnKeys'
+import {VALUE} from 'constants/columnKeys'
 
 // Types
-import {
-  BandLineMap,
-  ColumnGroupMap,
-  DomainLabel,
-  LatestIndexMap,
-  LegendColumn,
-  LegendData,
-  Scale,
-  Table,
-} from 'types'
+import {ColumnGroupMap, LegendColumn, LegendData, Scale, Table} from 'types'
 
-import {isVoid} from '../isVoid'
-import {createLatestBandIndices, getTooltipBandGroupColumns} from './band'
-import {formatLegendValues} from './format'
-import {sortBandLines, sortIndicesByValueColumn} from './sort'
+import {sortIndicesByValueColumn} from './sort'
 
 const orderDataByValue = (
   originalOrder: number[],
@@ -28,12 +15,14 @@ const orderDataByValue = (
   return nextOrder.map(place => dataMap[place])
 }
 
-export const getRangeLabel = (min: number, max: number, formatter): string => {
+export const getRangeLabel = (
+  min: number,
+  max: number,
+  formatter: (v: any) => string,
+): string => {
   let label = ''
 
-  if (isVoid(min) || isVoid(max)) {
-    label = ''
-  } else if (min === max) {
+  if (min === max) {
     label = formatter(min)
   } else {
     label = `${formatter(min)} – ${formatter(max)}`
@@ -59,7 +48,7 @@ const getTooltipGroupColumns = (
       type: table.getColumnType(key),
       colors: rowColors,
       values: rowIndices.map(i =>
-        !isVoid(colData[i]) ? formatter(colData[i]) : null,
+        colData[i] == null ? null : formatter(colData[i]),
       ),
     }
   })
@@ -127,160 +116,4 @@ export const getPointsTooltipData = (
   )
 
   return [tooltipXCol, tooltipYCol, ...tooltipAdditionalColumns, ...fillColumns]
-}
-
-export const getBandTooltipData = (
-  bandHoverIndices: BandLineMap,
-  xColKey: string,
-  yColKey: string,
-  bandName: string,
-  lowerColumnName: string,
-  upperColumnName: string,
-  getValueFormatter: (colKey: string) => (x: any) => string,
-  fillColKeys: string[],
-  spec: BandLayerSpec,
-): LegendData => {
-  const {bandLineMap, lineData, table} = spec
-
-  const groupColData = table.getColumn(FILL, 'number')
-  const bandDimension = yColKey === TIME ? DomainLabel.Y : DomainLabel.X
-  const {rowLines: rowIndices} = bandHoverIndices
-  const hoveredLinesMap: LatestIndexMap = {}
-  rowIndices.forEach(index => {
-    hoveredLinesMap[groupColData[index]] = index
-  })
-
-  const hoveredIndices = createLatestBandIndices(
-    lineData,
-    bandLineMap,
-    bandDimension,
-    hoveredLinesMap,
-  )
-  const bandValues =
-    xColKey === VALUE ? table.getColumn(xColKey) : table.getColumn(yColKey)
-
-  const sortedBandLineMap = sortBandLines(
-    bandValues,
-    bandLineMap,
-    hoveredIndices,
-  )
-  const {
-    upperLines: sortedUpperLines,
-    rowLines: sortedRowLines,
-    lowerLines: sortedLowerLines,
-  } = sortedBandLineMap
-
-  // rowLines come from bandLineMap, which is built from this same lineData
-  const colors = sortedRowLines.map(line => lineData.get(line)!.fill)
-
-  const xColumnName =
-    xColKey === VALUE ? `${xColKey}:${bandName}` : table.getColumnName(xColKey)
-  const yColumnName =
-    yColKey === VALUE ? `${yColKey}:${bandName}` : table.getColumnName(yColKey)
-  const xColData = table.getColumn(xColKey, 'number')
-  const yColData = table.getColumn(yColKey, 'number')
-  const xFormatter = getValueFormatter(xColKey)
-  const yFormatter = getValueFormatter(yColKey)
-
-  const tooltipXCol = {
-    key: xColKey,
-    name: xColumnName,
-    type: table.getColumnType(xColKey),
-    colors,
-    values: formatLegendValues(
-      xColData,
-      sortedRowLines.map(line => hoveredIndices[line]),
-      xFormatter,
-    ),
-  }
-
-  const tooltipYCol = {
-    key: yColKey,
-    name: yColumnName,
-    type: table.getColumnType(yColKey),
-    colors,
-    values: formatLegendValues(
-      yColData,
-      sortedRowLines.map(line => hoveredIndices[line]),
-      yFormatter,
-    ),
-  }
-
-  const tooltipAdditionalColumns = []
-
-  if (yColKey === VALUE) {
-    if (upperColumnName) {
-      tooltipAdditionalColumns.push({
-        key: yColKey,
-        name: `${yColKey}:${upperColumnName}`,
-        type: table.getColumnType(yColKey),
-        colors,
-        values: formatLegendValues(
-          yColData,
-          sortedUpperLines.map(line => hoveredIndices[line]),
-          yFormatter,
-        ),
-      })
-    }
-
-    if (lowerColumnName) {
-      tooltipAdditionalColumns.push({
-        key: yColKey,
-        name: `${yColKey}:${lowerColumnName}`,
-        type: table.getColumnType(yColKey),
-        colors,
-        values: formatLegendValues(
-          yColData,
-          sortedLowerLines.map(line => hoveredIndices[line]),
-          yFormatter,
-        ),
-      })
-    }
-  } else {
-    if (upperColumnName) {
-      tooltipAdditionalColumns.push({
-        key: xColKey,
-        name: `${xColKey}:${upperColumnName}`,
-        type: table.getColumnType(xColKey),
-        colors,
-        values: formatLegendValues(
-          xColData,
-          sortedUpperLines.map(line => hoveredIndices[line]),
-          xFormatter,
-        ),
-      })
-    }
-
-    if (lowerColumnName) {
-      tooltipAdditionalColumns.push({
-        key: xColKey,
-        name: `${xColKey}:${lowerColumnName}`,
-        type: table.getColumnType(xColKey),
-        colors,
-        values: formatLegendValues(
-          xColData,
-          sortedLowerLines.map(line => hoveredIndices[line]),
-          xFormatter,
-        ),
-      })
-    }
-  }
-
-  const fillColumns = getTooltipBandGroupColumns(
-    table,
-    sortedRowLines.map(line => hoveredIndices[line]),
-    fillColKeys,
-    getValueFormatter,
-    colors,
-  )
-
-  if (yColKey === VALUE) {
-    return [
-      tooltipXCol,
-      tooltipYCol,
-      ...tooltipAdditionalColumns,
-      ...fillColumns,
-    ]
-  }
-  return [tooltipYCol, tooltipXCol, ...tooltipAdditionalColumns, ...fillColumns]
 }

@@ -12,7 +12,7 @@ import type {AnnotationMark, LineHoverDimension, SVGAttributes} from 'types'
 import {
   getAnnotationHoverIndices,
   getAnnotationsPositions,
-} from 'utils/annotationData'
+} from './annotationData'
 
 // Constants
 import {ANNOTATION_DEFAULT_HOVER_MARGIN} from 'constants/index'

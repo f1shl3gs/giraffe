@@ -3,23 +3,34 @@ import {FunctionComponent} from 'react'
 
 import {usePlot} from 'components/Plot/PlotEnv'
 
-// Constants
-import {FILL} from 'constants/columnKeys'
-
-// Types
-import type {BandLineMap, LineData, LineHoverDimension, Scale} from 'types'
-
-// Utils
-import {getBandHoverPoints} from 'utils/bandHover'
-import {drawLineHoverData} from 'utils/drawLineHoverData'
-import {drawLines} from 'utils/drawLines'
-import {getBandTooltipData} from 'utils/legend/tooltip'
-import {useCanvas} from 'utils/useCanvas'
-
 // Components
 import {Tooltip} from '../Tooltip'
+import {formatLegendValues} from 'utils/legend/format'
+
+// Types
+import {
+  BandLineMap,
+  DomainLabel,
+  LatestIndexMap,
+  LegendColumn,
+  LegendData,
+  LineData,
+  LineHoverDimension,
+  Scale,
+  Table,
+} from 'types'
 import type {BandConfig} from './Band'
-import type {BandLayerSpec} from './transform'
+import {BandLayerSpec, sortBandLines} from './transform'
+
+// Utils
+import {getBandHoverPoints} from './bandHover'
+import {drawLineHoverData} from 'utils/drawLineHoverData'
+import {drawLines} from 'utils/drawLines'
+import {useCanvas} from 'utils/useCanvas'
+import {createLatestBandIndices} from './transform'
+
+// Constants
+import {FILL, RESULT, TIME, VALUE} from 'constants/columnKeys'
 
 interface Props {
   bandHoverIndices: BandLineMap
@@ -48,8 +59,6 @@ export const BandHover: FunctionComponent<Props> = ({
 }) => {
   const {
     interpolation,
-    x: xColKey,
-    y: yColKey,
     fill: fillColKeys,
     lineWidth,
     lowerColumnName,
@@ -57,6 +66,10 @@ export const BandHover: FunctionComponent<Props> = ({
     shadeOpacity,
     upperColumnName,
   } = config
+
+  const env = usePlot()
+  const {xColumn: xColKey, yColumn: yColKey} = env.config
+  const crosshairColor = env.config.legend?.crosshairColor
 
   const xColData = spec.table.getColumn(xColKey, 'number')
   const yColData = spec.table.getColumn(yColKey, 'number')
@@ -74,9 +87,6 @@ export const BandHover: FunctionComponent<Props> = ({
     spec.lineData,
   )
 
-  const env = usePlot()
-  const crosshairColor = env.config.legend?.crosshairColor
-
   const crosshairX =
     dimension === 'xy' || dimension === 'x'
       ? xScale(xColData[rowLines[0]])
@@ -90,7 +100,7 @@ export const BandHover: FunctionComponent<Props> = ({
   const canvasRef = useCanvas(
     width,
     height,
-    context => {
+    ctx => {
       if (dimension === 'xy') {
         const groupKey = groupColData[rowLines[0]]
         const lineDatum = simplifiedLineData.get(groupKey)
@@ -100,27 +110,27 @@ export const BandHover: FunctionComponent<Props> = ({
         }
 
         // Highlight the line that the single hovered point belongs to
-        drawLines({
-          context,
-          lineData: new Map([[groupKey, lineDatum]]),
+        drawLines(
+          ctx,
           interpolation,
-          lineWidth: lineWidth * 2,
-          shadeBelow: false,
-          shadeBelowOpacity: shadeOpacity * 1.5,
-          shadeAboveY: height,
-        })
+          new Map([[groupKey, lineDatum]]),
+          lineWidth * 2,
+          false,
+          shadeOpacity * 1.5,
+          height,
+        )
       }
 
-      drawLineHoverData({
-        context,
+      drawLineHoverData(
+        ctx,
         width,
         height,
         crosshairX,
         crosshairY,
         crosshairColor,
         points,
-        radius: lineWidth * 2,
-      })
+        2 * lineWidth,
+      )
     },
     [
       dimension,
@@ -139,8 +149,8 @@ export const BandHover: FunctionComponent<Props> = ({
 
   const tooltipData = getBandTooltipData(
     bandHoverIndices,
-    config.x,
-    config.y,
+    env.config.xColumn,
+    env.config.yColumn,
     rowColumnName,
     lowerColumnName,
     upperColumnName,
@@ -165,4 +175,187 @@ export const BandHover: FunctionComponent<Props> = ({
       />
     </>
   )
+}
+
+const getBandTooltipData = (
+  bandHoverIndices: BandLineMap,
+  xColKey: string,
+  yColKey: string,
+  bandName: string,
+  lowerColumnName: string,
+  upperColumnName: string,
+  getValueFormatter: (colKey: string) => (x: any) => string,
+  fillColKeys: string[],
+  spec: BandLayerSpec,
+): LegendData => {
+  const {bandLineMap, lineData, table} = spec
+
+  const groupColData = table.getColumn(FILL, 'number')
+  const bandDimension = yColKey === TIME ? DomainLabel.Y : DomainLabel.X
+  const {rowLines: rowIndices} = bandHoverIndices
+  const hoveredLinesMap: LatestIndexMap = {}
+  rowIndices.forEach(index => {
+    hoveredLinesMap[groupColData[index]] = index
+  })
+
+  const hoveredIndices = createLatestBandIndices(
+    lineData,
+    bandLineMap,
+    bandDimension,
+    hoveredLinesMap,
+  )
+  const bandValues =
+    xColKey === VALUE ? table.getColumn(xColKey) : table.getColumn(yColKey)
+
+  const sortedBandLineMap = sortBandLines(
+    bandValues,
+    bandLineMap,
+    hoveredIndices,
+  )
+  const {
+    upperLines: sortedUpperLines,
+    rowLines: sortedRowLines,
+    lowerLines: sortedLowerLines,
+  } = sortedBandLineMap
+
+  // rowLines come from bandLineMap, which is built from this same lineData
+  const colors = sortedRowLines.map(line => lineData.get(line)!.fill)
+
+  const xColumnName =
+    xColKey === VALUE ? `${xColKey}:${bandName}` : table.getColumnName(xColKey)
+  const yColumnName =
+    yColKey === VALUE ? `${yColKey}:${bandName}` : table.getColumnName(yColKey)
+  const xColData = table.getColumn(xColKey, 'number')
+  const yColData = table.getColumn(yColKey, 'number')
+  const xFormatter = getValueFormatter(xColKey)
+  const yFormatter = getValueFormatter(yColKey)
+
+  const tooltipXCol = {
+    key: xColKey,
+    name: xColumnName,
+    type: table.getColumnType(xColKey),
+    colors,
+    values: formatLegendValues(
+      xColData,
+      sortedRowLines.map(line => hoveredIndices[line]),
+      xFormatter,
+    ),
+  }
+
+  const tooltipYCol = {
+    key: yColKey,
+    name: yColumnName,
+    type: table.getColumnType(yColKey),
+    colors,
+    values: formatLegendValues(
+      yColData,
+      sortedRowLines.map(line => hoveredIndices[line]),
+      yFormatter,
+    ),
+  }
+
+  const tooltipAdditionalColumns = []
+
+  if (yColKey === VALUE) {
+    if (upperColumnName) {
+      tooltipAdditionalColumns.push({
+        key: yColKey,
+        name: `${yColKey}:${upperColumnName}`,
+        type: table.getColumnType(yColKey),
+        colors,
+        values: formatLegendValues(
+          yColData,
+          sortedUpperLines.map(line => hoveredIndices[line]),
+          yFormatter,
+        ),
+      })
+    }
+
+    if (lowerColumnName) {
+      tooltipAdditionalColumns.push({
+        key: yColKey,
+        name: `${yColKey}:${lowerColumnName}`,
+        type: table.getColumnType(yColKey),
+        colors,
+        values: formatLegendValues(
+          yColData,
+          sortedLowerLines.map(line => hoveredIndices[line]),
+          yFormatter,
+        ),
+      })
+    }
+  } else {
+    if (upperColumnName) {
+      tooltipAdditionalColumns.push({
+        key: xColKey,
+        name: `${xColKey}:${upperColumnName}`,
+        type: table.getColumnType(xColKey),
+        colors,
+        values: formatLegendValues(
+          xColData,
+          sortedUpperLines.map(line => hoveredIndices[line]),
+          xFormatter,
+        ),
+      })
+    }
+
+    if (lowerColumnName) {
+      tooltipAdditionalColumns.push({
+        key: xColKey,
+        name: `${xColKey}:${lowerColumnName}`,
+        type: table.getColumnType(xColKey),
+        colors,
+        values: formatLegendValues(
+          xColData,
+          sortedLowerLines.map(line => hoveredIndices[line]),
+          xFormatter,
+        ),
+      })
+    }
+  }
+
+  const fillColumns = getBandGroupLegendColumns(
+    table,
+    sortedRowLines.map(line => hoveredIndices[line]),
+    fillColKeys,
+    getValueFormatter,
+    colors,
+  )
+
+  if (yColKey === VALUE) {
+    return [
+      tooltipXCol,
+      tooltipYCol,
+      ...tooltipAdditionalColumns,
+      ...fillColumns,
+    ]
+  }
+  return [tooltipYCol, tooltipXCol, ...tooltipAdditionalColumns, ...fillColumns]
+}
+
+const getBandGroupLegendColumns = (
+  table: Table,
+  rowIndices: number[],
+  groupColKeys: string[],
+  getValueFormatter: (colKey: string) => (x: any) => string,
+  rowColors: string[] | null,
+): LegendColumn[] => {
+  return groupColKeys.reduce((accum: LegendColumn[], key: string) => {
+    if (key === RESULT) {
+      return accum
+    }
+    const colData = table.getColumn(key)
+    const formatter = getValueFormatter(key)
+
+    accum.push({
+      key,
+      name: table.getColumnName(key),
+      type: table.getColumnType(key),
+      colors: rowColors,
+      values: rowIndices.map(i =>
+        colData[i] == null ? null : formatter(colData[i]),
+      ),
+    })
+    return accum
+  }, [])
 }

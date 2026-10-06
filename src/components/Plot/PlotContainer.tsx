@@ -13,10 +13,9 @@ import {
   useMemo,
 } from 'react'
 // Types
-import {InteractionHandlerArguments} from 'types'
+import {InteractionHandlerArguments, Scale} from 'types'
 
 // Utils
-import {rangeToDomain} from 'utils/brush'
 import {nearestTimestamp} from 'utils/nearestTimestamp'
 import {useDragEvent} from 'utils/useDragEvent'
 import {useMousePos} from 'utils/useMousePos'
@@ -168,3 +167,12 @@ export const PlotContainer: FunctionComponent<Props> = ({
     </PlotInteractionContext>
   )
 }
+
+export const rangeToDomain = (
+  [p0, p1]: number[],
+  scale: Scale<number, number>,
+  length: number,
+): number[] => [
+  scale.invert(Math.max(Math.min(p0, p1), 0)),
+  scale.invert(Math.min(Math.max(p0, p1), length)),
+]

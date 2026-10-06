@@ -44,7 +44,6 @@
       // src/constants/index.ts, while the identical target reached through the
       // wildcard below worked. So import `from 'constants/index'` instead.
       "constants/*": ["./src/constants/*"],
-      "hooks/*": ["./src/hooks/*"],
       "stories/*": ["./stories/*"],
       "style/*": ["./src/style/*"],
       "types": ["./src/types"],

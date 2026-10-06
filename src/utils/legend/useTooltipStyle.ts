@@ -1,16 +1,9 @@
-// Types
-import {AnnotationTooltipOptions} from 'types'
-
 // Utils
 import {useLayoutStyle} from 'utils/useLayoutStyle'
 import {useRefMousePos} from 'utils/useMousePos'
 
 // Constants
-import {
-  ANNOTATION_DEFAULT_MAX_WIDTH,
-  CLOCKFACE_Z_INDEX,
-  LEAFLET_Z_INDEX,
-} from 'constants/index'
+import {CLOCKFACE_Z_INDEX, LEAFLET_Z_INDEX} from 'constants/index'
 
 const MARGIN_X = 30
 
@@ -64,96 +57,6 @@ export const useTooltipStyle = (el: HTMLDivElement) => {
        that so that tooltips are not rendered/are hidden below the map, */
       return {
         display: 'inline',
-        position: 'fixed',
-        left: `${clampedX}px`,
-        top: `${clampedY}px`,
-        zIndex: CLOCKFACE_Z_INDEX + LEAFLET_Z_INDEX + 1,
-      }
-    },
-  )
-}
-
-export const useAnnotationStyle = (
-  el: HTMLDivElement,
-  options: AnnotationTooltipOptions,
-) => {
-  const {dimension, position, xOffset, yOffset} = options || {}
-  const {x, y} = position || {x: null, y: null}
-
-  // Position the tooltip above the annotation for vertical annotations, like this:
-  //
-  //          ┌─────────────┐
-  //          │             │
-  //          │   tooltip   │
-  //          │             │
-  //          └─────────────┘
-  //                 |
-  //                 |
-  //                 |
-  //                 |
-  //
-  // Position the tooltip to the right of the annotation for horizontal annotations, like this:
-  //
-  //             ┌─────────────┐
-  //             │             │
-  //    ---------│   tooltip   │
-  //             │             │
-  //             └─────────────┘
-  //
-  // The positioning is subject to the following restrictions:
-  //
-  // - If the tooltip does not fit above a vertical annotation due to screen size,
-  //   shift it to overlay the top part of the annotation
-  //
-  // - If the tooltip does not fit to the right of a horizontal annotation due to screen size,
-  //   shift it to overlay the right part of the annotation
-  //
-  useLayoutStyle(
-    el,
-    ({offsetWidth: tooltipWidth, offsetHeight: tooltipHeight}) => {
-      if (x === null || y === null) {
-        return {
-          display: 'none',
-        }
-      }
-      // xOffset : start x-coordinate value of the plot layer
-      // yOffset : start y-coordinate value of the plot layer
-      // (xOffset, yOffset) is the origin of this plot
-      // dx      : the distance to the middle of the tooltip from the parent plot container left edge
-      let dx = xOffset - tooltipWidth / 2
-      if (dx + tooltipWidth > window.innerWidth) {
-        dx = 0 - tooltipWidth / 2 + window.innerWidth - (x + xOffset)
-      }
-      let dy = Math.max(yOffset - tooltipHeight, 0)
-
-      if (dimension === 'y') {
-        dx = xOffset
-        if (dx + x + tooltipWidth > window.innerWidth) {
-          dx = 0 - tooltipWidth + window.innerWidth - (dx + x)
-        }
-        dy = yOffset - tooltipHeight / 2
-        if (dy + y + tooltipHeight > window.innerHeight) {
-          dy = 0 - tooltipHeight + window.innerHeight - (dy + y)
-        }
-      }
-
-      let clampedX = Math.round(x + dx)
-      const clampedY = Math.round(dy + y)
-
-      // When the annotation is in the far edge of the screen, the position.left value
-      // overrides the width of the tooltip and makes its width smaller than its max-width.
-      // Position the left edge of the tooltip such that the tooltip occupies its max width.
-      if (
-        window.innerWidth - clampedX < ANNOTATION_DEFAULT_MAX_WIDTH &&
-        tooltipWidth >= ANNOTATION_DEFAULT_MAX_WIDTH
-      ) {
-        clampedX = window.innerWidth - ANNOTATION_DEFAULT_MAX_WIDTH
-      }
-
-      /* Geo widget maps are rendered with z-index: 399, we have to set it above
-       that so that tooltips are not rendered/are hidden below the map, */
-      return {
-        display: 'inline-block',
         position: 'fixed',
         left: `${clampedX}px`,
         top: `${clampedY}px`,

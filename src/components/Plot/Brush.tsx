@@ -5,7 +5,7 @@ import {
   MouseEvent,
   useLayoutEffect,
 } from 'react'
-import {getRectDimensions} from 'utils/brush'
+
 // Utils
 import {DragEvent} from 'utils/useDragEvent'
 
@@ -95,4 +95,41 @@ export const Brush: FunctionComponent<Props> = ({
   }
 
   return <div className='giraffe-brush-selection' style={selectionStyle} />
+}
+
+const getRectDimensions = (
+  event: DragEvent,
+  plotWidth: number,
+  plotHeight: number,
+) => {
+  if (event.direction === 'x') {
+    const x = Math.max(0, Math.min(event.initialX, event.x))
+
+    const width = Math.min(Math.max(event.initialX, event.x) - x, plotWidth - x)
+
+    return {
+      x,
+      y: 0,
+      width,
+      height: plotHeight,
+    }
+  }
+
+  if (event.direction === 'y') {
+    const y = Math.max(0, Math.min(event.initialY, event.y))
+
+    const height = Math.min(
+      Math.max(event.initialY, event.y) - y,
+      plotHeight - y,
+    )
+
+    return {
+      x: 0,
+      y,
+      width: plotWidth,
+      height: height,
+    }
+  }
+
+  return null
 }

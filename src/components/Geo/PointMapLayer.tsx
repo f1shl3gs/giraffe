@@ -1,6 +1,7 @@
 // Libraries
 import L from 'leaflet'
 import {FunctionComponent, useEffect, useMemo} from 'react'
+
 import 'leaflet.markercluster'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
@@ -10,7 +11,7 @@ import {
   createClusterCustomIcon,
   formatPointLayerRowInfo,
   MARKER_ICON_SIZE,
-} from 'utils/geo'
+} from './geo'
 
 import {getColor} from './dimensionCalculations'
 import {useGeoMap} from './GeoMapContext'

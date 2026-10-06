@@ -1,5 +1,4 @@
 // Types
-
 import {Table} from 'types'
 import type {LatLonColumns} from '../geoTypes'
 import {GeoTable} from './GeoTable'
@@ -41,56 +40,14 @@ export const preprocessData = (
 
 const latLonAsTags = (useS2CellID, latLonColumns) => {
   if (typeof useS2CellID !== 'undefined' && useS2CellID === false) {
-    if (
-      latLonColumns?.lat?.key === 'tag' &&
-      latLonColumns?.lon?.key === 'tag'
-    ) {
-      return true
-    }
-    return false
+    return (
+      latLonColumns?.lat?.key === 'tag' && latLonColumns?.lon?.key === 'tag'
+    )
   }
+
   return false
-}
-
-export const getColumnNames = (
-  table: Table,
-  autoPivoting: boolean,
-): string[] => {
-  if (autoPivoting) {
-    return getFieldColumnValues(table)
-  }
-  return getNumericColumns(table)
-}
-
-const getFieldColumnValues = (table: Table): string[] => {
-  const fieldColumn = table.getColumn(FIELD_COLUMN, 'string')
-  const valueColumn = table.getColumn(VALUE_COLUMN)
-  if (!fieldColumn) {
-    return []
-  }
-  const entriesCount = fieldColumn.length
-  const fieldNames = {}
-  for (let i = 0; i < entriesCount; i++) {
-    const fieldName = fieldColumn[i]
-    if (typeof valueColumn[i] === 'number') {
-      fieldNames[fieldName] = true
-    }
-  }
-  return filterMetaColumns(Object.keys(fieldNames))
 }
 
 export const filterMetaColumns = (fieldNames: string[]) => {
   return fieldNames.filter(name => QUERY_META_COLUMNS.indexOf(name) < 0)
-}
-
-const getNumericColumns = (table: Table): string[] => {
-  return table.columnKeys.filter(k => {
-    if (k === 'result' || k === 'table') {
-      return false
-    }
-
-    const columnType = table.getColumnType(k)
-
-    return columnType === 'time' || columnType === 'number'
-  })
 }

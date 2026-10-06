@@ -1,13 +1,7 @@
-import type {CSSProperties} from 'react'
-
-import type {
-  ColumnGroupMap,
-  ColumnType,
-  Formatter,
-  InteractionHandlers,
-  TextMetrics,
-} from 'types'
-import type {LegendConfig} from '../Legend/LegendConfig'
+// Types
+import type {ColumnType, Formatter, InteractionHandlers} from 'types'
+import type {LegendConfig} from 'components/Legend/LegendConfig'
+import {StaticLegendConfig} from 'components/StaticLegend/StaticLegend'
 
 export interface PlotConfig {
   /*
@@ -73,58 +67,4 @@ export interface PlotConfig {
   staticLegend?: StaticLegendConfig
 
   yColumnType?: ColumnType
-}
-
-/*
-  Only <Plot> reads this. It is also the props type of <StaticLegend>
-  (`StaticLegendProps extends StaticLegendConfig`), so the box is currently handed
-  fields it does not read — cursor, heightRatio, valueAxis and the rest. That
-  duplication is a separate cleanup; moving the type here does not address it.
-*/
-
-export interface StaticLegendConfig {
-  backgroundColor?: string
-  border?: string
-  colorizeRows?: boolean
-  columns?: string[]
-  crosshairColor?: string
-  cursor?: string // no corresponding legend property, unique to static legend
-  font?: string
-  fontBrightColor?: string
-  fontColor?: string
-  heightRatio?: number // no corresponding legend property, unique to static legend
-  hide?: boolean
-  message?: string
-  opacity?: number
-  orientationThreshold?: number
-  renderEffect?: (options: StaticLegendRenderEffectOptions) => void // no corresponding legend property, unique to static legend
-  style?: CSSProperties // no correspinding legend property, unique to static legend
-  valueAxis?: 'x' | 'y' // no corresponding legend property, unique to static legend
-  widthRatio?: number // no corresponding legend property, unique to static legend
-
-  /*
-    D6: the legend declares its own rows, so it needs no layer index and no
-    layer spec. These mirror the layer's own config -- the legend has to be
-    told which columns group the rows, and which colours they were drawn in,
-    because it no longer reads them out of the layer's transform output.
-  */
-  fill?: string[]
-  colors?: string[]
-  colorMapping?: ColumnGroupMap
-  /* Band-only: which columns carry the row / upper / lower bounds. */
-  mainColumnName?: string
-  upperColumnName?: string
-  lowerColumnName?: string
-  bandName?: string
-}
-
-export interface StaticLegendRenderEffectOptions {
-  totalHeight: number
-  staticLegendHeight: number
-  legendDataLength: number
-  lineCount: number
-  lineSpacingRatio: number
-  padding: number
-  headerTextMetrics: TextMetrics
-  sampleTextMetrics: TextMetrics
 }

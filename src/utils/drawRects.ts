@@ -16,18 +16,18 @@ interface DrawRectsOptions {
   fillOpacity: number
 }
 
-export const drawRects = ({
-  context,
-  table,
-  xScale,
-  yScale,
-  fillScale,
-  hoveredRowIndices,
-  strokeWidth,
-  strokePadding,
-  strokeOpacity,
-  fillOpacity,
-}: DrawRectsOptions): void => {
+export const drawRects = (
+  ctx: CanvasRenderingContext2D,
+  table: Table,
+  xScale: Scale<number, number>,
+  yScale: Scale<number, number>,
+  fillScale: Scale<number, string>,
+  hoveredRowIndices: number[] | null,
+  strokeWidth: number,
+  strokePadding: number,
+  strokeOpacity: number,
+  fillOpacity: number,
+): void => {
   const xMinCol = table.getColumn(X_MIN, 'number')
   const xMaxCol = table.getColumn(X_MAX, 'number')
   const yMinCol = table.getColumn(Y_MIN, 'number')
@@ -54,24 +54,24 @@ export const drawRects = ({
 
     if (strokeWidth || strokeOpacity) {
       // See https://stackoverflow.com/a/45125187
-      context.beginPath()
-      context.rect(x, y, width, height)
-      context.save()
-      context.clip()
-      context.lineWidth = strokeWidth * 2
-      context.globalAlpha = fillOpacity
-      context.fillStyle = fill
-      context.fill()
-      context.globalAlpha = strokeOpacity
-      context.strokeStyle = fill
-      context.stroke()
-      context.restore()
+      ctx.beginPath()
+      ctx.rect(x, y, width, height)
+      ctx.save()
+      ctx.clip()
+      ctx.lineWidth = strokeWidth * 2
+      ctx.globalAlpha = fillOpacity
+      ctx.fillStyle = fill
+      ctx.fill()
+      ctx.globalAlpha = strokeOpacity
+      ctx.strokeStyle = fill
+      ctx.stroke()
+      ctx.restore()
     } else {
-      context.globalAlpha = fillOpacity
-      context.fillStyle = fill
-      context.beginPath()
-      context.rect(x, y, width, height)
-      context.fill()
+      ctx.globalAlpha = fillOpacity
+      ctx.fillStyle = fill
+      ctx.beginPath()
+      ctx.rect(x, y, width, height)
+      ctx.fill()
     }
   }
 }

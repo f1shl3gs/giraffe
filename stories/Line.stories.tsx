@@ -1435,8 +1435,6 @@ export const Standard: Story = {
     } = args
 
     const lineConfig: LineConfig = {
-      x,
-      y,
       fill: [fill],
       interpolation,
       colors: getColors(colorScheme),
@@ -1545,8 +1543,6 @@ export const YDomainControlledMode: Story = {
     )
 
     const lineConfig: LineConfig = {
-      x,
-      y,
       fill: fill
         ? fill.split(',').map(col => col.trim())
         : findStringColumns(table),
@@ -1672,8 +1668,6 @@ export const UserDefinedTicks: Story = {
     const yTickStep = !yTickStepText ? null : Number(yTickStepText)
 
     const lineConfig: LineConfig = {
-      x,
-      y,
       fill: [fill],
       interpolation,
       colors: getColors(colorScheme),
@@ -1785,8 +1779,6 @@ export const StaticCSV: Story = {
     const table = fromFlux(staticData).table
 
     const lineConfig: LineConfig = {
-      x,
-      y,
       fill: findStringColumns(table),
       interpolation,
       colors: getColors(colorScheme),
@@ -1861,8 +1853,6 @@ export const CustomCSV: Story = {
     const table = fromFlux(csv).table
 
     const lineConfig: LineConfig = {
-      x,
-      y,
       fill: findStringColumns(table),
       interpolation,
       colors: getColors(colorScheme),
@@ -1934,8 +1924,6 @@ export const StaticCSVWithColorMapping: Story = {
     const table = fromFlux(staticData).table
 
     const lineConfig: LineConfig = {
-      x,
-      y,
       fill: findStringColumns(table),
       interpolation,
       colors: getColors(colorScheme),
@@ -2023,8 +2011,6 @@ export const InfluxDataCloudUINumberFormatter: Story = {
     const table = fromFlux(formattableNumbersCSV).table
 
     const lineConfig: LineConfig = {
-      x,
-      y,
       fill: findStringColumns(table),
       interpolation,
       colors: getColors(colorScheme),

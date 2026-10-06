@@ -1,16 +1,68 @@
+// Libraries
+import {type CSSProperties, FunctionComponent, useEffect, useMemo} from 'react'
+
+// Components
+import {DapperScrollbars} from 'components/DapperScrollbars'
+import {Legend} from 'components/Legend'
+
+// Types
+import type {ColumnGroupMap, TextMetrics} from 'types'
 import type {LegendConfig} from 'components/Legend/LegendConfig'
+
+// Utils
+import {getStaticLegendTexMetrics} from 'utils/textMetrics'
+import {getLegendData} from './convert'
+import {getFormatterForColumn, usePlot} from 'components/Plot/PlotEnv'
+
+// Constants
 import {
   STATIC_LEGEND_BOX_PADDING,
   STATIC_LEGEND_LINE_SPACING_RATIO,
   STATIC_LEGEND_SCROLL_PADDING,
 } from 'constants/index'
-import {FunctionComponent, useEffect, useMemo} from 'react'
-import {getLegendData} from 'utils/legend/staticLegend'
-import {getStaticLegendTexMetrics} from 'utils/textMetrics'
-import {DapperScrollbars} from '../DapperScrollbars'
-import {Legend} from '../Legend'
-import {getFormatterForColumn, usePlot} from './PlotEnv'
-import {STATIC_LEGEND_DEFAULTS} from './StaticLegendDefaults'
+
+export interface StaticLegendRenderEffectOptions {
+  totalHeight: number
+  staticLegendHeight: number
+  legendDataLength: number
+  lineCount: number
+  lineSpacingRatio: number
+  padding: number
+  headerTextMetrics: TextMetrics
+  sampleTextMetrics: TextMetrics
+}
+
+export interface StaticLegendConfig {
+  backgroundColor?: string
+  border?: string
+  colorizeRows?: boolean
+  columns?: string[]
+  crosshairColor?: string
+  cursor?: string // no corresponding legend property, unique to static legend
+  font?: string
+  fontBrightColor?: string
+  fontColor?: string
+  heightRatio?: number // no corresponding legend property, unique to static legend
+  hide?: boolean
+  message?: string
+  opacity?: number
+  orientationThreshold?: number
+  renderEffect?: (options: StaticLegendRenderEffectOptions) => void // no corresponding legend property, unique to static legend
+  style?: CSSProperties // no corresponding legend property, unique to static legend
+  valueAxis?: 'x' | 'y' // no corresponding legend property, unique to static legend
+  widthRatio?: number // no corresponding legend property, unique to static legend
+
+  fill?: string[]
+  colors?: string[]
+  colorMapping?: ColumnGroupMap
+
+  /*
+    Adds a Min and a Max column beside the latest value, each holding the
+    smallest and largest value that line took across the whole table. Off by
+    default.
+  */
+  showBounds?: boolean
+}
 
 export interface StaticLegendProps {
   height: number
@@ -18,19 +70,20 @@ export interface StaticLegendProps {
   width: number
 }
 
-/*
-  D6: <Plot> owns the static legend and hands it nothing but its own box, so it
-  never learns which child layer is on screen. The rows come from
-  `config.staticLegend`, which declares them (see StaticLegendConfig).
-*/
 export const StaticLegend: FunctionComponent<StaticLegendProps> = ({
   height,
   top,
   width,
 }) => {
   const {table, config} = usePlot()
-  const staticLegend = {
-    ...STATIC_LEGEND_DEFAULTS,
+  const staticLegend: StaticLegendConfig = {
+    // Default static legend config
+    cursor: 'auto',
+    heightRatio: 0.2,
+    valueAxis: 'y',
+    widthRatio: 1.0,
+    renderEffect: () => {},
+
     ...config.staticLegend,
   }
 
@@ -41,13 +94,7 @@ export const StaticLegend: FunctionComponent<StaticLegendProps> = ({
     PlotConfig nests the legend, that inheritance is spelled out here.
   */
   const legendStyle: LegendConfig = {...config.legend, ...staticLegend}
-  const {
-    backgroundColor,
-    border,
-    font,
-    fontBrightColor,
-    opacity,
-  } = legendStyle
+  const {backgroundColor, border, font, fontBrightColor, opacity} = legendStyle
 
   const {
     cursor = 'auto',

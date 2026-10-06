@@ -1,8 +1,10 @@
+// Types
 import {BandLineMap, LineData, NumericColumnData, Scale, Table} from 'types'
+
+// Utils
 
 // Constant
 import {FILL} from 'constants/columnKeys'
-import {isDefined} from './isDefined'
 
 export const getBandHoverPoints = (
   table: Table,
@@ -53,6 +55,7 @@ export const getLineLengths = (lineData: LineData): LineLengths => {
     lineLengths[lineIndex].startIndex = total
     total += length
   }
+
   return lineLengths
 }
 
@@ -101,13 +104,13 @@ export const getBandHoverIndices = (
 
         bandHoverIndices.rowLines.push(rowBase + offset)
 
-        if (isDefined(hoverGroupBoundaries[hoveredBandId].upper)) {
+        if (hoverGroupBoundaries[hoveredBandId].upper != null) {
           const upperBase =
             lineLengths[hoverGroupBoundaries[hoveredBandId].upper].startIndex
           bandHoverIndices.upperLines.push(upperBase + offset)
         }
 
-        if (isDefined(hoverGroupBoundaries[hoveredBandId].lower)) {
+        if (hoverGroupBoundaries[hoveredBandId].lower != null) {
           const lowerBase =
             lineLengths[hoverGroupBoundaries[hoveredBandId].lower].startIndex
           bandHoverIndices.lowerLines.push(lowerBase + offset)

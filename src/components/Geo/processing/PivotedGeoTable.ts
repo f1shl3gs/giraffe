@@ -1,7 +1,7 @@
 // Types
 
 import {Table} from 'types'
-import {timestampToString} from 'utils/geo'
+import {timestampToString} from '../geo'
 import type {LatLonColumns} from '../geoTypes'
 import {CoordinateEncoding, GeoTable, Track} from './GeoTable'
 import {getLatLonMixin} from './mixins'

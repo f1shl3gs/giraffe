@@ -1,6 +1,16 @@
 // Libraries
 import {range} from 'd3-array'
 import {FunctionComponent, RefObject, useEffect, useRef} from 'react'
+
+// Components
+import {AutoSizer} from 'components/AutoSizer'
+
+// Types
+import type {Color, DecimalPlaces, GaugeTheme} from 'types'
+
+// Utils
+import {formatStatValue, MAX_DECIMAL_PLACES} from 'utils/formatStatValue'
+
 // Styles
 import {
   COLOR_TYPE_MAX,
@@ -10,14 +20,6 @@ import {
   GAUGE_THEME_DARK,
   MIN_THRESHOLDS,
 } from 'style/gaugeStyles'
-
-// Types
-import type {Color, DecimalPlaces, GaugeTheme} from 'types'
-
-// Utils
-import {formatStatValue, MAX_DECIMAL_PLACES} from 'utils/formatStatValue'
-// Components
-import {AutoSizer} from '../AutoSizer'
 
 /* ---------------------------------------------------------------------
    The canvas gauge: draws the arc, ticks, labels, needle and value.

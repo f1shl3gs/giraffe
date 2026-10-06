@@ -1,5 +1,4 @@
 // Types
-
 import type {DashboardColor} from './geoTypes'
 import {GeoTable, getMinAndMax, MinAndMax} from './processing/GeoTable'
 
@@ -142,5 +141,3 @@ export const normalizeValue = (
     return maxValue / 2
   }
 }
-
-export const nameOf = <T>(name: keyof T): string => String(name)

@@ -379,10 +379,7 @@ export interface LatestIndexMap {
   [columnKey: string]: number
 }
 
-export type LineData = Map<
-  number,
-  {xs: number[]; ys: number[]; fill: string}
->
+export type LineData = Map<number, {xs: number[]; ys: number[]; fill: string}>
 
 export enum ErrorName {
   UnknownColumnTypeError = 'UnknownColumnTypeError',
