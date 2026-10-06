@@ -72,7 +72,7 @@ export const Band: FunctionComponent<BandProps> = ({config}) => {
   const {width, height, xScale, yScale, table} = env
   const legendHide = env.config.legend?.hide ?? false
 
-  const spec = useMemo(
+  const {bandLineMap, fillTable, lineData, fillColumnMap} = useMemo(
     () =>
       bandTransform(
         table,
@@ -97,11 +97,11 @@ export const Band: FunctionComponent<BandProps> = ({config}) => {
   const simplifiedLineData = useMemo(
     () =>
       simplifyBandData(
-        alignMinMaxWithBand(spec.lineData, spec.bandLineMap),
+        alignMinMaxWithBand(lineData, bandLineMap),
         xScale,
         yScale,
       ),
-    [spec.lineData, xScale, yScale],
+    [lineData, xScale, yScale],
   )
 
   const canvasRef = useCanvas(
@@ -112,13 +112,13 @@ export const Band: FunctionComponent<BandProps> = ({config}) => {
         ctx,
         config.interpolation ?? 'linear',
         simplifiedLineData,
-        spec.bandLineMap,
+        bandLineMap,
         config.lineWidth,
         config.lineOpacity,
         config.shadeOpacity,
       ),
     [
-      spec.bandLineMap,
+      bandLineMap,
       config.interpolation,
       simplifiedLineData,
       config.lineWidth,
@@ -131,7 +131,7 @@ export const Band: FunctionComponent<BandProps> = ({config}) => {
 
   if (config.hoverDimension === 'auto') {
     hoverDimension = 'x'
-    if (Object.keys(spec.lineData).length > config.maxTooltipRows) {
+    if (Object.keys(lineData).length > config.maxTooltipRows) {
       hoverDimension = 'xy'
     }
   } else {
@@ -143,9 +143,9 @@ export const Band: FunctionComponent<BandProps> = ({config}) => {
   const hoverableColumnData = useBandHoverColumns(
     hoverX,
     hoverY,
-    spec.lineData,
-    spec.table.getColumn(FILL, 'number'),
-    spec.bandLineMap,
+    lineData,
+    fillTable.getColumn(FILL, 'number'),
+    bandLineMap,
     width,
     height,
   )
@@ -163,14 +163,14 @@ export const Band: FunctionComponent<BandProps> = ({config}) => {
     height,
   )
 
-  const lineLengths = getLineLengths(spec.lineData)
+  const lineLengths = getLineLengths(lineData)
 
   const bandHoverIndices = getBandHoverIndices(
     lineLengths,
     hoverRowIndices,
     hoverableColumnData.groupColData,
     groupLineIndicesIntoBands(
-      spec.columnGroupMaps.fill,
+      fillColumnMap,
       lowerColumnName,
       rowColumnName,
       upperColumnName,
@@ -197,6 +197,9 @@ export const Band: FunctionComponent<BandProps> = ({config}) => {
       {hasHoverData && (
         <BandHover
           bandHoverIndices={bandHoverIndices}
+          bandLineMap={bandLineMap}
+          lineData={lineData}
+          fillTable={fillTable}
           columnFormatter={(colKey: string) =>
             getFormatterForColumn(env.table, colKey, env.config.valueFormatters)
           }
@@ -204,7 +207,6 @@ export const Band: FunctionComponent<BandProps> = ({config}) => {
           dimension={hoverDimension}
           height={height}
           simplifiedLineData={simplifiedLineData}
-          spec={spec}
           width={width}
           xScale={xScale}
           yScale={yScale}

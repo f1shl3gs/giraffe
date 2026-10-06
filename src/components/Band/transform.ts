@@ -4,7 +4,6 @@ import {
   BandLineMap,
   ColumnData,
   ColumnGroupMap,
-  ColumnType,
   LatestIndexMap,
   LineData,
   Scale,
@@ -18,30 +17,10 @@ import {scalePoints} from 'utils/lineData'
 import {isSortable, sortIndicesByValueColumn} from 'utils/legend/sort'
 
 // Constants
-import {FILL, LOWER, RESULT, TIME, UPPER} from 'constants/columnKeys'
+import {FILL, LOWER, RESULT, UPPER} from 'constants/columnKeys'
 import {BAND_COLOR_SCALE_CONSTANT} from 'constants/index'
 
 /* The transform's output, consumed only by Band and BandHover. */
-export interface BandLayerSpec {
-  bandLineMap: BandLineMap
-  bandName: string
-  upperColumnName: string
-  lowerColumnName: string
-  inputTable: Table
-  table: Table // has `FILL` column added
-  lineData: LineData
-  xDomain: number[]
-  yDomain: number[]
-  xColumnKey: string
-  yColumnKey: string
-  xColumnType: ColumnType
-  yColumnType: ColumnType
-  columnGroupMaps: {
-    fill: ColumnGroupMap
-    latestIndices: LatestIndexMap
-  }
-}
-
 export const getBands = (
   lineData: LineData,
   bandLineMap: BandLineMap,
@@ -499,7 +478,7 @@ export const bandTransform = (
   lowerColumnName: string,
   rowColumnName: string,
   upperColumnName: string,
-): BandLayerSpec => {
+) => {
   const [fillColumn, fillColumnMap] = createGroupIDColumn(
     inputTable,
     fillColKeys,
@@ -524,11 +503,6 @@ export const bandTransform = (
 
   const lineData: LineData = new Map()
 
-  let xMin = Infinity
-  let xMax = -Infinity
-  let yMin = Infinity
-  let yMax = -Infinity
-
   for (let i = 0; i < table.length; i++) {
     const groupID = fillColumn[i]
     const x = xCol[i]
@@ -547,19 +521,7 @@ export const bandTransform = (
 
     series.xs.push(x)
     series.ys.push(y)
-
-    xMin = Math.min(x, xMin)
-    xMax = Math.max(x, xMax)
-    yMin = Math.min(y, yMin)
-    yMax = Math.max(y, yMax)
   }
-  // remember the latest (most recent) index for each group
-  const bandDimension = yColumnKey === TIME ? DomainLabel.Y : DomainLabel.X
-  const latestIndices: LatestIndexMap = createLatestBandIndices(
-    lineData,
-    bandLineMap,
-    bandDimension,
-  )
 
   Object.keys(bandLineMap).forEach(indexType => {
     bandLineMap[indexType].forEach((groupID: number, index: number) => {
@@ -573,19 +535,13 @@ export const bandTransform = (
 
   return {
     bandLineMap,
-    bandName: rowColumnName,
-    upperColumnName,
-    lowerColumnName,
-    inputTable,
-    table,
+    /*
+      Not the input table: this one has the FILL group column added, which is
+      what the hover columns and the band grouping are keyed on.
+    */
+    fillTable: table,
     lineData,
-    xDomain: [xMin, xMax],
-    yDomain: [yMin, yMax],
-    xColumnKey,
-    yColumnKey,
-    xColumnType: table.getColumnType(xColumnKey),
-    yColumnType: table.getColumnType(yColumnKey),
-    columnGroupMaps: {fill: fillColumnMap, latestIndices},
+    fillColumnMap,
   }
 }
 

@@ -20,7 +20,7 @@ import {
   Table,
 } from 'types'
 import type {BandConfig} from './Band'
-import {BandLayerSpec, sortBandLines} from './transform'
+import {sortBandLines} from './transform'
 
 // Utils
 import {getBandHoverPoints} from './bandHover'
@@ -37,7 +37,9 @@ interface Props {
   dimension: LineHoverDimension
   simplifiedLineData: LineData
   config: BandConfig
-  spec: BandLayerSpec
+  bandLineMap: BandLineMap
+  lineData: LineData
+  fillTable: Table
   width: number
   height: number
   xScale: Scale<number, number>
@@ -50,7 +52,9 @@ export const BandHover: FunctionComponent<Props> = ({
   dimension,
   simplifiedLineData,
   config,
-  spec,
+  bandLineMap,
+  lineData,
+  fillTable,
   width,
   height,
   xScale,
@@ -71,20 +75,20 @@ export const BandHover: FunctionComponent<Props> = ({
   const {xColumn: xColKey, yColumn: yColKey} = env.config
   const crosshairColor = env.config.legend?.crosshairColor
 
-  const xColData = spec.table.getColumn(xColKey, 'number')
-  const yColData = spec.table.getColumn(yColKey, 'number')
-  const groupColData = spec.table.getColumn(FILL, 'number')
+  const xColData = fillTable.getColumn(xColKey, 'number')
+  const yColData = fillTable.getColumn(yColKey, 'number')
+  const groupColData = fillTable.getColumn(FILL, 'number')
 
   const {rowLines} = bandHoverIndices
 
   const points = getBandHoverPoints(
-    spec.table,
+    fillTable,
     rowLines,
     xColKey,
     yColKey,
     xScale,
     yScale,
-    spec.lineData,
+    lineData,
   )
 
   const crosshairX =
@@ -156,7 +160,9 @@ export const BandHover: FunctionComponent<Props> = ({
     upperColumnName,
     columnFormatter,
     fillColKeys,
-    spec,
+    bandLineMap,
+  lineData,
+  fillTable,
   )
 
   return (
@@ -186,11 +192,12 @@ const getBandTooltipData = (
   upperColumnName: string,
   getValueFormatter: (colKey: string) => (x: any) => string,
   fillColKeys: string[],
-  spec: BandLayerSpec,
+  bandLineMap: BandLineMap,
+  lineData: LineData,
+  fillTable: Table,
 ): LegendData => {
-  const {bandLineMap, lineData, table} = spec
 
-  const groupColData = table.getColumn(FILL, 'number')
+  const groupColData = fillTable.getColumn(FILL, 'number')
   const bandDimension = yColKey === TIME ? DomainLabel.Y : DomainLabel.X
   const {rowLines: rowIndices} = bandHoverIndices
   const hoveredLinesMap: LatestIndexMap = {}
@@ -205,7 +212,7 @@ const getBandTooltipData = (
     hoveredLinesMap,
   )
   const bandValues =
-    xColKey === VALUE ? table.getColumn(xColKey) : table.getColumn(yColKey)
+    xColKey === VALUE ? fillTable.getColumn(xColKey) : fillTable.getColumn(yColKey)
 
   const sortedBandLineMap = sortBandLines(
     bandValues,
@@ -222,18 +229,18 @@ const getBandTooltipData = (
   const colors = sortedRowLines.map(line => lineData.get(line)!.fill)
 
   const xColumnName =
-    xColKey === VALUE ? `${xColKey}:${bandName}` : table.getColumnName(xColKey)
+    xColKey === VALUE ? `${xColKey}:${bandName}` : fillTable.getColumnName(xColKey)
   const yColumnName =
-    yColKey === VALUE ? `${yColKey}:${bandName}` : table.getColumnName(yColKey)
-  const xColData = table.getColumn(xColKey, 'number')
-  const yColData = table.getColumn(yColKey, 'number')
+    yColKey === VALUE ? `${yColKey}:${bandName}` : fillTable.getColumnName(yColKey)
+  const xColData = fillTable.getColumn(xColKey, 'number')
+  const yColData = fillTable.getColumn(yColKey, 'number')
   const xFormatter = getValueFormatter(xColKey)
   const yFormatter = getValueFormatter(yColKey)
 
   const tooltipXCol = {
     key: xColKey,
     name: xColumnName,
-    type: table.getColumnType(xColKey),
+    type: fillTable.getColumnType(xColKey),
     colors,
     values: formatLegendValues(
       xColData,
@@ -245,7 +252,7 @@ const getBandTooltipData = (
   const tooltipYCol = {
     key: yColKey,
     name: yColumnName,
-    type: table.getColumnType(yColKey),
+    type: fillTable.getColumnType(yColKey),
     colors,
     values: formatLegendValues(
       yColData,
@@ -261,7 +268,7 @@ const getBandTooltipData = (
       tooltipAdditionalColumns.push({
         key: yColKey,
         name: `${yColKey}:${upperColumnName}`,
-        type: table.getColumnType(yColKey),
+        type: fillTable.getColumnType(yColKey),
         colors,
         values: formatLegendValues(
           yColData,
@@ -275,7 +282,7 @@ const getBandTooltipData = (
       tooltipAdditionalColumns.push({
         key: yColKey,
         name: `${yColKey}:${lowerColumnName}`,
-        type: table.getColumnType(yColKey),
+        type: fillTable.getColumnType(yColKey),
         colors,
         values: formatLegendValues(
           yColData,
@@ -289,7 +296,7 @@ const getBandTooltipData = (
       tooltipAdditionalColumns.push({
         key: xColKey,
         name: `${xColKey}:${upperColumnName}`,
-        type: table.getColumnType(xColKey),
+        type: fillTable.getColumnType(xColKey),
         colors,
         values: formatLegendValues(
           xColData,
@@ -303,7 +310,7 @@ const getBandTooltipData = (
       tooltipAdditionalColumns.push({
         key: xColKey,
         name: `${xColKey}:${lowerColumnName}`,
-        type: table.getColumnType(xColKey),
+        type: fillTable.getColumnType(xColKey),
         colors,
         values: formatLegendValues(
           xColData,
@@ -315,7 +322,7 @@ const getBandTooltipData = (
   }
 
   const fillColumns = getBandGroupLegendColumns(
-    table,
+    fillTable,
     sortedRowLines.map(line => hoveredIndices[line]),
     fillColKeys,
     getValueFormatter,
