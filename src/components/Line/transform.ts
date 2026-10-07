@@ -1,33 +1,6 @@
-import {FILL, TIME} from 'constants/columnKeys'
+import {FILL} from 'constants/columnKeys'
 import {createGroupIDColumn, getNominalColorScale} from 'utils/transform'
-import {
-  ColumnGroupMap,
-  ColumnType,
-  LatestIndexMap,
-  LineData,
-  Scale,
-  Table,
-} from 'types'
-
-/* The transform's output, consumed only by Line and LineHover. */
-export interface LineLayerSpec {
-  inputTable: Table
-  table: Table // has `FILL` column added
-  lineData: LineData
-  xDomain: number[]
-  yDomain: number[]
-  xColumnKey: string
-  yColumnKey: string
-  xColumnType: ColumnType
-  yColumnType: ColumnType
-  scales: {
-    fill: Scale<number, string>
-  }
-  columnGroupMaps: {
-    fill: ColumnGroupMap
-    latestIndices: LatestIndexMap
-  }
-}
+import {ColumnGroupMap, LineData, Table} from 'types'
 
 export const lineTransform = (
   inputTable: Table,
@@ -36,7 +9,7 @@ export const lineTransform = (
   fillColKeys: string[],
   colors: string[],
   colorMapping?: ColumnGroupMap,
-): LineLayerSpec => {
+) => {
   const [fillColumn, fillColumnMap] = createGroupIDColumn(
     inputTable,
     fillColKeys,
@@ -47,12 +20,6 @@ export const lineTransform = (
   const yCol = table.getColumn(yColumnKey, 'number') || []
   const fillScale = getNominalColorScale(fillColumnMap, colors)
   const lineData: LineData = new Map()
-  const latestIndices: LatestIndexMap = {}
-
-  let xMin = Infinity
-  let xMax = -Infinity
-  let yMin = Infinity
-  let yMax = -Infinity
 
   for (let i = 0; i < table.length; i++) {
     const groupID = fillColumn[i]
@@ -72,52 +39,15 @@ export const lineTransform = (
 
     series.xs.push(x)
     series.ys.push(y)
-
-    // remember the latest (most recent) index for each group
-    if (latestIndices[groupID] == null) {
-      latestIndices[groupID] = i
-    } else if (yColumnKey === TIME) {
-      if (
-        y > yCol[latestIndices[groupID]] ||
-        yCol[latestIndices[groupID]] == null
-      ) {
-        latestIndices[groupID] = i
-      }
-    } else if (
-      x > xCol[latestIndices[groupID]] ||
-      xCol[latestIndices[groupID]] == null
-    ) {
-      latestIndices[groupID] = i
-    }
-
-    if (x < xMin) {
-      xMin = x
-    }
-
-    if (x > xMax) {
-      xMax = x
-    }
-
-    if (y < yMin) {
-      yMin = y
-    }
-
-    if (y > yMax) {
-      yMax = y
-    }
   }
 
   return {
-    inputTable,
-    table,
+    /*
+      Not the input table: this one has the FILL group column added, which is
+      what the lines are grouped and coloured by.
+    */
+    fillTable: table,
     lineData,
-    xDomain: [xMin, xMax],
-    yDomain: [yMin, yMax],
-    xColumnKey,
-    yColumnKey,
-    xColumnType: table.getColumnType(xColumnKey) ?? 'number',
-    yColumnType: table.getColumnType(yColumnKey) ?? 'number',
-    scales: {fill: fillScale},
-    columnGroupMaps: {fill: fillColumnMap, latestIndices},
+    fillScale,
   }
 }

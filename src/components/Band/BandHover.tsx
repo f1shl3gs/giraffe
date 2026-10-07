@@ -161,8 +161,8 @@ export const BandHover: FunctionComponent<Props> = ({
     columnFormatter,
     fillColKeys,
     bandLineMap,
-  lineData,
-  fillTable,
+    lineData,
+    fillTable,
   )
 
   return (
@@ -196,7 +196,6 @@ const getBandTooltipData = (
   lineData: LineData,
   fillTable: Table,
 ): LegendData => {
-
   const groupColData = fillTable.getColumn(FILL, 'number')
   const bandDimension = yColKey === TIME ? DomainLabel.Y : DomainLabel.X
   const {rowLines: rowIndices} = bandHoverIndices
@@ -212,7 +211,9 @@ const getBandTooltipData = (
     hoveredLinesMap,
   )
   const bandValues =
-    xColKey === VALUE ? fillTable.getColumn(xColKey) : fillTable.getColumn(yColKey)
+    xColKey === VALUE
+      ? fillTable.getColumn(xColKey)
+      : fillTable.getColumn(yColKey)
 
   const sortedBandLineMap = sortBandLines(
     bandValues,
@@ -229,9 +230,13 @@ const getBandTooltipData = (
   const colors = sortedRowLines.map(line => lineData.get(line)!.fill)
 
   const xColumnName =
-    xColKey === VALUE ? `${xColKey}:${bandName}` : fillTable.getColumnName(xColKey)
+    xColKey === VALUE
+      ? `${xColKey}:${bandName}`
+      : fillTable.getColumnName(xColKey)
   const yColumnName =
-    yColKey === VALUE ? `${yColKey}:${bandName}` : fillTable.getColumnName(yColKey)
+    yColKey === VALUE
+      ? `${yColKey}:${bandName}`
+      : fillTable.getColumnName(yColKey)
   const xColData = fillTable.getColumn(xColKey, 'number')
   const yColData = fillTable.getColumn(yColKey, 'number')
   const xFormatter = getValueFormatter(xColKey)

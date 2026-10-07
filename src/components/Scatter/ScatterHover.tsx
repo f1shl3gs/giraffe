@@ -5,9 +5,8 @@ import {FunctionComponent} from 'react'
 import {Tooltip} from '../Tooltip'
 
 // Types
-import type {ScatterSpec} from './transform'
 import type {PlotConfig} from 'components/Plot'
-import type {ColumnType, Scale} from 'types'
+import type {ColumnType, Scale, SymbolType, Table} from 'types'
 
 // Utils
 import {drawPoints} from 'utils/drawPoints'
@@ -34,13 +33,17 @@ interface Props {
   fill: string[]
   symbol: string[]
 
-  spec: ScatterSpec
+  table: Table
+  fillScale: Scale<number, string>
+  symbolScale: Scale<number, SymbolType>
 }
 
 export const ScatterHover: FunctionComponent<Props> = ({
   fill,
   symbol,
-  spec,
+  table,
+  fillScale,
+  symbolScale,
   plotConfig,
   width,
   height,
@@ -50,12 +53,10 @@ export const ScatterHover: FunctionComponent<Props> = ({
   hoverY,
   columnFormatter,
 }) => {
-  const xColData = spec.table.getColumn(plotConfig.xColumn, 'number')
-  const yColData = spec.table.getColumn(plotConfig.yColumn, 'number')
-  const fillColData = spec.table.getColumn(FILL, 'number')
-  const symbolColData = spec.table.getColumn(SYMBOL, 'number')
-  const fillScale = spec.scales.fill
-  const symbolScale = spec.scales.symbol
+  const xColData = table.getColumn(plotConfig.xColumn, 'number')
+  const yColData = table.getColumn(plotConfig.yColumn, 'number')
+  const fillColData = table.getColumn(FILL, 'number')
+  const symbolColData = table.getColumn(SYMBOL, 'number')
 
   const rowIndices = useHoverPointIndices(
     'xy',
@@ -116,7 +117,7 @@ export const ScatterHover: FunctionComponent<Props> = ({
 
   const tooltipData = getPointsTooltipData(
     rowIndices,
-    spec.table,
+    table,
     plotConfig.xColumn,
     plotConfig.yColumn,
     FILL,

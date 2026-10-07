@@ -5,7 +5,6 @@ import {interpolateRgbBasis} from 'd3-interpolate'
 
 // Types
 import {Scale, Table} from 'types'
-import type {RectSpec} from 'components/Rect/transform'
 
 // Utils
 import {newTable} from 'utils/newTable'
@@ -24,7 +23,7 @@ export const heatmapTransform = (
   height: number,
   binSize: number,
   colors: string[],
-): RectSpec => {
+) => {
   const resolvedXDomain = resolveDomain(
     inputTable.getColumn(xColumnKey, 'number'),
     xDomain,
@@ -50,17 +49,12 @@ export const heatmapTransform = (
   const fillScale = getContinuousColorScale(countDomain, colors)
 
   return {
-    inputTable,
-    table,
-    binDimension: 'xy',
-    xDomain: resolvedXDomain,
-    yDomain: resolvedYDomain,
-    xColumnKey,
-    yColumnKey,
-    xColumnType: inputTable.getColumnType(xColumnKey),
-    yColumnType: 'number',
-    scales: {fill: fillScale},
-    columnGroupMaps: {},
+    /*
+      Not the input table: this one has the bin boundary and count columns added,
+      which is what <Rect> draws from and what the tooltip counts.
+    */
+    binnedTable: table,
+    fillScale,
   }
 }
 

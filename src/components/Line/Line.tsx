@@ -4,21 +4,21 @@ import {FunctionComponent, useMemo} from 'react'
 // Components
 import {LineHover} from 'components/Line/LineHover'
 
+// Types
+import type {ColumnGroupMap, LineHoverDimension, LineInterpolation} from 'types'
+
 // Utils
 import {getFormatterForColumn, usePlot} from 'components/Plot/PlotEnv'
 import {usePlotInteraction} from 'components/Plot/PlotInteractionContext'
 import {lineTransform} from 'components/Line/transform'
-
-// Constants
-import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
-import {FILL} from 'constants/columnKeys'
-
-// Types
-import type {ColumnGroupMap, LineHoverDimension, LineInterpolation} from 'types'
 import {drawLines} from 'utils/drawLines'
 import {simplifyLineData} from 'utils/lineData'
 import {useCanvas} from 'utils/useCanvas'
 import {useHoverPointIndices} from 'utils/useHoverPointIndices'
+
+// Constants
+import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
+import {FILL} from 'constants/columnKeys'
 
 export interface LineProps {
   config: LineConfig
@@ -48,7 +48,7 @@ export const Line: FunctionComponent<LineProps> = ({config}) => {
   const {hoverX, hoverY} = usePlotInteraction()
   const {width, height, xScale, yScale, table} = env
 
-  const spec = useMemo(
+  const {fillTable, lineData, fillScale} = useMemo(
     () =>
       lineTransform(
         table,
@@ -65,8 +65,8 @@ export const Line: FunctionComponent<LineProps> = ({config}) => {
   const legendHide = env.config.legend?.hide ?? false
 
   const simplifiedLineData = useMemo(
-    () => simplifyLineData(spec.lineData, xScale, yScale),
-    [spec.lineData, xScale, yScale],
+    () => simplifyLineData(lineData, xScale, yScale),
+    [lineData, xScale, yScale],
   )
 
   if (config.colorMapping && config.colorMappingCallback) {
@@ -99,21 +99,21 @@ export const Line: FunctionComponent<LineProps> = ({config}) => {
 
   if (config.hoverDimension === 'auto') {
     hoverDimension = 'x'
-    if (Object.keys(spec.lineData).length > config.maxTooltipRows) {
+    if (Object.keys(lineData).length > config.maxTooltipRows) {
       hoverDimension = 'xy'
     }
   } else {
     hoverDimension = config.hoverDimension
   }
 
-  const hoverYColumnData = spec.table.getColumn(env.config.yColumn, 'number')
+  const hoverYColumnData = fillTable.getColumn(env.config.yColumn, 'number')
   const hoverRowIndices = useHoverPointIndices(
     hoverDimension,
     hoverX,
     hoverY,
-    spec.table.getColumn(env.config.xColumn, 'number'),
+    fillTable.getColumn(env.config.xColumn, 'number'),
     hoverYColumnData,
-    spec.table.getColumn(FILL, 'number'),
+    fillTable.getColumn(FILL, 'number'),
     xScale,
     yScale,
     width,
@@ -141,7 +141,8 @@ export const Line: FunctionComponent<LineProps> = ({config}) => {
           }
           config={config}
           height={height}
-          spec={spec}
+          table={fillTable}
+          fillScale={fillScale}
           width={width}
           xScale={xScale}
           yScale={yScale}

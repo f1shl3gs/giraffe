@@ -6,8 +6,7 @@ import {Tooltip} from 'components/Tooltip'
 
 // Types
 import type {LegendConfig} from 'components/Legend/LegendConfig'
-import type {Formatter, Scale} from 'types'
-import type {RectSpec} from './transform'
+import type {ColumnGroupMap, Formatter, Scale, Table} from 'types'
 
 // Utils
 import {findHoveredRects, get1DTooltipData, get2DTooltipData} from './tooltip'
@@ -28,7 +27,11 @@ import {useCanvas} from 'utils/useCanvas'
   components are <Heatmap> and <Histogram>.
 */
 interface RectProps {
-  spec: RectSpec
+  inputTable: Table
+  table: Table
+  binDimension: 'xy' | 'x'
+  fillScale: Scale<number, string>
+  fillColumnMap?: ColumnGroupMap
   x: string
   y: string
   strokeWidth: number
@@ -46,7 +49,11 @@ interface RectProps {
 }
 
 export const Rect: FunctionComponent<RectProps> = ({
-  spec,
+  inputTable,
+  table,
+  binDimension,
+  fillScale,
+  fillColumnMap,
   x,
   y,
   strokeWidth,
@@ -63,12 +70,12 @@ export const Rect: FunctionComponent<RectProps> = ({
   hoverY,
 }) => {
   const hoveredRowIndices = findHoveredRects(
-    spec.table,
+    table,
     hoverX,
     hoverY,
     xScale,
     yScale,
-    spec.binDimension,
+    binDimension,
   )
 
   const canvasRef = useCanvas(
@@ -77,10 +84,10 @@ export const Rect: FunctionComponent<RectProps> = ({
     ctx =>
       drawRects(
         ctx,
-        spec.table,
+        table,
         xScale,
         yScale,
-        spec.scales.fill,
+        fillScale,
         hoveredRowIndices,
         strokeWidth,
         strokePadding,
@@ -88,10 +95,10 @@ export const Rect: FunctionComponent<RectProps> = ({
         fillOpacity,
       ),
     [
-      spec.table,
+      table,
       xScale,
       yScale,
-      spec.scales.fill,
+      fillScale,
       hoveredRowIndices,
       strokeWidth,
       strokePadding,
@@ -101,23 +108,23 @@ export const Rect: FunctionComponent<RectProps> = ({
   )
 
   let tooltipData = []
-  if (hoveredRowIndices.length > 0 && spec.binDimension === 'xy') {
+  if (hoveredRowIndices.length > 0 && binDimension === 'xy') {
     tooltipData = get2DTooltipData(
       hoveredRowIndices,
-      spec.table,
-      spec.inputTable,
+      table,
+      inputTable,
       x,
       y,
       columnFormatter,
     )
-  } else if (hoveredRowIndices.length > 0 && spec.binDimension === 'x') {
+  } else if (hoveredRowIndices.length > 0 && binDimension === 'x') {
     tooltipData = get1DTooltipData(
       hoveredRowIndices,
-      spec.table,
-      spec.inputTable,
+      table,
+      inputTable,
       x,
-      spec.columnGroupMaps.fill,
-      spec.scales.fill,
+      fillColumnMap,
+      fillScale,
       columnFormatter,
     )
   }

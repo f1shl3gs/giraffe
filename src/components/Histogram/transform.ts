@@ -1,4 +1,3 @@
-import type {RectSpec} from 'components/Rect/transform'
 import {COUNT, FILL, X_MAX, X_MIN, Y_MAX, Y_MIN} from 'constants/columnKeys'
 import {range, thresholdSturges} from 'd3-array'
 import {createGroupIDColumn, getNominalColorScale} from 'utils/transform'
@@ -15,7 +14,7 @@ export const histogramTransform = (
   fillColKeys: string[],
   binCount: number,
   position: HistogramPosition,
-): RectSpec => {
+) => {
   const [fillColumn, fillColumnMap] = createGroupIDColumn(
     inputTable,
     fillColKeys,
@@ -42,17 +41,10 @@ export const histogramTransform = (
   )
 
   return {
-    inputTable,
-    table,
-    binDimension: 'x',
-    xColumnKey,
-    yColumnKey: COUNT,
-    xDomain: resolvedXDomain,
+    binnedTable: table,
+    fillScale,
+    fillColumnMap,
     yDomain,
-    xColumnType: inputTable.getColumnType(xColumnKey),
-    yColumnType: 'number',
-    scales: {fill: fillScale},
-    columnGroupMaps: {fill: fillColumnMap},
   }
 }
 

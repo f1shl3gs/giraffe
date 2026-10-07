@@ -5,7 +5,6 @@ import {FunctionComponent, useMemo} from 'react'
 // Components
 import {getFormatterForColumn, usePlot} from 'components/Plot/PlotEnv'
 import {ScatterHover} from 'components/Scatter/ScatterHover'
-import type {ScatterSpec} from 'components/Scatter/transform'
 import {scatterTransform} from 'components/Scatter/transform'
 import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
 import {FILL, SYMBOL} from 'constants/columnKeys'
@@ -56,7 +55,11 @@ export const Scatter: FunctionComponent<ScatterProps> = ({config}) => {
 
   const {position, onMouseMove, onMouseLeave} = useMousePos()
 
-  const spec: ScatterSpec = useMemo(
+  const {
+    table: scatterTable,
+    fillScale,
+    symbolScale,
+  } = useMemo(
     () => scatterTransform(table, xColumnKey, yColumnKey, fill, symbol, colors),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [table, config],
@@ -65,12 +68,10 @@ export const Scatter: FunctionComponent<ScatterProps> = ({config}) => {
   const columnFormatter = (colKey: string) =>
     getFormatterForColumn(table, colKey, env.config.valueFormatters)
 
-  const xColData = spec.table.getColumn(xColumnKey, 'number') || []
-  const yColData = spec.table.getColumn(yColumnKey, 'number') || []
-  const fillColData = spec.table.getColumn(FILL, 'number') || []
-  const symbolColData = spec.table.getColumn(SYMBOL, 'number') || []
-  const fillScale = spec.scales.fill
-  const symbolScale = spec.scales.symbol
+  const xColData = scatterTable.getColumn(xColumnKey, 'number') || []
+  const yColData = scatterTable.getColumn(yColumnKey, 'number') || []
+  const fillColData = scatterTable.getColumn(FILL, 'number') || []
+  const symbolColData = scatterTable.getColumn(SYMBOL, 'number') || []
 
   const canvasRef = useCanvas(
     width,
@@ -117,7 +118,9 @@ export const Scatter: FunctionComponent<ScatterProps> = ({config}) => {
         height={height}
         xScale={xScale}
         yScale={yScale}
-        spec={spec}
+        table={scatterTable}
+        fillScale={fillScale}
+        symbolScale={symbolScale}
       />
     </div>
   )

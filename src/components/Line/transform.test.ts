@@ -30,10 +30,16 @@ describe('lineTransform', () => {
     )
 
     it('should give every distinct fill value its own group ID, numbered in order of first appearance', () => {
-      const spec = lineTransform(table, TIME, VALUE, ['cpu'], colors)
+      const {fillTable, lineData} = lineTransform(
+        table,
+        TIME,
+        VALUE,
+        ['cpu'],
+        colors,
+      )
 
-      expect([...spec.lineData.keys()]).toEqual([0, 1])
-      expect(Array.from(spec.table.getColumn(FILL, 'number') ?? [])).toEqual([
+      expect([...lineData.keys()]).toEqual([0, 1])
+      expect(Array.from(fillTable.getColumn(FILL, 'number') ?? [])).toEqual([
         0, 0, 1, 1,
       ])
     })
@@ -45,13 +51,6 @@ describe('lineTransform', () => {
       expect(seriesAt(spec.lineData, 0).ys).toEqual([10, 20])
       expect(seriesAt(spec.lineData, 1).xs).toEqual([300, 400])
       expect(seriesAt(spec.lineData, 1).ys).toEqual([30, 40])
-    })
-
-    it('should span the whole domain in both dimensions', () => {
-      const spec = lineTransform(table, TIME, VALUE, ['cpu'], colors)
-
-      expect(spec.xDomain).toEqual([100, 400])
-      expect(spec.yDomain).toEqual([10, 40])
     })
   })
 
@@ -103,77 +102,5 @@ describe('lineTransform', () => {
       expect(seriesAt(spec.lineData, 0).fill).toEqual('#111111')
       expect(seriesAt(spec.lineData, 1).fill).toEqual('#222222')
     })
-  })
-
-  describe('remembering the latest index of every series', () => {
-    it('should record the row of a series that appears only once', () => {
-      const spec = lineTransform(
-        tableOf(1, [100], [10], ['cpu0']),
-        TIME,
-        VALUE,
-        ['cpu'],
-        colors,
-      )
-
-      expect(spec.columnGroupMaps.latestIndices).toEqual({0: 0})
-    })
-
-    it('should move to the row with the largest x when the y column is not time', () => {
-      // x descends after the first row, so comparing y instead would land on 2
-      const spec = lineTransform(
-        tableOf(3, [30, 10, 20], [1, 2, 3], ['cpu0', 'cpu0', 'cpu0']),
-        TIME,
-        VALUE,
-        ['cpu'],
-        colors,
-      )
-
-      expect(spec.columnGroupMaps.latestIndices).toEqual({0: 0})
-    })
-
-    it('should move to the row with the largest y when the y column is time', () => {
-      // the same table, read with the columns swapped: y now holds the
-      // timestamps, which descend after the first row, so a comparison against
-      // x instead would land on 2
-      const spec = lineTransform(
-        tableOf(3, [30, 10, 20], [1, 2, 3], ['cpu0', 'cpu0', 'cpu0']),
-        VALUE,
-        TIME,
-        ['cpu'],
-        colors,
-      )
-
-      expect(spec.columnGroupMaps.latestIndices).toEqual({0: 0})
-    })
-
-    it('should track each series independently', () => {
-      const spec = lineTransform(
-        tableOf(
-          4,
-          [100, 300, 200, 400],
-          [10, 30, 20, 40],
-          ['cpu0', 'cpu1', 'cpu0', 'cpu1'],
-        ),
-        TIME,
-        VALUE,
-        ['cpu'],
-        colors,
-      )
-
-      expect(spec.columnGroupMaps.latestIndices).toEqual({0: 2, 1: 3})
-    })
-  })
-
-  it('should fall back to number when a column type is unavailable', () => {
-    const spec = lineTransform(
-      tableOf(1, [100], [10], ['cpu0']),
-      TIME,
-      VALUE,
-      ['cpu'],
-      colors,
-    )
-
-    expect(spec.xColumnType).toEqual('time')
-    expect(spec.yColumnType).toEqual('number')
   })
 })

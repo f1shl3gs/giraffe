@@ -29,7 +29,7 @@ describe('line graph performance', () => {
         ['cpu'],
         ['#31C0F6', '#A500A5', '#FF7E27'],
       )
-      expect(result.table.length).toBeGreaterThanOrEqual(REASONABLE_LIMIT)
+      expect(result.fillTable.length).toBeGreaterThanOrEqual(REASONABLE_LIMIT)
     }).not.toThrow()
   }, 30_000)
 })

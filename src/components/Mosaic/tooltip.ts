@@ -44,10 +44,9 @@ export const findHoveredBoxes = (
   const dataY = yScale.invert(hoverY)
 
   const xRange = range(0, xMinData.length)
-  const hoveredYTick =
-    Math.floor(dataY) >= yDomain[0] && Math.floor(dataY) < yDomain[1]
-      ? yTicks[Math.floor(dataY)]
-      : ''
+
+  const bandIndex = Math.min(Math.floor(dataY), yDomain[1] - 1)
+  const hoveredYTick = bandIndex >= yDomain[0] ? yTicks[bandIndex] : ''
 
   const containsHoverX = (index: number): boolean =>
     xMinData[index] <= dataX && xMaxData[index] > dataX

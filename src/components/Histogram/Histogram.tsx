@@ -10,7 +10,6 @@ import type {PlotConfig} from 'components/Plot/PlotConfig'
 import {PLOT_DEFAULTS} from 'components/Plot/PlotDefaults'
 import {getFormatterForColumn} from 'components/Plot/PlotEnv'
 import {Rect} from 'components/Rect/Rect'
-import type {RectSpec} from 'components/Rect/transform'
 import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
 import {COUNT} from 'constants/columnKeys'
 import type {Table} from 'types'
@@ -48,9 +47,8 @@ const FULL_SIZE_STYLE: CSSProperties = {
   the two components built on the shared internal <Rect>, binning on x alone and
   drawing counts on y.
 
-  The y axis is the count axis, so the spec's own extent is handed to
-  createPlotEnv as the domain override. The old <Plot> read that extent off the
-  layer spec; nothing reads a spec now.
+  The y axis is the count axis, so the binned extent is handed to createPlotEnv as
+  the domain override.
 */
 export const Histogram: FunctionComponent<HistogramProps> = ({
   table,
@@ -99,7 +97,7 @@ const HistogramSized: FunctionComponent<HistogramSizedProps> = ({
     onMouseLeave,
   } = useMousePos()
 
-  const spec: RectSpec = useMemo(
+  const {binnedTable, fillScale, fillColumnMap, yDomain} = useMemo(
     () =>
       histogramTransform(
         table,
@@ -117,14 +115,14 @@ const HistogramSized: FunctionComponent<HistogramSizedProps> = ({
   const plotConfig: PlotConfig = {
     ...PLOT_DEFAULTS,
     xColumn: x,
-    /* Unused by the rect itself -- the y domain comes from the spec below, as
-       the override. It is still required by PlotConfig, and `x` is the only
-       numeric column a histogram's input table is guaranteed to have. */
+    /* Unused by the rect itself -- the y domain comes from the override below. It is
+       still required by PlotConfig, and `x` is the only numeric column a
+       histogram's input table is guaranteed to have. */
     yColumn: x,
   }
 
   const env = createPlotEnv(plotConfig, table, width, height, {
-    yDomain: spec.yDomain,
+    yDomain,
   })
   const {margins, xScale, yScale} = env
 
@@ -156,7 +154,11 @@ const HistogramSized: FunctionComponent<HistogramSizedProps> = ({
       >
         <div className='giraffe-layers' style={FULL_SIZE_STYLE}>
           <Rect
-            spec={spec}
+            inputTable={table}
+            table={binnedTable}
+            binDimension='x'
+            fillScale={fillScale}
+            fillColumnMap={fillColumnMap}
             x={x}
             y={COUNT}
             strokeWidth={strokeWidth}

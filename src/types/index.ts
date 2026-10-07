@@ -123,21 +123,6 @@ export type FluxDataType =
   | 'dateTime:RFC3339'
   | 'system'
 
-export enum LayerTypes {
-  Gauge = 'gauge',
-  Annotation = 'annotation',
-  SingleStat = 'single stat',
-  Heatmap = 'heatmap',
-  Histogram = 'histogram',
-  Line = 'line',
-  Band = 'band',
-  Scatter = 'scatter',
-  Mosaic = 'mosaic',
-  Table = 'table',
-  Geo = 'geo',
-  SimpleTable = 'simple table',
-}
-
 export interface CustomLayerRenderProps {
   key: string | number
   xScale: Scale<number, number>

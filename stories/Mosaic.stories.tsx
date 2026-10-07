@@ -78,6 +78,7 @@ const render = (args: MosaicArgs) => {
     yLabelColumns,
     showAxes,
     hoverDimension,
+    timeFormat,
   } = args
 
   const table = cpuTable
@@ -89,6 +90,7 @@ const render = (args: MosaicArgs) => {
     yLabelColumns,
     fill: [fill],
     hoverDimension,
+    timeFormat,
     colors: COLOR_SCHEME_OPTIONS[colorScheme],
   }
 
@@ -138,6 +140,7 @@ const renderCircleCiBranch = (args: MosaicArgs) => {
     yLabelColumns,
     showAxes,
     hoverDimension,
+    timeFormat,
   } = args
 
   const table = fromFlux(circle_ci_branch).table
@@ -149,6 +152,7 @@ const renderCircleCiBranch = (args: MosaicArgs) => {
     yLabelColumns,
     fill: [fill],
     hoverDimension,
+    timeFormat,
     colors: COLOR_SCHEME_OPTIONS[colorScheme],
   }
 
@@ -201,6 +205,7 @@ const renderCloudy = (args: MosaicArgs) => {
     yLabelColumns,
     showAxes,
     hoverDimension,
+    timeFormat,
   } = args
 
   const table = fromFlux(cloudy).table
@@ -212,6 +217,7 @@ const renderCloudy = (args: MosaicArgs) => {
     yLabelColumns,
     fill: [fill],
     hoverDimension,
+    timeFormat,
     colors: COLOR_SCHEME_OPTIONS[colorScheme],
   }
 
@@ -261,6 +267,7 @@ const renderNFL = (args: MosaicArgs) => {
     yLabelColumns,
     showAxes,
     hoverDimension,
+    timeFormat,
   } = args
 
   const table = fromFlux(nfl).table
@@ -272,6 +279,7 @@ const renderNFL = (args: MosaicArgs) => {
     yLabelColumns,
     fill: [fill],
     hoverDimension,
+    timeFormat,
     colors: COLOR_SCHEME_OPTIONS[colorScheme],
   }
 
@@ -321,6 +329,7 @@ const renderCustomCSV = (args: MosaicArgs) => {
     colorScheme,
     showAxes,
     hoverDimension,
+    timeFormat,
   } = args
 
   const table = fromFlux(csv).table
@@ -332,6 +341,7 @@ const renderCustomCSV = (args: MosaicArgs) => {
     yLabelColumnSeparator,
     fill: [fill],
     hoverDimension,
+    timeFormat,
     colors: COLOR_SCHEME_OPTIONS[colorScheme],
   }
 

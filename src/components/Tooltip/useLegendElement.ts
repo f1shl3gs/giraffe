@@ -11,6 +11,19 @@ import {CLOCKFACE_Z_INDEX, LEAFLET_Z_INDEX} from 'constants/index'
 const MARGIN_X = 30
 
 /*
+  How far the cursor has to travel back past the threshold before the tooltip
+  changes sides again.
+
+  The threshold is a single pixel wide: only at x = innerWidth - MARGIN_X -
+  tooltipWidth does the choice flip. Any movement of the hand across it flips the
+  tooltip from one side of the cursor to the other, which moves it by its own
+  width plus twice the margin, so it appears to teleport on every frame. Requiring
+  the cursor to clear the threshold by this much before switching back means
+  ordinary movement around the boundary cannot cause a second flip.
+*/
+const SWITCH_MARGIN = 12
+
+/*
   Returns a DOM node that a tooltip can be rendered inside.
 
   The node will be created and appended to the end of the document body on
@@ -26,10 +39,16 @@ export const useLegendElement = (className: string) => {
   if (ref.current === null) {
     ref.current = document.createElement('div')
     ref.current.classList.add(className)
+    /* Appended here, during render, rather than in an effect. The tooltip
+       positions itself in a layout effect by reading its own offsetWidth, and a
+       node that is not in the document yet measures 0. Reading 0 makes the
+       overflow test below pass, so a freshly mounted tooltip would sit on the
+       right of the cursor and then jump to the left on the next frame, once the
+       node was attached and the real width was measured. */
+    document.body.appendChild(ref.current)
   }
 
   useEffect(() => {
-    document.body.appendChild(ref.current)
     return () => {
       document.body.removeChild(ref.current)
     }
@@ -42,6 +61,8 @@ export const useLegendElement = (className: string) => {
 
 const useTooltipStyle = (el: HTMLDivElement) => {
   const {x, y} = useRefMousePos(document.body)
+  /* Which side of the cursor the tooltip is on. See SWITCH_MARGIN. */
+  const sideRef = useRef<'right' | 'left'>('right')
 
   // Position the tooltip next to the mouse cursor, like this:
   //
@@ -71,7 +92,16 @@ const useTooltipStyle = (el: HTMLDivElement) => {
       let dx = MARGIN_X
       let dy = 0 - tooltipHeight / 2
 
-      if (x + dx + tooltipWidth > window.innerWidth) {
+      if (x + MARGIN_X + tooltipWidth > window.innerWidth) {
+        sideRef.current = 'left'
+      } else if (
+        x + MARGIN_X + tooltipWidth + SWITCH_MARGIN <=
+        window.innerWidth
+      ) {
+        sideRef.current = 'right'
+      }
+
+      if (sideRef.current === 'left') {
         dx = 0 - MARGIN_X - tooltipWidth
       }
 

@@ -1,37 +1,38 @@
 // Libraries
-import {color} from 'd3-color'
-import type {CSSProperties} from 'react'
-import {FunctionComponent, useMemo} from 'react'
 
 // Components
 import {AutoSizer} from 'components/AutoSizer'
+// Utils
+import {useMosaicTransform} from 'components/Mosaic/useMosaicTransform'
 import {Axes} from 'components/Plot/Axes'
-import {Tooltip} from 'components/Tooltip'
-
 // Types
-import type {MosaicLayerSpec} from 'components/Mosaic/transform'
-import {mosaicTransform} from 'components/Mosaic/transform'
 import {createPlotEnv} from 'components/Plot/Plot'
 import type {PlotConfig} from 'components/Plot/PlotConfig'
 import {PLOT_DEFAULTS} from 'components/Plot/PlotDefaults'
 import {getFormatterForColumn} from 'components/Plot/PlotEnv'
-import {LegendData, MosaicHoverDimension, Scale, Table} from 'types'
-
-// Utils
-import {findHoveredBoxes, getMosaicTooltipData} from './tooltip'
-import {resolveDomain} from 'utils/resolveDomain'
-import {useCanvas} from 'utils/useCanvas'
-import {useMousePos} from 'utils/useMousePos'
-
+import {Tooltip} from 'components/Tooltip'
 // Constants
 import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
 import {FILL, SERIES, X_MAX, X_MIN} from 'constants/columnKeys'
+import {color} from 'd3-color'
+import type {CSSProperties} from 'react'
+import {FunctionComponent} from 'react'
+import {LegendData, MosaicHoverDimension, Scale, Table} from 'types'
+import {timeFormatter} from 'utils/formatters'
+import {resolveTimeFormat} from 'utils/tableGraph'
+import {useCanvas} from 'utils/useCanvas'
+import {useMousePos} from 'utils/useMousePos'
+// Utils
+import {findHoveredBoxes, getMosaicTooltipData} from './tooltip'
 
 export interface MosaicConfig {
   x: string
   y: string[]
   yLabelColumns?: string[]
   yLabelColumnSeparator?: string
+  /* Formats the x column everywhere it is displayed: the axis ticks and the
+     tooltip both resolve their formatter from valueFormatters. */
+  timeFormat?: string
   fill: string[]
   hoverDimension?: MosaicHoverDimension | 'auto'
   colors?: string[]
@@ -61,9 +62,9 @@ const FULL_SIZE_STYLE: CSSProperties = {
   yColumn for <Plot> to measure and nothing here renders through a <Plot>.
 
   It still builds a PlotEnv, because <Axes> and the shared tooltip want one: the
-  categorical axis is expressed by handing mosaicTransform's own yDomain and
-  yTicks to createPlotEnv as the domain and tick overrides, which is the same
-  seam <Plot> uses for a numeric column.
+categorical axis is expressed by handing the binned yDomain and yTicks to
+    createPlotEnv as the domain and tick overrides, which is the same seam
+    <Plot> uses for a numeric column.
 */
 export const Mosaic: FunctionComponent<MosaicProps> = ({table, config}) => (
   <AutoSizer>
@@ -107,30 +108,27 @@ const MosaicSized: FunctionComponent<MosaicSizedProps> = ({
     y,
     yLabelColumnSeparator = '',
     yLabelColumns = y,
+    timeFormat,
   } = config
 
   const {position, onMouseMove, onMouseLeave} = useMousePos()
 
-  const xColumn = table.getColumn(x, 'number')
-  const xDomain = useMemo(
-    () => (xColumn?.length ? resolveDomain(xColumn) : [0, 1]),
-    [xColumn],
-  )
-
-  const spec: MosaicLayerSpec = useMemo(
-    () =>
-      mosaicTransform(
-        table,
-        x,
-        y,
-        yLabelColumns,
-        yLabelColumnSeparator,
-        xDomain,
-        fill,
-        colors,
-      ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [table, config, xDomain],
+  const {
+    binnedTable,
+    yDomain,
+    yColumnsName,
+    fillScale,
+    fillColumnMap,
+    ySeries,
+    yTicks,
+  } = useMosaicTransform(
+    table,
+    x,
+    y,
+    yLabelColumns,
+    yLabelColumnSeparator,
+    fill,
+    colors,
   )
 
   const plotConfig: PlotConfig = {
@@ -139,11 +137,18 @@ const MosaicSized: FunctionComponent<MosaicSizedProps> = ({
     /* Unused: the y domain and the y ticks both come from the spec, as the
        overrides below. It is still required by PlotConfig. */
     yColumn: y[0],
-    yTicks: spec.yTicks,
+    yTicks,
+    /* The x column only holds times in practice. Keying the formatter off the
+       column type rather than the config keeps a numeric x on the number
+       formatter instead of formatting it as a date. */
+    valueFormatters:
+      table.getColumnType(x) === 'time'
+        ? {[x]: timeFormatter({format: resolveTimeFormat(timeFormat ?? '')})}
+        : undefined,
   }
 
   const env = createPlotEnv(plotConfig, table, width, height, {
-    yDomain: spec.yDomain,
+    yDomain,
   })
   const {margins, xScale, yScale} = env
 
@@ -154,11 +159,11 @@ const MosaicSized: FunctionComponent<MosaicSizedProps> = ({
     hoverDimension,
     position.x,
     position.y,
-    spec.table,
+    binnedTable,
     xScale,
     yScale,
     env.yDomain,
-    spec.ySeries,
+    ySeries,
     width,
     height,
   )
@@ -169,10 +174,10 @@ const MosaicSized: FunctionComponent<MosaicSizedProps> = ({
     ctx =>
       drawMosaic(
         ctx,
-        spec.table,
+        binnedTable,
         xScale,
         yScale,
-        spec.scales.fill,
+        fillScale,
         hoveredRowIndices,
         strokeWidth,
         strokePadding,
@@ -180,10 +185,10 @@ const MosaicSized: FunctionComponent<MosaicSizedProps> = ({
         fillOpacity,
       ),
     [
-      spec.table,
+      binnedTable,
       xScale,
       yScale,
-      spec.scales.fill,
+      fillScale,
       hoveredRowIndices,
       strokeWidth,
       strokePadding,
@@ -196,12 +201,12 @@ const MosaicSized: FunctionComponent<MosaicSizedProps> = ({
   if (hoveredRowIndices.length > 0) {
     tooltipData = getMosaicTooltipData(
       hoveredRowIndices,
-      spec.table,
-      spec.inputTable,
+      binnedTable,
+      table,
       x,
-      spec.yColumnsName,
-      spec.columnGroupMaps.fill,
-      spec.scales.fill,
+      yColumnsName,
+      fillColumnMap,
+      fillScale,
       columnFormatter,
     )
   }
@@ -238,14 +243,21 @@ const MosaicSized: FunctionComponent<MosaicSizedProps> = ({
           />
         </div>
       </div>
-      {tooltipData.length > 0 && (
-        <Tooltip
-          data={tooltipData}
-          config={plotConfig.legend}
-          width={width}
-          height={height}
-        />
-      )}
+      {
+        /*
+         Kept mounted on purpose: see the note on Tooltip's props. The legend
+         guard is only for the type -- PLOT_DEFAULTS always supplies one, so it
+         never unmounts anything.
+       */
+        plotConfig.legend && (
+          <Tooltip
+            data={tooltipData}
+            config={plotConfig.legend}
+            width={width}
+            height={height}
+          />
+        )
+      }
     </div>
   )
 }

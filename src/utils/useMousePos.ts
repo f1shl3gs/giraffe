@@ -33,12 +33,17 @@ export const useMousePos = () => {
 }
 
 export const useRefMousePos = (el: Element): Position => {
-  const [state, setState] = useState({x: 0, y: 0})
+  /*
+    Null until the first mousemove, not (0, 0). The tooltip places itself from
+    this position, and (0, 0) would put it in the top left corner: a tooltip
+    that mounts before it has seen a mouse event is briefly drawn there.
+  */
+  const [state, setState] = useState<Position>({x: null, y: null})
 
   useEffect(() => {
     if (!el) {
       // Force one more render to give the ref a chance to attach
-      setState({x: 0, y: 0})
+      setState({x: null, y: null})
 
       return
     }

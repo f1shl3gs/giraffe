@@ -11,7 +11,6 @@ import type {PlotConfig} from 'components/Plot/PlotConfig'
 import {PLOT_DEFAULTS} from 'components/Plot/PlotDefaults'
 import {getFormatterForColumn} from 'components/Plot/PlotEnv'
 import {Rect} from 'components/Rect/Rect'
-import type {RectSpec} from 'components/Rect/transform'
 import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
 import type {Table, ValueFormatters} from 'types'
 import {useMousePos} from 'utils/useMousePos'
@@ -94,7 +93,7 @@ const HeatmapSized: FunctionComponent<HeatmapSizedProps> = ({
 
   const {position, onMouseMove, onMouseLeave} = useMousePos()
 
-  const spec: RectSpec = useMemo(
+  const {binnedTable, fillScale} = useMemo(
     () =>
       heatmapTransform(
         table,
@@ -119,7 +118,7 @@ const HeatmapSized: FunctionComponent<HeatmapSizedProps> = ({
   }
 
   const env = createPlotEnv(plotConfig, table, width, height, {
-    yDomain: spec.yDomain,
+    yDomain,
   })
   const {margins, xScale, yScale} = env
 
@@ -151,7 +150,10 @@ const HeatmapSized: FunctionComponent<HeatmapSizedProps> = ({
       >
         <div className='giraffe-layers' style={FULL_SIZE_STYLE}>
           <Rect
-            spec={spec}
+            inputTable={table}
+            table={binnedTable}
+            binDimension='xy'
+            fillScale={fillScale}
             x={x}
             y={y}
             strokeWidth={strokeWidth}

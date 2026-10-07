@@ -1,9 +1,6 @@
-import {LineLayerSpec, lineTransform} from 'components/Line/transform'
-import type {ScatterSpec} from 'components/Scatter/transform'
 import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
 import {FILL} from 'constants/columnKeys'
 import {createGroupIDColumn, getNominalColorScale} from 'utils/transform'
-import {LayerTypes} from 'types'
 import {
   COLUMN_KEY,
   createSampleTable,
@@ -19,7 +16,7 @@ describe('getPointsTooltipData', () => {
   const yColKey = '_value'
   const columnFormatter = () => x => String(x)
   const pointFormatter = () => x => String(x)
-  let lineSpec
+  let lastRowOfEachGroup: number[]
   let fillScale
   let result
 
@@ -30,19 +27,24 @@ describe('getPointsTooltipData', () => {
   const setUp = options => {
     const {plotType = 'line', ...tableOptions} = options
     sampleTable = createSampleTable({...tableOptions, plotType})
-    if (plotType === 'line') {
-      lineSpec = lineTransform(
-        sampleTable,
-        xColKey,
-        yColKey,
-        [COLUMN_KEY],
-        NINETEEN_EIGHTY_FOUR,
-      )
-    }
 
     const [fillColumn, fillColumnMap] = createGroupIDColumn(sampleTable, [
       plotType === 'line' ? COLUMN_KEY : HOST_KEY,
     ])
+
+    /*
+      The row the legend reads each group from: the last one, since the legend
+      shows latest values. The tooltip has to hover those same rows for the two
+      sets of columns to line up.
+    */
+    lastRowOfEachGroup = []
+    const lastRowByGroup = new Map<number, number>()
+    for (let i = 0; i < fillColumn.length; i++) {
+      lastRowByGroup.set(fillColumn[i], i)
+    }
+    for (const row of lastRowByGroup.values()) {
+      lastRowOfEachGroup.push(row)
+    }
     fillScale = getNominalColorScale(fillColumnMap, NINETEEN_EIGHTY_FOUR)
     sampleTable = sampleTable.addColumn(FILL, 'system', 'number', fillColumn)
 
@@ -54,7 +56,6 @@ describe('getPointsTooltipData', () => {
 
   describe('tooltip for overlaid line graph', () => {
     it('should have a value column that is sorted in descending order', () => {
-      lineSpec = {} as LineLayerSpec
       startingIndex = 3
       const hoveredRowIndices = []
       for (let i = startingIndex; i < numberOfRecords; i += recordsPerLine) {
@@ -90,7 +91,6 @@ describe('getPointsTooltipData', () => {
 
   describe('tooltip and static legend at the edge of the graph', () => {
     it('should have the same columns and order for tooltip and static legend in an overlaid line graph', () => {
-      lineSpec = {} as LineLayerSpec
       setUp({
         include_negative: true,
         all_negative: false,
@@ -104,7 +104,7 @@ describe('getPointsTooltipData', () => {
         columnFormatter,
       )
       const overlaidLineGraphTooltip = getPointsTooltipData(
-        Object.values(lineSpec.columnGroupMaps.latestIndices),
+        lastRowOfEachGroup,
         sampleTable,
         xColKey,
         yColKey,
@@ -140,13 +140,12 @@ describe('getPointsTooltipData', () => {
 
   describe('tooltip for scattered plot', () => {
     it('should create the proper columns each with length 1 when optional parameters are missing', () => {
-      lineSpec = {} as ScatterSpec
       const randomIndex = Math.floor(Math.random() * numberOfRecords)
       const hoveredRowIndices = [randomIndex]
       setUp({
         numberOfRecords,
         recordsPerLine,
-        plotType: LayerTypes.Scatter,
+        plotType: 'scatter',
       })
       result = getPointsTooltipData(
         hoveredRowIndices,

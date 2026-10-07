@@ -1,5 +1,4 @@
 import memoizeOne from 'memoize-one'
-import {LayerTypes} from 'types'
 import {newTable} from '../newTable'
 
 const getRandomNumber = (
@@ -156,7 +155,7 @@ export const createSampleTable = (options: SampleTableOptions) => {
     VALUE_COL.push(num)
     CPU_COL.push(`${COLUMN_KEY}${Math.floor(i / recordsPerLine)}`)
     TIME_COL.push(now + (i % recordsPerLine) * 1000 * 60)
-    if (plotType === LayerTypes.Scatter) {
+    if (plotType === 'scatter') {
       SYMBOL_COL.push(i % 2)
       DISK_COL.push(`disk-${i % recordsPerLine}`)
       HOST_COL.push(`host-${i % 2}`)
@@ -166,7 +165,7 @@ export const createSampleTable = (options: SampleTableOptions) => {
     .addColumn('_time', 'dateTime:RFC3339', 'time', TIME_COL)
     .addColumn('_value', 'system', 'number', VALUE_COL)
 
-  if (plotType === LayerTypes.Scatter) {
+  if (plotType === 'scatter') {
     return table
       .addColumn(POINT_KEY, 'string', 'string', DISK_COL)
       .addColumn('__symbol', 'string', 'string', SYMBOL_COL)

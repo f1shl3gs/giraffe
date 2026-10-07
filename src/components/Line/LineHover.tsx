@@ -5,9 +5,8 @@ import {FunctionComponent} from 'react'
 import {Tooltip} from 'components/Tooltip'
 
 // Types
-import {ColumnGroupMap, LineData, LineHoverDimension, Scale} from 'types'
+import {ColumnGroupMap, LineData, LineHoverDimension, Scale, Table} from 'types'
 import type {LineConfig} from './Line'
-import type {LineLayerSpec} from './transform'
 
 // Utils
 import {usePlot} from 'components/Plot/PlotEnv'
@@ -21,13 +20,14 @@ import {FILL} from 'constants/columnKeys'
 
 interface Props {
   config: LineConfig
-  spec: LineLayerSpec
+  table: Table
+  fillScale: Scale<number, string>
   width: number
   height: number
   xScale: Scale<number, number>
   yScale: Scale<number, number>
   columnFormatter: (colKey: string) => (x: any) => string
-  rowIndices: number[] | null
+  rowIndices: number[]
   dimension: LineHoverDimension
   simplifiedLineData: LineData
 }
@@ -37,7 +37,8 @@ export const LineHover: FunctionComponent<Props> = ({
   dimension,
   simplifiedLineData,
   config,
-  spec,
+  table,
+  fillScale,
   width,
   height,
   xScale,
@@ -54,25 +55,24 @@ export const LineHover: FunctionComponent<Props> = ({
   } = config
 
   const env = usePlot()
-  const {xColumn: xColKey, yColumn: yColKey} = env.config
+  const {xColumn, yColumn, legend} = env.config
 
-  const xColData = spec.table.getColumn(xColKey, 'number')
-  const yColData = spec.table.getColumn(yColKey, 'number')
-  const groupColData = spec.table.getColumn(FILL, 'number')
-  const fillScale = spec.scales.fill
+  const xColData = table.getColumn(xColumn, 'number')
+  const yColData = table.getColumn(yColumn, 'number')
+  const groupColData = table.getColumn(FILL, 'number')
 
   const points = getLineHoverPoints(
-    spec,
+    table,
     rowIndices,
-    xColKey,
-    yColKey,
+    xColumn,
+    yColumn,
     xScale,
     yScale,
     fillScale,
     colorMapping,
   )
 
-  const crosshairColor = env.config.legend?.crosshairColor
+  const crosshairColor = legend?.crosshairColor
 
   const crosshairX =
     dimension === 'xy' || dimension === 'x'
@@ -137,9 +137,9 @@ export const LineHover: FunctionComponent<Props> = ({
 
   const tooltipData = getPointsTooltipData(
     rowIndices,
-    spec.table,
-    env.config.xColumn,
-    env.config.yColumn,
+    table,
+    xColumn,
+    yColumn,
     FILL,
     columnFormatter,
     fillColKeys,
@@ -157,7 +157,7 @@ export const LineHover: FunctionComponent<Props> = ({
       />
       <Tooltip
         data={tooltipData}
-        config={env.config.legend}
+        config={legend}
         width={width}
         height={height}
       />
@@ -166,7 +166,7 @@ export const LineHover: FunctionComponent<Props> = ({
 }
 
 export const getLineHoverPoints = (
-  spec: LineLayerSpec,
+  table: Table,
   hoverRowIndices: number[],
   xColKey: string,
   yColKey: string,
@@ -175,7 +175,6 @@ export const getLineHoverPoints = (
   fillScale: Scale<number, string>,
   colorMapping?: ColumnGroupMap,
 ): Array<{x: number; y: number; fill: string}> => {
-  const {table} = spec
   const xColData = table.getColumn(xColKey, 'number')
   const yColData = table.getColumn(yColKey, 'number')
   const groupColData = table.getColumn(FILL, 'number')

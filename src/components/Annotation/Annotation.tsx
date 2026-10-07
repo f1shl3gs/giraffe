@@ -1,22 +1,17 @@
 // Libraries
 import {CSSProperties, FunctionComponent, useMemo, useRef} from 'react'
 
+import {usePlot} from 'components/Plot/PlotEnv'
+import {usePlotInteraction} from 'components/Plot/PlotInteractionContext'
+import type {AnnotationMark, LineHoverDimension, SVGAttributes} from 'types'
 // Components
 import {AnnotationHover} from './AnnotationHover'
 import {AnnotationLine} from './AnnotationLine'
-
-import {usePlot} from 'components/Plot/PlotEnv'
-import {usePlotInteraction} from 'components/Plot/PlotInteractionContext'
-
-import type {AnnotationMark, LineHoverDimension, SVGAttributes} from 'types'
 import {
   getAnnotationHoverIndices,
   getAnnotationsPositions,
   getVisibleAnnotations,
 } from './annotationData'
-
-// Constants
-import {ANNOTATION_DEFAULT_HOVER_MARGIN} from 'constants/index'
 
 export interface AnnotationConfig {
   x: string
@@ -40,6 +35,9 @@ export interface AnnotationProps {
   config: AnnotationConfig
 }
 
+// Constants
+import {ANNOTATION_DEFAULT_HOVER_MARGIN} from 'constants/index'
+
 const ANNOTATION_OVERLAY_DEFAULT_STYLE = {
   position: 'absolute',
 } as CSSProperties
@@ -47,7 +45,7 @@ const ANNOTATION_OVERLAY_DEFAULT_STYLE = {
 export const Annotation: FunctionComponent<AnnotationProps> = ({config}) => {
   const env = usePlot()
   const {hoverX, hoverY} = usePlotInteraction()
-  const {width, height, xScale, yScale, xDomain, yDomain} = env
+  const {innerWidth, innerHeight, xScale, yScale, xDomain, yDomain} = env
 
   const annotationData = useMemo(
     () => getVisibleAnnotations(config.annotations, xDomain, yDomain),
@@ -90,11 +88,20 @@ export const Annotation: FunctionComponent<AnnotationProps> = ({config}) => {
     }
   }
 
+  /*
+    This overlay is a child of <Plot>, so it sits inside .giraffe-inner-plot and
+    its coordinates are the inner plot's. Sizing it to the outer plot ran the
+    annotation lines out through the axes, into the tick labels.
+  */
   return (
     <svg
       className='giraffe-layer giraffe-layer-annotation'
       ref={svgRef}
-      style={{...ANNOTATION_OVERLAY_DEFAULT_STYLE, width, height}}
+      style={{
+        ...ANNOTATION_OVERLAY_DEFAULT_STYLE,
+        width: innerWidth,
+        height: innerHeight,
+      }}
       onClick={handleClick}
     >
       <AnnotationHover
@@ -102,14 +109,14 @@ export const Annotation: FunctionComponent<AnnotationProps> = ({config}) => {
         boundingReference={boundingRect}
         hoverRowIndices={hoverRowIndices}
         legend={env.config.legend}
-        width={width}
+        width={innerWidth}
       />
       {annotationsPositions.map(annotationData =>
         annotationData.dimension === 'y' ? (
           <AnnotationLine
             dimension={annotationData.dimension}
             key={`line-y-${annotationData.dimension}-${annotationData.startValue}-${annotationData.stopValue}`}
-            length={width}
+            length={innerWidth}
             startValue={annotationData.startValue}
             stopValue={annotationData.stopValue}
             color={annotationData.color}
@@ -121,7 +128,7 @@ export const Annotation: FunctionComponent<AnnotationProps> = ({config}) => {
           <AnnotationLine
             dimension={annotationData.dimension}
             key={`line-x-${annotationData.dimension}-${annotationData.startValue}-${annotationData.stopValue}`}
-            length={height}
+            length={innerHeight}
             startValue={annotationData.startValue}
             stopValue={annotationData.stopValue}
             color={annotationData.color}
