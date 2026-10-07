@@ -38,6 +38,12 @@ export type {
   StaticLegendConfig,
   StaticLegendRenderEffectOptions,
 } from './components/StaticLegend'
+export type {ScatterProps, ScatterConfig} from './components/Scatter'
+export {Scatter} from './components/Scatter'
+export type {SingleStatConfig, SingleStatProps} from './components/SingleStat'
+export {SingleStat} from './components/SingleStat'
+export type {MosaicConfig, MosaicProps} from './components/Mosaic'
+export {Mosaic} from './components/Mosaic'
 
 // Types the configs above are written in terms of
 export type {

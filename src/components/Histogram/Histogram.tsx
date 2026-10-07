@@ -2,18 +2,25 @@
 import type {CSSProperties} from 'react'
 import {FunctionComponent, useMemo} from 'react'
 
+// Components
 import {AutoSizer} from 'components/AutoSizer'
-import {histogramTransform} from 'components/Histogram/transform'
 import {Axes} from 'components/Plot/Axes'
+
+// Types
 import {createPlotEnv} from 'components/Plot/Plot'
 import type {PlotConfig} from 'components/Plot/PlotConfig'
-import {PLOT_DEFAULTS} from 'components/Plot/PlotDefaults'
 import {getFormatterForColumn} from 'components/Plot/PlotEnv'
 import {Rect} from 'components/Rect/Rect'
+import type {Table} from 'types'
+
+// Utils
+import {useMousePos} from 'utils/useMousePos'
+import {histogramTransform} from 'components/Histogram/transform'
+
+// Constants
 import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
 import {COUNT} from 'constants/columnKeys'
-import type {Table} from 'types'
-import {useMousePos} from 'utils/useMousePos'
+import {PLOT_DEFAULTS} from 'components/Plot/PlotDefaults'
 
 export interface HistogramConfig {
   x: string
@@ -102,7 +109,7 @@ const HistogramSized: FunctionComponent<HistogramSizedProps> = ({
       histogramTransform(
         table,
         x,
-        xDomain ?? null,
+        xDomain ?? [],
         colors,
         fill,
         binCount,

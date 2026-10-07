@@ -1,6 +1,6 @@
 import {createContext, useContext} from 'react'
 
-export interface PlotInteraction {
+interface PlotInteraction {
   hoverX: number | null
   hoverY: number | null
 }

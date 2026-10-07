@@ -15,8 +15,8 @@ import {PlotConfig} from './PlotConfig'
 // Utils
 import {timeFormatter} from 'utils/formatters'
 
-export const DEFAULT_TIME_FORMATTER: Formatter = timeFormatter()
-export const DEFAULT_FORMATTER: Formatter = x => String(x)
+const DEFAULT_TIME_FORMATTER: Formatter = timeFormatter()
+const DEFAULT_FORMATTER: Formatter = x => String(x)
 
 export interface PlotEnv {
   readonly config: PlotConfig

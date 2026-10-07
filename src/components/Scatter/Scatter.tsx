@@ -6,14 +6,16 @@ import {FunctionComponent, useMemo} from 'react'
 import {getFormatterForColumn, usePlot} from 'components/Plot/PlotEnv'
 import {ScatterHover} from 'components/Scatter/ScatterHover'
 import {scatterTransform} from 'components/Scatter/transform'
-import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
-import {FILL, SYMBOL} from 'constants/columnKeys'
-import {SCATTER_POINT_SIZE} from 'constants/index'
 
 // Utils
 import {drawPoints} from 'utils/drawPoints'
 import {useCanvas} from 'utils/useCanvas'
 import {useMousePos} from 'utils/useMousePos'
+
+// Constants
+import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
+import {FILL, SYMBOL} from 'constants/columnKeys'
+import {SCATTER_POINT_SIZE} from 'constants/index'
 
 export interface ScatterConfig {
   fill?: string[]
@@ -51,7 +53,7 @@ export const Scatter: FunctionComponent<ScatterProps> = ({config}) => {
     downstream read those. `config.x` / `config.y` stay for the hover layer,
     which names them separately -- the same split <Line> has.
   */
-  const {xColumn: xColumnKey, yColumn: yColumnKey} = env.config
+  const {xColumn, yColumn} = env.config
 
   const {position, onMouseMove, onMouseLeave} = useMousePos()
 
@@ -60,16 +62,15 @@ export const Scatter: FunctionComponent<ScatterProps> = ({config}) => {
     fillScale,
     symbolScale,
   } = useMemo(
-    () => scatterTransform(table, xColumnKey, yColumnKey, fill, symbol, colors),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    () => scatterTransform(table, fill, symbol, colors),
     [table, config],
   )
 
   const columnFormatter = (colKey: string) =>
     getFormatterForColumn(table, colKey, env.config.valueFormatters)
 
-  const xColData = scatterTable.getColumn(xColumnKey, 'number') || []
-  const yColData = scatterTable.getColumn(yColumnKey, 'number') || []
+  const xColData = scatterTable.getColumn(xColumn, 'number') || []
+  const yColData = scatterTable.getColumn(yColumn, 'number') || []
   const fillColData = scatterTable.getColumn(FILL, 'number') || []
   const symbolColData = scatterTable.getColumn(SYMBOL, 'number') || []
 
@@ -109,7 +110,6 @@ export const Scatter: FunctionComponent<ScatterProps> = ({config}) => {
         fill={fill}
         symbol={symbol}
         columnFormatter={columnFormatter}
-        yColumnType={env.yColumnType}
         plotConfig={env.config}
         hoverX={position.x}
         hoverY={position.y}

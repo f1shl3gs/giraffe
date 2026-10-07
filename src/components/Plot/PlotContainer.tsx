@@ -93,7 +93,7 @@ export const PlotContainer: FunctionComponent<Props> = ({
 
   const singleShiftClick = config.interactionHandlers?.singleShiftClick
   const onShiftClick = singleShiftClick
-    ? ev => singleShiftClick(plotInteraction)
+    ? () => singleShiftClick(plotInteraction)
     : () => {}
 
   const handleXBrushEnd = useCallback(
@@ -170,7 +170,7 @@ export const PlotContainer: FunctionComponent<Props> = ({
   )
 }
 
-export const rangeToDomain = (
+const rangeToDomain = (
   [p0, p1]: number[],
   scale: Scale<number, number>,
   length: number,

@@ -4,7 +4,7 @@ import {CSSProperties, FunctionComponent, useLayoutEffect, useRef} from 'react'
 import {getFormatterForColumn} from 'components/Plot/PlotEnv'
 
 // Types
-import {ColumnType, Formatter, Margins, Scale} from 'types'
+import {Formatter, Margins, Scale} from 'types'
 import {PlotConfig} from './PlotConfig'
 import {PlotEnv} from './PlotEnv'
 
@@ -42,10 +42,9 @@ interface DrawAxesOptions {
   xScale: Scale<number, number>
   yScale: Scale<number, number>
   config: PlotConfig
-  yColumnType?: ColumnType
 }
 
-export const drawAxes = ({
+const drawAxes = ({
   canvas,
   width,
   height,
@@ -218,7 +217,6 @@ export const Axes: FunctionComponent<Props> = ({
     yScale,
     table,
     config,
-    yColumnType,
   },
 }) => {
   // valueFormatters is optional, and an absent one has to fall back to the
@@ -254,7 +252,6 @@ export const Axes: FunctionComponent<Props> = ({
       xScale,
       yScale,
       config,
-      yColumnType,
     })
   }, [
     canvasRef.current,
@@ -272,7 +269,6 @@ export const Axes: FunctionComponent<Props> = ({
     xScale,
     yScale,
     config,
-    yColumnType,
   ])
 
   return (

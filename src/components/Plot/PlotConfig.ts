@@ -51,12 +51,12 @@ export interface PlotConfig {
 
   // Pixels of inset at each end of the value axis, so a thick line is not
   // clipped by the plot edge. It replaces a scan for the widest lineWidth
-  // across the layers (PlotEnv.ts:503-512).
+  // across the layers.
   //
-  // The default is 0, which is what that scan produced: the getter returns
-  // `layer.lineWidth ?? DEFAULT_RANGE_PADDING` for line and band and
+  // The default is 0, which is what that scan produced: the getter used to
+  // return `layer.lineWidth ?? DEFAULT_RANGE_PADDING` for line and band and
   // `DEFAULT_RANGE_PADDING` for everything else, and DEFAULT_RANGE_PADDING is
-  // 0 (`constants/index.ts:19`). A consumer who wanted the old behaviour set
+  // 0 (`constants/index.ts`). A consumer who wanted the old behaviour set
   // lineWidth on their widest layer; now they set this instead.
   rangePadding?: number
 

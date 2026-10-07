@@ -1,26 +1,22 @@
 // Libraries
-import {FunctionComponent} from 'react'
-
-// Components
-import {Tooltip} from '../Tooltip'
 
 // Types
 import type {PlotConfig} from 'components/Plot'
-import type {ColumnType, Scale, SymbolType, Table} from 'types'
-
+// Constants
+import {FILL, SYMBOL} from 'constants/columnKeys'
+import {SCATTER_HOVER_POINT_SIZE} from 'constants/index'
+import {FunctionComponent} from 'react'
+import type {Scale, SymbolType, Table} from 'types'
 // Utils
 import {drawPoints} from 'utils/drawPoints'
 import {getPointsTooltipData} from 'utils/legend/tooltip'
 import {useCanvas} from 'utils/useCanvas'
 import {useHoverPointIndices} from 'utils/useHoverPointIndices'
-
-// Constants
-import {FILL, SYMBOL} from 'constants/columnKeys'
-import {SCATTER_HOVER_POINT_SIZE} from 'constants/index'
+// Components
+import {Tooltip} from '../Tooltip'
 
 interface Props {
   columnFormatter: (colKey: string) => (x: any) => string
-  yColumnType: ColumnType
   plotConfig: PlotConfig
   hoverX: number | null
   hoverY: number | null
@@ -52,6 +48,7 @@ export const ScatterHover: FunctionComponent<Props> = ({
   hoverX,
   hoverY,
   columnFormatter,
+  legendHide,
 }) => {
   const xColData = table.getColumn(plotConfig.xColumn, 'number')
   const yColData = table.getColumn(plotConfig.yColumn, 'number')
@@ -71,19 +68,10 @@ export const ScatterHover: FunctionComponent<Props> = ({
     height,
   )
 
-  /*
-    The `!rowIndices` bail-out below sits after this hook (hooks cannot be
-    called conditionally), so this draw effect does run on mount with no hover
-    data. Guard inside the callback -- drawPoints reads `rowIndices.length`.
-  */
   const canvasRef = useCanvas(
     width,
     height,
-    ctx => {
-      if (!rowIndices) {
-        return
-      }
-
+    ctx =>
       drawPoints(
         ctx,
         xColData,
@@ -96,8 +84,7 @@ export const ScatterHover: FunctionComponent<Props> = ({
         symbolScale,
         SCATTER_HOVER_POINT_SIZE,
         rowIndices,
-      )
-    },
+      ),
     [
       xColData,
       yColData,
@@ -110,10 +97,6 @@ export const ScatterHover: FunctionComponent<Props> = ({
       rowIndices,
     ],
   )
-
-  if (!rowIndices) {
-    return null
-  }
 
   const tooltipData = getPointsTooltipData(
     rowIndices,
@@ -134,7 +117,7 @@ export const ScatterHover: FunctionComponent<Props> = ({
         style={{position: 'absolute'}}
         data-testid='giraffe-layer--scatter-interact'
       />
-      {tooltipData && (
+      {!legendHide && tooltipData.length > 0 && (
         <Tooltip
           data={tooltipData}
           config={plotConfig.legend}

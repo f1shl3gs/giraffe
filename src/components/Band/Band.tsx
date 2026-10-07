@@ -46,12 +46,6 @@ export interface BandConfig {
   interpolation?: LineInterpolation
   lineWidth?: number
   lineOpacity?: number
-  /*
-    Defaults to NINETEEN_EIGHTY_FOUR. This used to come from LAYER_DEFAULTS.line
-    / .band, and D9 moved layer defaults into each layer -- passing nothing used
-    to mean the default palette, and with no default it means every line is drawn
-    black.
-  */
   colors?: string[]
   shadeOpacity?: number
   mainColumnName: string
@@ -127,16 +121,17 @@ export const Band: FunctionComponent<BandProps> = ({config}) => {
     ],
   )
 
-  let hoverDimension: 'x' | 'y' | 'xy'
+  const {hoverDimension: hoverDimensionConfig = 'auto', maxTooltipRows} = config
 
-  if (config.hoverDimension === 'auto') {
-    hoverDimension = 'x'
-    if (Object.keys(lineData).length > config.maxTooltipRows) {
-      hoverDimension = 'xy'
-    }
-  } else {
-    hoverDimension = config.hoverDimension
-  }
+  /* 'auto' widens the hover to both axes once there are more series than a
+     single-axis tooltip should list. `size` is the number of series;
+     `Object.keys` on the Map would always be empty. */
+  const hoverDimension: LineHoverDimension =
+    hoverDimensionConfig === 'auto'
+      ? lineData.size > (maxTooltipRows ?? Infinity)
+        ? 'xy'
+        : 'x'
+      : hoverDimensionConfig
 
   // Band Plot allows hovering on the nearest band or bands,
   // and any hoverable point should be associated with a band

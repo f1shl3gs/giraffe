@@ -293,8 +293,6 @@ export const LineGraphWithRandomFillColumnNames: Story = {
         opacity: legendOpacity,
         orientationThreshold: legendOrientationThreshold,
       },
-      /* D6: the legend declares its own fill and colors. It gets no layer spec,
-         so the grouping and the palette are stated here as well as on the layer. */
       staticLegend: {
         backgroundColor: staticLegendBackgroundColor,
         border: staticLegendBorder,

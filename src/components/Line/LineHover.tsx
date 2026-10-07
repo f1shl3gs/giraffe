@@ -165,7 +165,7 @@ export const LineHover: FunctionComponent<Props> = ({
   )
 }
 
-export const getLineHoverPoints = (
+const getLineHoverPoints = (
   table: Table,
   hoverRowIndices: number[],
   xColKey: string,

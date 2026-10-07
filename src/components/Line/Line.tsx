@@ -30,12 +30,6 @@ export interface LineConfig {
   maxTooltipRows?: number
   interpolation?: LineInterpolation
   lineWidth?: number
-  /*
-    Defaults to NINETEEN_EIGHTY_FOUR. This used to come from LAYER_DEFAULTS.line
-    / .band, and D9 moved layer defaults into each layer -- passing nothing used
-    to mean the default palette, and with no default it means every line is drawn
-    black.
-  */
   colors?: string[]
   shadeBelow?: boolean
   shadeBelowOpacity?: number
@@ -44,25 +38,29 @@ export interface LineConfig {
 }
 
 export const Line: FunctionComponent<LineProps> = ({config}) => {
-  const env = usePlot()
+  const {
+    width,
+    height,
+    xScale,
+    yScale,
+    table,
+    config: {xColumn, yColumn, valueFormatters, legend = {hide: true}},
+  } = usePlot()
   const {hoverX, hoverY} = usePlotInteraction()
-  const {width, height, xScale, yScale, table} = env
 
   const {fillTable, lineData, fillScale} = useMemo(
     () =>
       lineTransform(
         table,
-        env.config.xColumn,
-        env.config.yColumn,
+        xColumn,
+        yColumn,
         config.fill ?? [],
         config.colors ?? NINETEEN_EIGHTY_FOUR,
         config.colorMapping,
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [table, config, env.config.xColumn, env.config.yColumn],
+    [table, config, xColumn, yColumn],
   )
-
-  const legendHide = env.config.legend?.hide ?? false
 
   const simplifiedLineData = useMemo(
     () => simplifyLineData(lineData, xScale, yScale),
@@ -79,11 +77,11 @@ export const Line: FunctionComponent<LineProps> = ({config}) => {
     ctx =>
       drawLines(
         ctx,
-        config.interpolation,
+        config.interpolation ?? 'linear',
         simplifiedLineData,
-        config.lineWidth,
-        config.shadeBelow,
-        config.shadeBelowOpacity,
+        config.lineWidth ?? 1,
+        config.shadeBelow ?? false,
+        config.shadeBelowOpacity ?? 0.1,
         height,
       ),
     [
@@ -95,23 +93,21 @@ export const Line: FunctionComponent<LineProps> = ({config}) => {
     ],
   )
 
-  let hoverDimension: 'x' | 'y' | 'xy'
+  const maxTooltipRows = config.maxTooltipRows ?? 24
 
-  if (config.hoverDimension === 'auto') {
-    hoverDimension = 'x'
-    if (Object.keys(lineData).length > config.maxTooltipRows) {
-      hoverDimension = 'xy'
-    }
+  let hoverDimension: 'x' | 'y' | 'xy'
+  if (config.hoverDimension === 'auto' || config.hoverDimension === undefined) {
+    hoverDimension = lineData.size > maxTooltipRows ? 'xy' : 'x'
   } else {
     hoverDimension = config.hoverDimension
   }
 
-  const hoverYColumnData = fillTable.getColumn(env.config.yColumn, 'number')
+  const hoverYColumnData = fillTable.getColumn(yColumn, 'number')
   const hoverRowIndices = useHoverPointIndices(
     hoverDimension,
     hoverX,
     hoverY,
-    fillTable.getColumn(env.config.xColumn, 'number'),
+    fillTable.getColumn(xColumn, 'number'),
     hoverYColumnData,
     fillTable.getColumn(FILL, 'number'),
     xScale,
@@ -121,7 +117,7 @@ export const Line: FunctionComponent<LineProps> = ({config}) => {
   )
 
   const hasHoverData =
-    hoverRowIndices && hoverRowIndices.length > 0 && !legendHide
+    hoverRowIndices && hoverRowIndices.length > 0 && !legend.hide
 
   return (
     <>
@@ -137,7 +133,7 @@ export const Line: FunctionComponent<LineProps> = ({config}) => {
       {hasHoverData && (
         <LineHover
           columnFormatter={(colKey: string) =>
-            getFormatterForColumn(env.table, colKey, env.config.valueFormatters)
+            getFormatterForColumn(table, colKey, valueFormatters)
           }
           config={config}
           height={height}

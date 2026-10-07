@@ -26,7 +26,8 @@ export interface HeatmapConfig {
   strokeOpacity?: number
   strokeWidth?: number
   strokePadding?: number
-  /* See the note on ScatterConfig.valueFormatters. */
+  /* Reaches the same place <Scatter>'s does: PlotConfig.valueFormatters, which
+       both the axis ticks and the tooltip resolve their formatter from. */
   valueFormatters?: ValueFormatters
   showAxes?: boolean
 }

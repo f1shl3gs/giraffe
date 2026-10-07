@@ -1,12 +1,11 @@
 // Libraries
-import {useEffect, useRef} from 'react'
-
-// Utils
-import {useLayoutStyle} from 'utils/useLayoutStyle'
-import {useRefMousePos} from 'utils/useMousePos'
 
 // Constants
 import {CLOCKFACE_Z_INDEX, LEAFLET_Z_INDEX} from 'constants/index'
+import {useEffect, useRef} from 'react'
+// Utils
+import {useLayoutStyle} from 'utils/useLayoutStyle'
+import {useRefMousePos} from 'utils/useMousePos'
 
 const MARGIN_X = 30
 

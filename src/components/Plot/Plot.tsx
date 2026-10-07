@@ -36,19 +36,13 @@ const areDomainsStale = (
   prev.xColumn !== next.xColumn ||
   prev.yColumn !== next.yColumn
 
-export const getXTickFormatter = (
-  config: PlotConfig,
-  table: Table,
-): Formatter =>
+const getXTickFormatter = (config: PlotConfig, table: Table): Formatter =>
   getFormatterForColumn(table, config.xColumn, config.valueFormatters)
 
-export const getYTickFormatter = (
-  config: PlotConfig,
-  table: Table,
-): Formatter =>
+const getYTickFormatter = (config: PlotConfig, table: Table): Formatter =>
   getFormatterForColumn(table, config.yColumn, config.valueFormatters)
 
-export const getYColumnType = (config: PlotConfig): ColumnType =>
+const getYColumnType = (config: PlotConfig): ColumnType =>
   config.yColumnType ?? 'number'
 
 export interface PlotProps {
@@ -145,19 +139,19 @@ export const Plot: FunctionComponent<PlotProps> = ({
   return <AutoSizer>{(width, height) => renderSized(width, height)}</AutoSizer>
 }
 
-export const getXDomain = (config: PlotConfig, table: Table): number[] => {
+const getXDomain = (config: PlotConfig, table: Table): number[] => {
   const column = table.getColumn(config.xColumn, 'number')
 
   return column && column.length ? resolveDomain(column) : DEFAULT_X_DOMAIN
 }
 
-export const getYDomain = (config: PlotConfig, table: Table): number[] => {
+const getYDomain = (config: PlotConfig, table: Table): number[] => {
   const column = table.getColumn(config.yColumn, 'number')
 
   return column && column.length ? resolveDomain(column) : DEFAULT_Y_DOMAIN
 }
 
-export const getXTicks = (
+const getXTicks = (
   config: PlotConfig,
   xDomain: number[],
   xTickFormatter: Formatter,
@@ -178,7 +172,7 @@ export const getXTicks = (
   )
 }
 
-export const getYTicks = (
+const getYTicks = (
   config: PlotConfig,
   yDomain: number[],
   yTickFormatter: Formatter,
@@ -199,7 +193,7 @@ export const getYTicks = (
   )
 }
 
-export const getXScale = (
+const getXScale = (
   config: PlotConfig,
   xDomain: number[],
   rangePadding: number,
@@ -212,7 +206,7 @@ export const getXScale = (
     innerWidth - rangePadding * 2,
   )
 
-export const getYScale = (
+const getYScale = (
   config: PlotConfig,
   yDomain: number[],
   rangePadding: number,

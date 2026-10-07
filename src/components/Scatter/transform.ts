@@ -14,8 +14,6 @@ import {FILL, SYMBOL} from 'constants/columnKeys'
 
 export const scatterTransform = (
   inputTable: Table,
-  xColumnKey: string,
-  yColumnKey: string,
   fillColKeys: string[],
   symbolColKeys: string[],
   colors: string[],

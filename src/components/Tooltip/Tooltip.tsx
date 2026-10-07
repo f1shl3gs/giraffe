@@ -23,12 +23,11 @@ interface Props {
 }
 
 /* Callers are expected to keep this mounted and hand it empty data when there
-   is nothing hovered, rather than unmounting it. Mounting puts a detached div
-   on screen for a frame: useLegendElement creates the element during render and
-   only appends it in a passive effect, so the layout effect that positions the
-   tooltip measures offsetWidth on a node that is not in the document yet and
-   reads 0. With no width there is nothing to flip against, so the tooltip lands
-   on one side of the cursor and then jumps to the other once it is attached. */
+   is nothing hovered, rather than unmounting it. useLegendElement creates its
+   element and appends it during render, so the node is in the document before the
+   layout effect that positions the tooltip reads offsetWidth -- an unmounted
+   element measures 0, which would leave the side-of-cursor decision with no
+   width to go on for a frame. */
 
 export const Tooltip: FunctionComponent<Props> = ({
   data,

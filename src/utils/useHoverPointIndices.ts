@@ -8,8 +8,10 @@ import {minBy} from './extrema'
 
 export const useHoverPointIndices = (
   mode: 'x' | 'y' | 'xy',
-  mouseX: number,
-  mouseY: number,
+  /* Null when the pointer is not over the plot -- every call site passes the
+     tracked mouse position, which is nullable. */
+  mouseX: number | null,
+  mouseY: number | null,
   xColumnData: NumericColumnData,
   yColumnData: NumericColumnData,
   groupColData: NumericColumnData,
@@ -19,11 +21,9 @@ export const useHoverPointIndices = (
   height: number,
 ): number[] => {
   const active =
-    mouseX !== undefined &&
     mouseX !== null &&
     mouseX >= 0 &&
     mouseX < width &&
-    mouseY !== undefined &&
     mouseY !== null &&
     mouseY >= 0 &&
     mouseY < height
@@ -39,7 +39,7 @@ export const useHoverPointIndices = (
     [active, xColData, yColData, xScale, yScale, width, height],
   )
 
-  if (!index) {
+  if (!index || mouseX === null || mouseY === null) {
     return []
   }
 

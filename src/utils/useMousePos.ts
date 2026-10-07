@@ -1,7 +1,7 @@
 // Libraries
 import {MouseEvent, useEffect, useMemo, useState} from 'react'
 
-export interface Position {
+interface Position {
   x: number | null
   y: number | null
 }
