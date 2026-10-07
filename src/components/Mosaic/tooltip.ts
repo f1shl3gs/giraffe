@@ -2,7 +2,14 @@
 import {range} from 'd3-array'
 
 // Types
-import {ColumnGroupMap, LegendColumn, LegendData, Scale, Table} from 'types'
+import type {
+  ColumnGroupMap,
+  LegendColumn,
+  LegendData,
+  MosaicHoverDimension,
+  Scale,
+  Table,
+} from 'types'
 
 // Utils
 import {getRangeLabel} from 'utils/legend/tooltip'
@@ -11,7 +18,7 @@ import {getRangeLabel} from 'utils/legend/tooltip'
 import {DISPLAY_NAME, FILL, SERIES, X_MAX, X_MIN} from 'constants/columnKeys'
 
 export const findHoveredBoxes = (
-  hoverDimension: string,
+  hoverDimension: MosaicHoverDimension | 'auto',
   hoverX: number | null,
   hoverY: number | null,
   boxTable: Table,
@@ -23,11 +30,9 @@ export const findHoveredBoxes = (
   height: number,
 ): number[] => {
   const active =
-    hoverX !== undefined &&
     hoverX !== null &&
     hoverX >= 0 &&
     hoverX < width &&
-    hoverY !== undefined &&
     hoverY !== null &&
     hoverY >= 0 &&
     hoverY <= height
@@ -45,8 +50,10 @@ export const findHoveredBoxes = (
 
   const xRange = range(0, xMinData.length)
 
-  const bandIndex = Math.min(Math.floor(dataY), yDomain[1] - 1)
-  const hoveredYTick = bandIndex >= yDomain[0] ? yTicks[bandIndex] : ''
+  const hoveredYTick =
+    Math.floor(dataY) >= yDomain[0] && Math.floor(dataY) < yDomain[1]
+      ? yTicks[Math.floor(dataY)]
+      : ''
 
   const containsHoverX = (index: number): boolean =>
     xMinData[index] <= dataX && xMaxData[index] > dataX
@@ -58,7 +65,7 @@ export const findHoveredBoxes = (
    * 'xy' means a single piece at the mouse position
    * 'x'  means all pieces with the same time value along the y-axis at mouse position
    * 'y'  means all pieces with the same y-tick along the x-axis at mouse position
-   * 'auto' menas 'xy' see above
+   * 'auto' means 'xy', see above
    */
 
   if (hoverDimension === 'x') {
@@ -94,7 +101,9 @@ export const getMosaicTooltipData = (
   // Use reverse order because
   // Mosaic graph contents are filled in from bottom to top
   // Mosaic tooltip contents are filled in from top to bottom
-  const hoveredBoxRows = hoveredRowIndices.reverse()
+  // Copied rather than reversed in place: the caller passes the same array to
+  // drawMosaic for the highlight.
+  const hoveredBoxRows = [...hoveredRowIndices].reverse()
 
   const colors = hoveredBoxRows.map(i =>
     fillScale(valCol[i] as unknown as number),
@@ -123,9 +132,7 @@ export const getMosaicTooltipData = (
     name: 'Duration',
     type: 'number',
     colors,
-    values: hoveredBoxRows.map(
-      i => ((((xMaxCol[i] - xMinCol[i]) / 1000) as unknown) + ' sec') as string,
-    ),
+    values: hoveredBoxRows.map(i => `${(xMaxCol[i] - xMinCol[i]) / 1000} sec`),
   }
 
   // Mosaic uses only one key for the fill column

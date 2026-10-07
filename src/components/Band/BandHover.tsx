@@ -1,8 +1,6 @@
 // Libraries
 import {FunctionComponent} from 'react'
 
-import {usePlot} from 'components/Plot/PlotEnv'
-
 // Components
 import {Tooltip} from '../Tooltip'
 import {formatLegendValues} from 'utils/legend/format'
@@ -28,6 +26,7 @@ import {drawLineHoverData} from 'utils/drawLineHoverData'
 import {drawLines} from 'utils/drawLines'
 import {useCanvas} from 'utils/useCanvas'
 import {createLatestBandIndices} from './transform'
+import {usePlot} from 'components/Plot/PlotEnv'
 
 // Constants
 import {FILL, RESULT, TIME, VALUE} from 'constants/columnKeys'

@@ -39,6 +39,16 @@ export const useLegendElement = (className: string) => {
   if (ref.current === null) {
     ref.current = document.createElement('div')
     ref.current.classList.add(className)
+    /*
+      A wide tooltip reaches the cursor: it is positioned a margin away on
+      whichever side has room, so once it is wider than the space to the right of
+      the cursor it covers the cursor instead of staying clear of it. Taking
+      pointer events it then hides the plot underneath, the plot sees the cursor
+      leave and drops its hover state, and the tooltip disappears -- uncovering
+      the cursor, which brings the whole cycle back. The tooltip is a readout, so
+      it must never take the pointer.
+    */
+    ref.current.style.pointerEvents = 'none'
     /* Appended here, during render, rather than in an effect. The tooltip
        positions itself in a layout effect by reading its own offsetWidth, and a
        node that is not in the document yet measures 0. Reading 0 makes the
