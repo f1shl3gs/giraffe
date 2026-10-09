@@ -1,9 +1,16 @@
 // Libraries
+import {range} from 'd3-array'
+import {FunctionComponent, RefObject, useEffect, useRef} from 'react'
 
 // Components
 import {AutoSizer} from 'components/AutoSizer'
-import {range} from 'd3-array'
-import {FunctionComponent, RefObject, useEffect, useRef} from 'react'
+
+// Types
+import type {Color, DecimalPlaces, GaugeTheme} from 'types'
+
+// Utils
+import {formatStatValue, MAX_DECIMAL_PLACES} from 'utils/formatStatValue'
+
 // Styles
 import {
   COLOR_TYPE_MAX,
@@ -13,10 +20,6 @@ import {
   GAUGE_THEME_DARK,
   MIN_THRESHOLDS,
 } from 'style/gaugeStyles'
-// Types
-import type {Color, DecimalPlaces, GaugeTheme} from 'types'
-// Utils
-import {formatStatValue, MAX_DECIMAL_PLACES} from 'utils/formatStatValue'
 
 /* ---------------------------------------------------------------------
    The canvas gauge: draws the arc, ticks, labels, needle and value.
@@ -438,6 +441,19 @@ const GaugeCanvas: FunctionComponent<GaugeCanvasProps> = (
   )
 }
 
+export interface GaugeProps {
+  value: number
+  gaugeColors: Color[]
+  prefix?: string
+  suffix?: string
+  tickPrefix?: string
+  tickSuffix?: string
+  decimalPlaces?: DecimalPlaces
+  gaugeSize?: number
+  gaugeTheme?: Partial<GaugeTheme>
+}
+
+
 /*
   Gauge is standalone: it is an AutoSizer plus a canvas and needs no shared
   coordinate system, so it renders without a <Plot> wrapper.
@@ -490,16 +506,4 @@ export const Gauge: FunctionComponent<GaugeProps> = ({
       )}
     </AutoSizer>
   )
-}
-
-export interface GaugeProps {
-  value: number
-  gaugeColors: Color[]
-  prefix?: string
-  suffix?: string
-  tickPrefix?: string
-  tickSuffix?: string
-  decimalPlaces?: DecimalPlaces
-  gaugeSize?: number
-  gaugeTheme?: Partial<GaugeTheme>
 }
