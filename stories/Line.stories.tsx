@@ -17,8 +17,8 @@ import {
   timeFormatter,
 } from 'utils/formatters'
 import {fromFlux} from 'utils/fromFlux'
-import type {LineConfig} from 'components/Line'
 import {Line} from 'components/Line'
+import type {LineProps} from 'components/Line'
 
 const tooltipFalsyValues = `#group,false,false,true,true,true,false,false
 #datatype,string,long,dateTime:RFC3339,dateTime:RFC3339,string,long,dateTime:RFC3339
@@ -1434,7 +1434,7 @@ export const Standard: Story = {
       legendHide,
     } = args
 
-    const lineConfig: LineConfig = {
+    const lineConfig: LineProps = {
       fill: [fill],
       interpolation,
       colors: getColors(colorScheme),
@@ -1467,7 +1467,7 @@ export const Standard: Story = {
     return (
       <StoryFrame>
         <Plot table={cpuTable} config={config}>
-          <Line config={lineConfig} />
+          <Line {...lineConfig} />
         </Plot>
       </StoryFrame>
     )
@@ -1542,7 +1542,7 @@ export const YDomainControlledMode: Story = {
       fillColumnNameLength,
     )
 
-    const lineConfig: LineConfig = {
+    const lineConfig: LineProps = {
       fill: fill
         ? fill.split(',').map(col => col.trim())
         : findStringColumns(table),
@@ -1580,7 +1580,7 @@ export const YDomainControlledMode: Story = {
     return (
       <StoryFrame>
         <Plot table={table} config={config}>
-          <Line config={lineConfig} />
+          <Line {...lineConfig} />
         </Plot>
       </StoryFrame>
     )
@@ -1667,7 +1667,7 @@ export const UserDefinedTicks: Story = {
     const yTickStart = !yTickStartText ? null : Number(yTickStartText)
     const yTickStep = !yTickStepText ? null : Number(yTickStepText)
 
-    const lineConfig: LineConfig = {
+    const lineConfig: LineProps = {
       fill: [fill],
       interpolation,
       colors: getColors(colorScheme),
@@ -1707,7 +1707,7 @@ export const UserDefinedTicks: Story = {
     return (
       <StoryFrame>
         <Plot table={table} config={config}>
-          <Line config={lineConfig} />
+          <Line {...lineConfig} />
         </Plot>
       </StoryFrame>
     )
@@ -1778,7 +1778,7 @@ export const StaticCSV: Story = {
 
     const table = fromFlux(staticData).table
 
-    const lineConfig: LineConfig = {
+    const lineConfig: LineProps = {
       fill: findStringColumns(table),
       interpolation,
       colors: getColors(colorScheme),
@@ -1809,7 +1809,7 @@ export const StaticCSV: Story = {
     return (
       <StoryFrame>
         <Plot table={table} config={config}>
-          <Line config={lineConfig} />
+          <Line {...lineConfig} />
         </Plot>
       </StoryFrame>
     )
@@ -1852,7 +1852,7 @@ export const CustomCSV: Story = {
 
     const table = fromFlux(csv).table
 
-    const lineConfig: LineConfig = {
+    const lineConfig: LineProps = {
       fill: findStringColumns(table),
       interpolation,
       colors: getColors(colorScheme),
@@ -1883,7 +1883,7 @@ export const CustomCSV: Story = {
     return (
       <StoryFrame>
         <Plot table={table} config={config}>
-          <Line config={lineConfig} />
+          <Line {...lineConfig} />
         </Plot>
       </StoryFrame>
     )
@@ -1923,7 +1923,7 @@ export const StaticCSVWithColorMapping: Story = {
 
     const table = fromFlux(staticData).table
 
-    const lineConfig: LineConfig = {
+    const lineConfig: LineProps = {
       fill: findStringColumns(table),
       interpolation,
       colors: getColors(colorScheme),
@@ -1960,7 +1960,7 @@ export const StaticCSVWithColorMapping: Story = {
     return (
       <StoryFrame>
         <Plot table={table} config={config}>
-          <Line config={lineConfig} />
+          <Line {...lineConfig} />
         </Plot>
       </StoryFrame>
     )
@@ -2010,7 +2010,7 @@ export const InfluxDataCloudUINumberFormatter: Story = {
 
     const table = fromFlux(formattableNumbersCSV).table
 
-    const lineConfig: LineConfig = {
+    const lineConfig: LineProps = {
       fill: findStringColumns(table),
       interpolation,
       colors: getColors(colorScheme),
@@ -2056,7 +2056,7 @@ export const InfluxDataCloudUINumberFormatter: Story = {
     return (
       <StoryFrame>
         <Plot table={table} config={config}>
-          <Line config={lineConfig} />
+          <Line {...lineConfig} />
         </Plot>
       </StoryFrame>
     )

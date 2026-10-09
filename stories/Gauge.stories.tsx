@@ -4,7 +4,7 @@ import {StoryFrame} from 'stories/helpers'
 import {DEFAULT_GAUGE_COLORS} from 'style/gaugeStyles'
 import type {GaugeTheme, Table} from 'types'
 import {newTable} from 'utils/newTable'
-import type {GaugeConfig} from 'components/Gauge'
+import type {GaugeProps} from 'components/Gauge'
 import {Gauge} from 'components/Gauge'
 
 interface GaugeArgs {
@@ -69,7 +69,7 @@ const render = (args: GaugeArgs) => {
   const table = gaugeTable(Number(gaugeMin), Number(gaugeMax))
   const valueColumn = table.getColumn('_value', 'number')
 
-  const gaugeConfig: GaugeConfig = {
+  const gaugeProps: Omit<GaugeProps, 'value'> = {
     prefix,
     suffix,
     tickPrefix,
@@ -94,7 +94,7 @@ const render = (args: GaugeArgs) => {
 
   return (
     <StoryFrame>
-      <Gauge value={valueColumn[valueColumn.length - 1]} config={gaugeConfig} />
+      <Gauge value={valueColumn[valueColumn.length - 1]} {...gaugeProps} />
     </StoryFrame>
   )
 }

@@ -21,7 +21,7 @@ import type {
 import {timeFormatter} from 'utils/formatters'
 import {newTable} from 'utils/newTable'
 import type {PlotConfig} from 'components/Plot/PlotConfig'
-import type {AnnotationConfig} from 'components/Annotation'
+import type {AnnotationProps} from 'components/Annotation'
 import {Annotation} from 'components/Annotation'
 
 const now = Date.now()
@@ -157,16 +157,11 @@ const renderMarkAtEveryPoint = (args: AnnotationArgs) => {
     annotationColor,
     annotationDimension,
     annotationHoverMargin,
-    colorScheme,
-    fill,
-    hoverDimension,
-    interpolation,
     legendColorizeRows,
     legendFont,
     legendHide,
     legendOrientationThreshold,
     lineLayer,
-    linePosition,
     lineWidth,
     pin,
     tickFont,
@@ -181,9 +176,7 @@ const renderMarkAtEveryPoint = (args: AnnotationArgs) => {
     yTotalTicks,
   } = args
 
-  const annotationConfig: AnnotationConfig = {
-    x,
-    y,
+  const annotationProps: AnnotationProps = {
     annotations: matchAnnotationsToTable({
       color: annotationColor,
       dimension: annotationDimension,
@@ -192,24 +185,11 @@ const renderMarkAtEveryPoint = (args: AnnotationArgs) => {
       y,
       pin,
     }),
-    fill,
-    hoverDimension,
     hoverMargin: annotationHoverMargin,
   }
 
   if (lineLayer) {
-    annotationConfig.lineWidth = lineWidth
-    Object.assign(annotationConfig, {
-      x,
-      y,
-      fill,
-      position: linePosition,
-      interpolation,
-      colors:
-        COLOR_SCHEME_OPTIONS[colorScheme as keyof typeof COLOR_SCHEME_OPTIONS],
-      lineWidth,
-      hoverDimension,
-    })
+    annotationProps.lineWidth = lineWidth
   }
   const config: PlotConfig = {
     xColumn: x,
@@ -236,7 +216,7 @@ const renderMarkAtEveryPoint = (args: AnnotationArgs) => {
   return (
     <StoryFrame style={annotationContainerStyle}>
       <Plot table={table} config={config}>
-        <Annotation config={annotationConfig} />
+        <Annotation {...annotationProps} />
       </Plot>
     </StoryFrame>
   )
@@ -246,15 +226,10 @@ const renderOverriddenDoubleClick = (args: AnnotationArgs) => {
   const {
     annotationColor,
     annotationDimension,
-    colorScheme,
-    fill,
-    interpolation,
     legendColorizeRows,
     legendFont,
     legendOrientationThreshold,
-    hoverDimension,
     lineLayer,
-    linePosition,
     lineWidth,
     pin,
     tickFont,
@@ -287,9 +262,7 @@ const renderOverriddenDoubleClick = (args: AnnotationArgs) => {
     hover: hoverHandler,
   }
 
-  const annotationConfig: AnnotationConfig = {
-    x,
-    y,
+  const annotationProps: AnnotationProps = {
     annotations: matchAnnotationsToTable({
       color: annotationColor,
       dimension: annotationDimension,
@@ -298,22 +271,10 @@ const renderOverriddenDoubleClick = (args: AnnotationArgs) => {
       y,
       pin,
     }),
-    fill,
   }
 
   if (lineLayer) {
-    annotationConfig.lineWidth = lineWidth
-    Object.assign(annotationConfig, {
-      x,
-      y,
-      fill,
-      position: linePosition,
-      interpolation,
-      colors:
-        COLOR_SCHEME_OPTIONS[colorScheme as keyof typeof COLOR_SCHEME_OPTIONS],
-      lineWidth,
-      hoverDimension,
-    })
+    annotationProps.lineWidth = lineWidth
   }
 
   const config: PlotConfig = {
@@ -341,7 +302,7 @@ const renderOverriddenDoubleClick = (args: AnnotationArgs) => {
   return (
     <StoryFrame style={annotationContainerStyle}>
       <Plot table={table} config={config}>
-        <Annotation config={annotationConfig} />
+        <Annotation {...annotationProps} />
       </Plot>
     </StoryFrame>
   )
@@ -353,15 +314,10 @@ const renderSelectableMarks = (args: AnnotationArgs) => {
     annotationColor,
     annotationDimension,
     annotationHoverMargin,
-    colorScheme,
-    fill,
-    hoverDimension,
-    interpolation,
     legendColorizeRows,
     legendFont,
     legendOrientationThreshold,
     lineLayer,
-    linePosition,
     lineWidth,
     pin,
     tickFont,
@@ -376,9 +332,7 @@ const renderSelectableMarks = (args: AnnotationArgs) => {
     yTotalTicks,
   } = args
 
-  const annotationConfig: AnnotationConfig = {
-    x,
-    y,
+  const annotationProps: AnnotationProps = {
     annotations: annotations.map((valueString: string) => ({
       title: 'Hi!',
       description: `value: ${valueString}`,
@@ -388,24 +342,11 @@ const renderSelectableMarks = (args: AnnotationArgs) => {
       stopValue: Number(valueString),
       pin,
     })),
-    fill,
-    hoverDimension,
     hoverMargin: annotationHoverMargin,
   }
 
   if (lineLayer) {
-    annotationConfig.lineWidth = lineWidth
-    Object.assign(annotationConfig, {
-      x,
-      y,
-      fill,
-      position: linePosition,
-      interpolation,
-      colors:
-        COLOR_SCHEME_OPTIONS[colorScheme as keyof typeof COLOR_SCHEME_OPTIONS],
-      lineWidth,
-      hoverDimension,
-    })
+    annotationProps.lineWidth = lineWidth
   }
   const config: PlotConfig = {
     xColumn: x,
@@ -431,7 +372,7 @@ const renderSelectableMarks = (args: AnnotationArgs) => {
   return (
     <StoryFrame style={annotationContainerStyle}>
       <Plot table={table} config={config}>
-        <Annotation config={annotationConfig} />
+        <Annotation {...annotationProps} />
       </Plot>
     </StoryFrame>
   )
@@ -442,20 +383,15 @@ const renderAddYourOwnMarks = (args: AnnotationArgs) => {
     annotationColor,
     annotationDimension,
     annotationHoverMargin,
-    colorScheme,
     currentTime,
     currentValue,
     endTime,
     endValue,
-    fill,
-    hoverDimension,
-    interpolation,
     legendColorizeRows,
     legendFont,
     legendHide,
     legendOrientationThreshold,
     lineLayer,
-    linePosition,
     lineWidth,
     pin,
     tickFont,
@@ -495,28 +431,13 @@ const renderAddYourOwnMarks = (args: AnnotationArgs) => {
     })
   }
 
-  const annotationConfig: AnnotationConfig = {
-    x,
-    y,
+  const annotationProps: AnnotationProps = {
     annotations: annotationLayerData,
-    fill,
-    hoverDimension,
     hoverMargin: annotationHoverMargin,
   }
 
   if (lineLayer) {
-    annotationConfig.lineWidth = lineWidth
-    Object.assign(annotationConfig, {
-      x,
-      y,
-      fill,
-      position: linePosition,
-      interpolation,
-      colors:
-        COLOR_SCHEME_OPTIONS[colorScheme as keyof typeof COLOR_SCHEME_OPTIONS],
-      lineWidth,
-      hoverDimension,
-    })
+    annotationProps.lineWidth = lineWidth
   }
   const config: PlotConfig = {
     xColumn: x,
@@ -543,7 +464,7 @@ const renderAddYourOwnMarks = (args: AnnotationArgs) => {
   return (
     <StoryFrame style={annotationContainerStyle}>
       <Plot table={table} config={config}>
-        <Annotation config={annotationConfig} />
+        <Annotation {...annotationProps} />
       </Plot>
     </StoryFrame>
   )

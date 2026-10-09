@@ -1,8 +1,8 @@
 // Libraries
-import {useMemo} from 'react'
 
 // Constants
 import {DISPLAY_NAME, FILL, SERIES, X_MAX, X_MIN} from 'constants/columnKeys'
+import {useMemo} from 'react'
 
 // Types
 import type {ColumnGroupMap, NumericColumnData, Table} from 'types'

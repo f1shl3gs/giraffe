@@ -1,2 +1,2 @@
-export type {BandConfig, BandProps} from './Band'
+export type {BandProps} from './Band'
 export {Band} from './Band'

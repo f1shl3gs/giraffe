@@ -1,5 +1,5 @@
 import type {Meta, StoryObj} from '@storybook/react'
-import type {HeatmapConfig} from 'components/Heatmap'
+import type {HeatmapProps} from 'components/Heatmap'
 import {Heatmap} from 'components/Heatmap'
 import {
   COLOR_SCHEME_OPTIONS,
@@ -33,7 +33,7 @@ export const Example: Story = {
     const colors =
       COLOR_SCHEME_OPTIONS[colorScheme as keyof typeof COLOR_SCHEME_OPTIONS]
 
-    const config: HeatmapConfig = {
+    const heatmapProps: Omit<HeatmapProps, 'table'> = {
       x,
       y,
       colors,
@@ -46,7 +46,7 @@ export const Example: Story = {
 
     return (
       <StoryFrame>
-        <Heatmap config={config} table={TABLE}/>
+        <Heatmap {...heatmapProps} table={TABLE} />
       </StoryFrame>
     )
   },

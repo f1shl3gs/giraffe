@@ -1,5 +1,5 @@
 import type {ArgTypes, Meta, StoryObj} from '@storybook/react'
-import type {ScatterConfig} from 'components/Scatter'
+import type {ScatterProps} from 'components/Scatter'
 import {Plot} from 'components/Plot'
 import {Scatter} from 'components/Scatter'
 import {
@@ -60,7 +60,7 @@ const commonArgs: Partial<ScatterArgs> = {
 const render = (args: ScatterArgs) => {
   const {colorScheme, x, y, fill, symbol, valueAxisSuffix, showAxes} = args
 
-  const config: ScatterConfig = {
+  const scatterConfig: ScatterProps = {
     fill,
     symbol,
     colors: COLOR_SCHEME_OPTIONS[colorScheme],
@@ -77,7 +77,7 @@ const render = (args: ScatterArgs) => {
           valueFormatters: {_value: val => `${Math.round(val)}${valueAxisSuffix}`},
         }}
       >
-        <Scatter config={config} />
+        <Scatter {...scatterConfig} />
       </Plot>
     </StoryFrame>
   )
@@ -127,7 +127,7 @@ const renderCustomCSV = (args: ScatterArgs) => {
 
   const table = fromFlux(csv).table
 
-  const config: ScatterConfig = {
+  const scatterConfig: ScatterProps = {
     fill: findStringColumns(table),
     colors: COLOR_SCHEME_OPTIONS[colorScheme],
   }
@@ -146,7 +146,7 @@ const renderCustomCSV = (args: ScatterArgs) => {
           },
         }}
       >
-        <Scatter config={config} />
+        <Scatter {...scatterConfig} />
       </Plot>
     </StoryFrame>
   )

@@ -3,41 +3,46 @@ import {FunctionComponent, useMemo} from 'react'
 
 // Components
 import {LineHover} from 'components/Line/LineHover'
-
-// Types
-import type {ColumnGroupMap, LineHoverDimension, LineInterpolation} from 'types'
-
+import {lineTransform} from 'components/Line/transform'
 // Utils
 import {getFormatterForColumn, usePlot} from 'components/Plot/PlotEnv'
 import {usePlotInteraction} from 'components/Plot/PlotInteractionContext'
-import {lineTransform} from 'components/Line/transform'
+// Constants
+import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
+import {FILL} from 'constants/columnKeys'
+
+// Types
+import type {ColumnGroupMap, LineHoverDimension, LineInterpolation} from 'types'
 import {drawLines} from 'utils/drawLines'
 import {simplifyLineData} from 'utils/lineData'
 import {useCanvas} from 'utils/useCanvas'
 import {useHoverPointIndices} from 'utils/useHoverPointIndices'
 
-// Constants
-import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
-import {FILL} from 'constants/columnKeys'
-
 export interface LineProps {
-  config: LineConfig
-}
-
-export interface LineConfig {
   fill?: string[]
-  hoverDimension?: LineHoverDimension | 'auto'
-  maxTooltipRows?: number
-  interpolation?: LineInterpolation
-  lineWidth?: number
   colors?: string[]
-  shadeBelow?: boolean
-  shadeBelowOpacity?: number
   colorMapping?: ColumnGroupMap
   colorMappingCallback?: (arg: ColumnGroupMap) => void
+  interpolation?: LineInterpolation
+  lineWidth?: number
+  shadeBelow?: boolean
+  shadeBelowOpacity?: number
+  hoverDimension?: LineHoverDimension | 'auto'
+  maxTooltipRows?: number
 }
 
-export const Line: FunctionComponent<LineProps> = ({config}) => {
+export const Line: FunctionComponent<LineProps> = ({
+  fill = [],
+  colors = NINETEEN_EIGHTY_FOUR,
+  colorMapping,
+  colorMappingCallback,
+  interpolation = 'linear',
+  lineWidth = 1,
+  shadeBelow = false,
+  shadeBelowOpacity = 0.1,
+  hoverDimension: hoverDimensionProp = 'auto',
+  maxTooltipRows = 24,
+}) => {
   const {
     width,
     height,
@@ -49,17 +54,8 @@ export const Line: FunctionComponent<LineProps> = ({config}) => {
   const {hoverX, hoverY} = usePlotInteraction()
 
   const {fillTable, lineData, fillScale} = useMemo(
-    () =>
-      lineTransform(
-        table,
-        xColumn,
-        yColumn,
-        config.fill ?? [],
-        config.colors ?? NINETEEN_EIGHTY_FOUR,
-        config.colorMapping,
-      ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [table, config, xColumn, yColumn],
+    () => lineTransform(table, xColumn, yColumn, fill, colors, colorMapping),
+    [table, xColumn, yColumn, fill, colors, colorMapping],
   )
 
   const simplifiedLineData = useMemo(
@@ -67,8 +63,8 @@ export const Line: FunctionComponent<LineProps> = ({config}) => {
     [lineData, xScale, yScale],
   )
 
-  if (config.colorMapping && config.colorMappingCallback) {
-    config.colorMappingCallback(config.colorMapping)
+  if (colorMapping && colorMappingCallback) {
+    colorMappingCallback(colorMapping)
   }
 
   const canvasRef = useCanvas(
@@ -77,39 +73,39 @@ export const Line: FunctionComponent<LineProps> = ({config}) => {
     ctx =>
       drawLines(
         ctx,
-        config.interpolation ?? 'linear',
+        interpolation,
         simplifiedLineData,
-        config.lineWidth ?? 1,
-        config.shadeBelow ?? false,
-        config.shadeBelowOpacity ?? 0.1,
+        lineWidth,
+        shadeBelow,
+        shadeBelowOpacity,
         height,
       ),
     [
-      config.interpolation,
+      interpolation,
       simplifiedLineData,
-      config.lineWidth,
-      config.shadeBelow,
-      config.shadeBelowOpacity,
+      lineWidth,
+      shadeBelow,
+      shadeBelowOpacity,
     ],
   )
 
-  const maxTooltipRows = config.maxTooltipRows ?? 24
+  /* 'auto' widens the hover to both axes once a single-axis tooltip cannot list
+     every series. `size` counts series; `Object.keys` on the Map is always
+     empty. */
+  const hoverDimension: LineHoverDimension =
+    hoverDimensionProp === 'auto'
+      ? lineData.size > maxTooltipRows
+        ? 'xy'
+        : 'x'
+      : hoverDimensionProp
 
-  let hoverDimension: 'x' | 'y' | 'xy'
-  if (config.hoverDimension === 'auto' || config.hoverDimension === undefined) {
-    hoverDimension = lineData.size > maxTooltipRows ? 'xy' : 'x'
-  } else {
-    hoverDimension = config.hoverDimension
-  }
-
-  const hoverYColumnData = fillTable.getColumn(yColumn, 'number')
   const hoverRowIndices = useHoverPointIndices(
     hoverDimension,
     hoverX,
     hoverY,
-    fillTable.getColumn(xColumn, 'number'),
-    hoverYColumnData,
-    fillTable.getColumn(FILL, 'number'),
+    fillTable.getColumn(xColumn, 'number') ?? [],
+    fillTable.getColumn(yColumn, 'number') ?? [],
+    fillTable.getColumn(FILL, 'number') ?? [],
     xScale,
     yScale,
     width,
@@ -135,7 +131,12 @@ export const Line: FunctionComponent<LineProps> = ({config}) => {
           columnFormatter={(colKey: string) =>
             getFormatterForColumn(table, colKey, valueFormatters)
           }
-          config={config}
+          interpolation={interpolation}
+          fill={fill}
+          lineWidth={lineWidth}
+          shadeBelow={shadeBelow}
+          shadeBelowOpacity={shadeBelowOpacity}
+          colorMapping={colorMapping}
           height={height}
           table={fillTable}
           fillScale={fillScale}

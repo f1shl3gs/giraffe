@@ -25,7 +25,8 @@ import {useMousePos} from 'utils/useMousePos'
 // Utils
 import {findHoveredBoxes, getMosaicTooltipData} from './tooltip'
 
-export interface MosaicConfig {
+export interface MosaicProps {
+  table: Table
   x: string
   y: string[]
   yLabelColumns?: string[]
@@ -43,11 +44,6 @@ export interface MosaicConfig {
   showAxes?: boolean
 }
 
-export interface MosaicProps {
-  table: Table
-  config: MosaicConfig
-}
-
 const FULL_SIZE_STYLE: CSSProperties = {
   position: 'absolute',
   top: 0,
@@ -56,22 +52,39 @@ const FULL_SIZE_STYLE: CSSProperties = {
   bottom: 0,
 }
 
-/*
-  Mosaic is standalone (D13). Its y axis is categorical -- one band per distinct
-  combination of the string columns in `config.y` -- so there is no numeric
-  yColumn for <Plot> to measure and nothing here renders through a <Plot>.
-
-  It still builds a PlotEnv, because <Axes> and the shared tooltip want one: the
-categorical axis is expressed by handing the binned yDomain and yTicks to
-    createPlotEnv as the domain and tick overrides, which is the same seam
-    <Plot> uses for a numeric column.
-*/
-export const Mosaic: FunctionComponent<MosaicProps> = ({table, config}) => (
+export const Mosaic: FunctionComponent<MosaicProps> = ({
+  table,
+  x,
+  y,
+  yLabelColumns = [],
+  yLabelColumnSeparator = '',
+  timeFormat,
+  fill,
+  hoverDimension = 'auto',
+  colors = NINETEEN_EIGHTY_FOUR,
+  strokeWidth = 1,
+  strokePadding = 0.75,
+  strokeOpacity = 1,
+  fillOpacity = 0.75,
+  showAxes = true,
+}) => (
   <AutoSizer>
     {(width, height) => (
       <MosaicSized
         table={table}
-        config={config}
+        x={x}
+        y={y}
+        yLabelColumns={yLabelColumns}
+        yLabelColumnSeparator={yLabelColumnSeparator}
+        timeFormat={timeFormat}
+        fill={fill}
+        hoverDimension={hoverDimension}
+        colors={colors}
+        strokeWidth={strokeWidth}
+        strokePadding={strokePadding}
+        strokeOpacity={strokeOpacity}
+        fillOpacity={fillOpacity}
+        showAxes={showAxes}
         width={width}
         height={height}
       />
@@ -79,9 +92,25 @@ export const Mosaic: FunctionComponent<MosaicProps> = ({table, config}) => (
   </AutoSizer>
 )
 
-interface MosaicSizedProps extends MosaicProps {
+/* Every field the sizing wrapper needs is already resolved by <Mosaic>, so none
+   of them are optional here. */
+interface MosaicSizedProps {
+  table: Table
   width: number
   height: number
+  x: string
+  y: string[]
+  yLabelColumns: string[]
+  yLabelColumnSeparator: string
+  timeFormat: string | undefined
+  fill: string[]
+  hoverDimension: MosaicHoverDimension | 'auto'
+  colors: string[]
+  strokeWidth: number
+  strokePadding: number
+  strokeOpacity: number
+  fillOpacity: number
+  showAxes: boolean
 }
 
 /*
@@ -91,26 +120,22 @@ interface MosaicSizedProps extends MosaicProps {
 */
 const MosaicSized: FunctionComponent<MosaicSizedProps> = ({
   table,
-  config,
   width,
   height,
+  x,
+  y,
+  yLabelColumns,
+  yLabelColumnSeparator,
+  timeFormat,
+  fill,
+  hoverDimension,
+  colors,
+  strokeWidth,
+  strokePadding,
+  strokeOpacity,
+  fillOpacity,
+  showAxes,
 }) => {
-  const {
-    colors = NINETEEN_EIGHTY_FOUR,
-    fill,
-    hoverDimension = 'auto',
-    showAxes = true,
-    strokeOpacity = 1,
-    strokePadding = 0.75,
-    strokeWidth = 1,
-    fillOpacity = 0.75,
-    x,
-    y,
-    yLabelColumnSeparator = '',
-    yLabelColumns = y,
-    timeFormat,
-  } = config
-
   const {position, onMouseMove, onMouseLeave} = useMousePos()
 
   const {

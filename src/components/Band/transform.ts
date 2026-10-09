@@ -1,24 +1,23 @@
 // Types
+
+// Constants
+import {FILL, LOWER, RESULT, UPPER} from 'constants/columnKeys'
+import {BAND_COLOR_SCALE_CONSTANT} from 'constants/index'
 import {
   Band,
   BandLineMap,
   ColumnData,
   ColumnGroupMap,
+  DomainLabel,
   LatestIndexMap,
   LineData,
   Scale,
   Table,
-  DomainLabel,
 } from 'types'
-
+import {isSortable, sortIndicesByValueColumn} from 'utils/legend/sort'
+import {scalePoints} from 'utils/lineData'
 // Utils
 import {createGroupIDColumn, createNominalColorScale} from 'utils/transform'
-import {scalePoints} from 'utils/lineData'
-import {isSortable, sortIndicesByValueColumn} from 'utils/legend/sort'
-
-// Constants
-import {FILL, LOWER, RESULT, UPPER} from 'constants/columnKeys'
-import {BAND_COLOR_SCALE_CONSTANT} from 'constants/index'
 
 /* The transform's output, consumed only by Band and BandHover. */
 export const getBands = (

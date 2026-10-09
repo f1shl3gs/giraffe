@@ -1,9 +1,9 @@
 // Libraries
-import {FunctionComponent} from 'react'
 
-// Components
-import {Tooltip} from '../Tooltip'
-import {formatLegendValues} from 'utils/legend/format'
+import {usePlot} from 'components/Plot/PlotEnv'
+// Constants
+import {FILL, RESULT, TIME, VALUE} from 'constants/columnKeys'
+import {FunctionComponent} from 'react'
 
 // Types
 import {
@@ -14,28 +14,31 @@ import {
   LegendData,
   LineData,
   LineHoverDimension,
+  LineInterpolation,
   Scale,
   Table,
 } from 'types'
-import type {BandConfig} from './Band'
-import {sortBandLines} from './transform'
-
-// Utils
-import {getBandHoverPoints} from './bandHover'
 import {drawLineHoverData} from 'utils/drawLineHoverData'
 import {drawLines} from 'utils/drawLines'
+import {formatLegendValues} from 'utils/legend/format'
 import {useCanvas} from 'utils/useCanvas'
-import {createLatestBandIndices} from './transform'
-import {usePlot} from 'components/Plot/PlotEnv'
-
-// Constants
-import {FILL, RESULT, TIME, VALUE} from 'constants/columnKeys'
+// Components
+import {Tooltip} from '../Tooltip'
+// Utils
+import {getBandHoverPoints} from './bandHover'
+import {createLatestBandIndices, sortBandLines} from './transform'
 
 interface Props {
   bandHoverIndices: BandLineMap
   dimension: LineHoverDimension
   simplifiedLineData: LineData
-  config: BandConfig
+  interpolation: LineInterpolation
+  fill: string[]
+  lineWidth: number
+  lowerColumnName: string
+  mainColumnName: string
+  shadeOpacity: number
+  upperColumnName: string
   bandLineMap: BandLineMap
   lineData: LineData
   fillTable: Table
@@ -50,7 +53,13 @@ export const BandHover: FunctionComponent<Props> = ({
   bandHoverIndices,
   dimension,
   simplifiedLineData,
-  config,
+  interpolation,
+  fill: fillColKeys,
+  lineWidth,
+  lowerColumnName,
+  mainColumnName: rowColumnName,
+  shadeOpacity,
+  upperColumnName,
   bandLineMap,
   lineData,
   fillTable,
@@ -60,16 +69,6 @@ export const BandHover: FunctionComponent<Props> = ({
   yScale,
   columnFormatter,
 }) => {
-  const {
-    interpolation,
-    fill: fillColKeys,
-    lineWidth,
-    lowerColumnName,
-    mainColumnName: rowColumnName,
-    shadeOpacity,
-    upperColumnName,
-  } = config
-
   const env = usePlot()
   const {xColumn: xColKey, yColumn: yColKey} = env.config
   const crosshairColor = env.config.legend?.crosshairColor

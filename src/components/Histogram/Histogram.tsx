@@ -1,44 +1,37 @@
 // Libraries
-import type {CSSProperties} from 'react'
-import {FunctionComponent, useMemo} from 'react'
 
 // Components
 import {AutoSizer} from 'components/AutoSizer'
+import {histogramTransform} from 'components/Histogram/transform'
 import {Axes} from 'components/Plot/Axes'
-
 // Types
 import {createPlotEnv} from 'components/Plot/Plot'
 import type {PlotConfig} from 'components/Plot/PlotConfig'
+import {PLOT_DEFAULTS} from 'components/Plot/PlotDefaults'
 import {getFormatterForColumn} from 'components/Plot/PlotEnv'
 import {Rect} from 'components/Rect/Rect'
-import type {Table} from 'types'
-
-// Utils
-import {useMousePos} from 'utils/useMousePos'
-import {histogramTransform} from 'components/Histogram/transform'
-
 // Constants
 import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
 import {COUNT} from 'constants/columnKeys'
-import {PLOT_DEFAULTS} from 'components/Plot/PlotDefaults'
+import type {CSSProperties} from 'react'
+import {FunctionComponent, useMemo} from 'react'
+import type {HistogramPosition, Table} from 'types'
+// Utils
+import {useMousePos} from 'utils/useMousePos'
 
-export interface HistogramConfig {
+export interface HistogramProps {
+  table: Table
   x: string
   xDomain?: number[]
-  position?: 'overlaid' | 'stacked'
-  binCount?: number
+  position?: HistogramPosition
+  showAxes?: boolean
+  binCount?: number | null
   fill?: string[]
   colors?: string[]
   fillOpacity?: number
   strokeOpacity?: number
   strokeWidth?: number
   strokePadding?: number
-  showAxes?: boolean
-}
-
-export interface HistogramProps {
-  config: HistogramConfig
-  table: Table
 }
 
 const FULL_SIZE_STYLE: CSSProperties = {
@@ -49,23 +42,35 @@ const FULL_SIZE_STYLE: CSSProperties = {
   bottom: 0,
 }
 
-/*
-  Histogram is standalone and is not a <Plot> layer (D14): it is the other of
-  the two components built on the shared internal <Rect>, binning on x alone and
-  drawing counts on y.
-
-  The y axis is the count axis, so the binned extent is handed to createPlotEnv as
-  the domain override.
-*/
 export const Histogram: FunctionComponent<HistogramProps> = ({
   table,
-  config,
+  x,
+  xDomain,
+  position = 'overlaid',
+  showAxes = true,
+  binCount = null,
+  fill = [],
+  colors = NINETEEN_EIGHTY_FOUR,
+  fillOpacity = 0.75,
+  strokeOpacity = 1,
+  strokeWidth = 1,
+  strokePadding = 0.75,
 }) => (
   <AutoSizer>
     {(width, height) => (
       <HistogramSized
         table={table}
-        config={config}
+        x={x}
+        xDomain={xDomain}
+        position={position}
+        showAxes={showAxes}
+        binCount={binCount}
+        fill={fill}
+        colors={colors}
+        fillOpacity={fillOpacity}
+        strokeOpacity={strokeOpacity}
+        strokeWidth={strokeWidth}
+        strokePadding={strokePadding}
         width={width}
         height={height}
       />
@@ -73,31 +78,41 @@ export const Histogram: FunctionComponent<HistogramProps> = ({
   </AutoSizer>
 )
 
-interface HistogramSizedProps extends HistogramProps {
+/* Every field the sizing wrapper needs is already resolved by <Histogram>, so
+   none of them are optional here. */
+interface HistogramSizedProps {
+  table: Table
   width: number
   height: number
+  x: string
+  xDomain: number[] | undefined
+  position: HistogramPosition
+  showAxes: boolean
+  binCount: number | null
+  fill: string[]
+  colors: string[]
+  fillOpacity: number
+  strokeOpacity: number
+  strokeWidth: number
+  strokePadding: number
 }
 
 const HistogramSized: FunctionComponent<HistogramSizedProps> = ({
   table,
-  config,
   width,
   height,
+  x,
+  xDomain,
+  position,
+  showAxes,
+  binCount,
+  fill,
+  colors,
+  fillOpacity,
+  strokeOpacity,
+  strokeWidth,
+  strokePadding,
 }) => {
-  const {
-    x,
-    xDomain,
-    fill = [],
-    colors = NINETEEN_EIGHTY_FOUR,
-    binCount,
-    position = 'overlaid',
-    fillOpacity = 0.75,
-    strokeOpacity = 1,
-    strokePadding = 0.75,
-    strokeWidth = 1,
-    showAxes = true,
-  } = config
-
   const {
     position: {x: hoverX, y: hoverY},
     onMouseMove,
@@ -106,17 +121,8 @@ const HistogramSized: FunctionComponent<HistogramSizedProps> = ({
 
   const {binnedTable, fillScale, fillColumnMap, yDomain} = useMemo(
     () =>
-      histogramTransform(
-        table,
-        x,
-        xDomain ?? [],
-        colors,
-        fill,
-        binCount,
-        position,
-      ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [table, config],
+      histogramTransform(table, x, xDomain, colors, fill, binCount, position),
+    [table, x, xDomain, colors, fill, binCount, position],
   )
 
   const plotConfig: PlotConfig = {

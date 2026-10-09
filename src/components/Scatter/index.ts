@@ -1,2 +1,2 @@
-export type {ScatterConfig, ScatterProps} from './Scatter'
+export type {ScatterProps} from './Scatter'
 export {Scatter} from './Scatter'

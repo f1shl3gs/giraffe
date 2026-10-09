@@ -10,7 +10,7 @@ import {
 } from 'stories/helpers'
 import type {MosaicHoverDimension} from 'types'
 import {fromFlux} from 'utils/fromFlux'
-import type {MosaicConfig} from 'components/Mosaic'
+import type {MosaicProps} from 'components/Mosaic'
 import {Mosaic} from 'components/Mosaic'
 import {circle_ci_branch, cloudy} from 'stories/data/mosaicCSV'
 import {cpuTable} from 'stories/data/mosaicTable'
@@ -83,7 +83,7 @@ const render = (args: MosaicArgs) => {
 
   const table = cpuTable
 
-  const mosaicConfig: MosaicConfig = {
+  const mosaicConfig: Omit<MosaicProps, 'table'> = {
     x,
     y: yColumns,
     yLabelColumnSeparator,
@@ -96,7 +96,7 @@ const render = (args: MosaicArgs) => {
 
   return (
     <StoryFrame>
-      <Mosaic table={table} config={{...mosaicConfig, showAxes}} />
+      <Mosaic table={table} {...mosaicConfig} showAxes={showAxes} />
     </StoryFrame>
   )
 }
@@ -145,7 +145,7 @@ const renderCircleCiBranch = (args: MosaicArgs) => {
 
   const table = fromFlux(circle_ci_branch).table
 
-  const mosaicConfig: MosaicConfig = {
+  const mosaicConfig: Omit<MosaicProps, 'table'> = {
     x,
     y: yColumns,
     yLabelColumnSeparator,
@@ -158,7 +158,7 @@ const renderCircleCiBranch = (args: MosaicArgs) => {
 
   return (
     <StoryFrame>
-      <Mosaic table={table} config={{...mosaicConfig, showAxes}} />
+      <Mosaic table={table} {...mosaicConfig} showAxes={showAxes} />
     </StoryFrame>
   )
 }
@@ -210,7 +210,7 @@ const renderCloudy = (args: MosaicArgs) => {
 
   const table = fromFlux(cloudy).table
 
-  const mosaicConfig: MosaicConfig = {
+  const mosaicConfig: Omit<MosaicProps, 'table'> = {
     x,
     y: yColumns,
     yLabelColumnSeparator,
@@ -223,7 +223,7 @@ const renderCloudy = (args: MosaicArgs) => {
 
   return (
     <StoryFrame>
-      <Mosaic table={table} config={{...mosaicConfig, showAxes}} />
+      <Mosaic table={table} {...mosaicConfig} showAxes={showAxes} />
     </StoryFrame>
   )
 }
@@ -272,7 +272,7 @@ const renderNFL = (args: MosaicArgs) => {
 
   const table = fromFlux(nfl).table
 
-  const mosaicConfig: MosaicConfig = {
+  const mosaicConfig: Omit<MosaicProps, 'table'> = {
     x,
     y: yColumns,
     yLabelColumnSeparator,
@@ -285,7 +285,7 @@ const renderNFL = (args: MosaicArgs) => {
 
   return (
     <StoryFrame>
-      <Mosaic table={table} config={{...mosaicConfig, showAxes}} />
+      <Mosaic table={table} {...mosaicConfig} showAxes={showAxes} />
     </StoryFrame>
   )
 }
@@ -334,7 +334,7 @@ const renderCustomCSV = (args: MosaicArgs) => {
 
   const table = fromFlux(csv).table
 
-  const mosaicConfig: MosaicConfig = {
+  const mosaicConfig: Omit<MosaicProps, 'table'> = {
     x,
     y: y.split(','),
     yLabelColumns: y.split(','),
@@ -347,7 +347,7 @@ const renderCustomCSV = (args: MosaicArgs) => {
 
   return (
     <StoryFrame>
-      <Mosaic table={table} config={{...mosaicConfig, showAxes}} />
+      <Mosaic table={table} {...mosaicConfig} showAxes={showAxes} />
     </StoryFrame>
   )
 }

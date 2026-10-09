@@ -1,11 +1,7 @@
 // Libraries
-import {CSSProperties, FunctionComponent, useEffect, useRef} from 'react'
-import {createPortal} from 'react-dom'
 
 // Types
 import type {LegendConfig} from 'components/Legend/LegendConfig'
-import {AnnotationMark, AnnotationTooltipOptions, TooltipPosition} from 'types'
-
 // Constants
 import {
   ANNOTATION_DEFAULT_MAX_WIDTH,
@@ -13,6 +9,9 @@ import {
   CLOCKFACE_Z_INDEX,
   LEAFLET_Z_INDEX,
 } from 'constants/index'
+import {CSSProperties, FunctionComponent, useEffect, useRef} from 'react'
+import {createPortal} from 'react-dom'
+import {AnnotationMark, AnnotationTooltipOptions, TooltipPosition} from 'types'
 import {useLayoutStyle} from 'utils/useLayoutStyle'
 
 interface Props {

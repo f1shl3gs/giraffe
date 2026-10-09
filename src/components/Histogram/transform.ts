@@ -1,18 +1,18 @@
 import {COUNT, FILL, X_MAX, X_MIN, Y_MAX, Y_MIN} from 'constants/columnKeys'
 import {range, thresholdSturges} from 'd3-array'
-import {createGroupIDColumn, getNominalColorScale} from 'utils/transform'
 import {HistogramPosition, Table} from 'types'
 import {extentOfExtents} from 'utils/extrema'
 import {newTable} from 'utils/newTable'
 import {resolveDomain} from 'utils/resolveDomain'
+import {createGroupIDColumn, getNominalColorScale} from 'utils/transform'
 
 export const histogramTransform = (
   inputTable: Table,
   xColumnKey: string,
-  xDomain: number[],
+  xDomain: number[] | null | undefined,
   colors: string[],
   fillColKeys: string[],
-  binCount: number,
+  binCount: number | null,
   position: HistogramPosition,
 ) => {
   const [fillColumn, fillColumnMap] = createGroupIDColumn(
@@ -78,7 +78,7 @@ export const bin = (
   table: Table,
   xColKey: string,
   xDomain: number[],
-  binCount: number,
+  binCount: number | null,
   position: HistogramPosition,
 ): Table => {
   const xColData = table.getColumn(xColKey, 'number')

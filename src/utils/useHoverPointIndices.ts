@@ -28,15 +28,12 @@ export const useHoverPointIndices = (
     mouseY >= 0 &&
     mouseY < height
 
-  const xColData = xColumnData ? xColumnData : []
-  const yColData = yColumnData ? yColumnData : []
-
   const index = useMemo(
     () =>
       active
-        ? buildIndex(xColData, yColData, xScale, yScale, width, height)
+        ? buildIndex(xColumnData, yColumnData, xScale, yScale, width, height)
         : null,
-    [active, xColData, yColData, xScale, yScale, width, height],
+    [active, xColumnData, yColumnData, xScale, yScale, width, height],
   )
 
   if (!index || mouseX === null || mouseY === null) {
@@ -48,7 +45,7 @@ export const useHoverPointIndices = (
       index.xBins,
       mouseX,
       xScale.invert(mouseX),
-      xColData,
+      xColumnData,
       groupColData,
       width,
     )
@@ -59,7 +56,7 @@ export const useHoverPointIndices = (
       index.yBins,
       mouseY,
       yScale.invert(mouseY),
-      yColData,
+      yColumnData,
       groupColData,
       height,
     )
@@ -71,8 +68,8 @@ export const useHoverPointIndices = (
     mouseY,
     xScale.invert(mouseX),
     yScale.invert(mouseY),
-    xColData,
-    yColData,
+    xColumnData,
+    yColumnData,
     width,
     height,
   )

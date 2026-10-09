@@ -1,5 +1,5 @@
 import type {Meta, StoryObj} from '@storybook/react'
-import type {HistogramConfig} from 'components/Histogram'
+import type {HistogramProps} from 'components/Histogram'
 import {Histogram} from 'components/Histogram'
 import {
   COLOR_SCHEME_OPTIONS,
@@ -32,7 +32,7 @@ export const Example: Story = {
     const colors =
       COLOR_SCHEME_OPTIONS[colorScheme as keyof typeof COLOR_SCHEME_OPTIONS]
 
-    const config: HistogramConfig = {
+    const histogramProps: Omit<HistogramProps, 'table'> = {
       x,
       colors,
       fill,
@@ -43,7 +43,7 @@ export const Example: Story = {
 
     return (
       <StoryFrame>
-        <Histogram table={TABLE} config={config} />
+        <Histogram table={TABLE} {...histogramProps} />
       </StoryFrame>
     )
   },

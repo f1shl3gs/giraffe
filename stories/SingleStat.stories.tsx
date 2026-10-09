@@ -1,9 +1,9 @@
 import type {Meta, StoryObj} from '@storybook/react'
-import type {LineConfig} from 'components/Line'
 import {Line} from 'components/Line'
+import type {LineProps} from 'components/Line'
 import type {PlotConfig} from 'components/Plot'
 import {Plot} from 'components/Plot'
-import type {SingleStatConfig} from 'components/SingleStat'
+import type {SingleStatProps} from 'components/SingleStat'
 import {SingleStat as SingleStatComponent} from 'components/SingleStat'
 import {
   COLOR_SCHEME_OPTIONS,
@@ -111,7 +111,7 @@ export const SingleStat: Story = {
       viewBoxX,
       viewBoxY,
     } = args
-    const config: SingleStatConfig = {
+    const singleStatProps: Omit<SingleStatProps, 'table'> = {
       prefix,
       suffix,
       decimalPlaces: {
@@ -134,7 +134,7 @@ export const SingleStat: Story = {
     }
     return (
       <StoryFrame>
-        <SingleStatComponent table={singleStatTable} config={config} />
+        <SingleStatComponent table={singleStatTable} {...singleStatProps} />
       </StoryFrame>
     )
   },
@@ -168,7 +168,7 @@ export const SingleStatCustomCsv: Story = {
       viewBoxX,
       viewBoxY,
     } = args
-    const config: SingleStatConfig = {
+    const singleStatProps: Omit<SingleStatProps, 'table'> = {
       prefix,
       suffix,
       decimalPlaces: {
@@ -191,7 +191,7 @@ export const SingleStatCustomCsv: Story = {
     }
     return (
       <StoryFrame>
-        <SingleStatComponent table={fromFlux(csv).table} config={config} />
+        <SingleStatComponent table={fromFlux(csv).table} {...singleStatProps} />
       </StoryFrame>
     )
   },
@@ -248,7 +248,7 @@ export const SingleStatOnTopOfLineLayer: Story = {
     const colors =
       COLOR_SCHEME_OPTIONS[colorScheme as keyof typeof COLOR_SCHEME_OPTIONS]
 
-    const lineConfig: LineConfig = {
+    const lineConfig: LineProps = {
       fill,
       interpolation,
       colors,
@@ -279,7 +279,7 @@ export const SingleStatOnTopOfLineLayer: Story = {
       showAxes,
     }
 
-    const singleStatConfig: SingleStatConfig = {
+    const singleStatProps: Omit<SingleStatProps, 'table'> = {
       prefix,
       suffix,
       decimalPlaces: {
@@ -314,12 +314,12 @@ export const SingleStatOnTopOfLineLayer: Story = {
       <StoryFrame>
         <div style={{position: 'relative', width: '100%', height: '100%'}}>
           <Plot table={singleStatTable} config={config}>
-            <Line config={lineConfig} />
+            <Line {...lineConfig} />
           </Plot>
           {includeSingleStatLayer && (
             <SingleStatComponent
               table={singleStatTable}
-              config={singleStatConfig}
+              {...singleStatProps}
             />
           )}
         </div>

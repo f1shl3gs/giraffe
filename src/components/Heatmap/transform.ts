@@ -1,17 +1,15 @@
 // Libraries
-import {extent, range} from 'd3-array'
-import {scaleSequential} from 'd3-scale'
-import {interpolateRgbBasis} from 'd3-interpolate'
-
-// Types
-import {Scale, Table} from 'types'
-
-// Utils
-import {newTable} from 'utils/newTable'
-import {resolveDomain} from 'utils/resolveDomain'
 
 // Constants
 import {COUNT, X_MAX, X_MIN, Y_MAX, Y_MIN} from 'constants/columnKeys'
+import {extent, range} from 'd3-array'
+import {interpolateRgbBasis} from 'd3-interpolate'
+import {scaleSequential} from 'd3-scale'
+// Types
+import {Scale, Table} from 'types'
+// Utils
+import {newTable} from 'utils/newTable'
+import {resolveDomain} from 'utils/resolveDomain'
 
 export const heatmapTransform = (
   inputTable: Table,

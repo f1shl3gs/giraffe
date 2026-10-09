@@ -1,6 +1,8 @@
 // Libraries
-import {range} from 'd3-array'
 
+// Constants
+import {DISPLAY_NAME, FILL, SERIES, X_MAX, X_MIN} from 'constants/columnKeys'
+import {range} from 'd3-array'
 // Types
 import type {
   ColumnGroupMap,
@@ -10,12 +12,8 @@ import type {
   Scale,
   Table,
 } from 'types'
-
 // Utils
 import {getRangeLabel} from 'utils/legend/tooltip'
-
-// Constants
-import {DISPLAY_NAME, FILL, SERIES, X_MAX, X_MIN} from 'constants/columnKeys'
 
 export const findHoveredBoxes = (
   hoverDimension: MosaicHoverDimension | 'auto',

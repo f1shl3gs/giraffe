@@ -1,8 +1,8 @@
 import type {Meta, StoryObj} from '@storybook/react'
 
 import {CustomLayer} from 'components/CustomLayer'
-import type {LineConfig} from 'components/Line'
 import {Line} from 'components/Line'
+import type {LineProps} from 'components/Line'
 import type {PlotConfig} from 'components/Plot'
 import {Plot} from 'components/Plot'
 import {usePlotInteraction} from 'components/Plot/PlotInteractionContext'
@@ -23,7 +23,7 @@ const PLOT_CONFIG: PlotConfig = {
   yColumn: '_value',
 }
 
-const LINE_CONFIG: LineConfig = {
+const LINE_CONFIG: LineProps = {
   fill: ['cpu'],
 }
 
@@ -42,7 +42,7 @@ export const HighlightedRegion: Story = {
   render: () => (
     <StoryFrame>
       <Plot table={TABLE} config={PLOT_CONFIG}>
-        <Line config={LINE_CONFIG} />
+        <Line {...LINE_CONFIG} />
         <CustomLayer>
           {({yScale}) => (
             <div
@@ -67,7 +67,7 @@ export const HorizontalThreshold: Story = {
   render: () => (
     <StoryFrame>
       <Plot table={TABLE} config={PLOT_CONFIG}>
-        <Line config={LINE_CONFIG} />
+        <Line {...LINE_CONFIG} />
         <CustomLayer>
           {({yScale, columnFormatter}) => (
             <>
@@ -106,7 +106,7 @@ export const VerticalMarker: Story = {
   render: () => (
     <StoryFrame>
       <Plot table={TABLE} config={PLOT_CONFIG}>
-        <Line config={LINE_CONFIG} />
+        <Line {...LINE_CONFIG} />
         <CustomLayer>
           {({xScale, innerHeight}) => {
             const xCol = TABLE.getColumn('_time', 'number') || []
@@ -152,7 +152,7 @@ export const HoverTracking: Story = {
   render: () => (
     <StoryFrame>
       <Plot table={TABLE} config={PLOT_CONFIG}>
-        <Line config={LINE_CONFIG} />
+        <Line {...LINE_CONFIG} />
         <HoverReadout />
       </Plot>
     </StoryFrame>

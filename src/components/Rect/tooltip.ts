@@ -1,14 +1,12 @@
 // Libraries
-import {range} from 'd3-array'
-
-// Types
-import {ColumnGroupMap, LegendColumn, LegendData, Scale, Table} from 'types'
-
-// Utils
-import {getRangeLabel} from 'utils/legend/tooltip'
 
 // Constants
 import {COUNT, FILL, X_MAX, X_MIN, Y_MAX, Y_MIN} from 'constants/columnKeys'
+import {range} from 'd3-array'
+// Types
+import {ColumnGroupMap, LegendColumn, LegendData, Scale, Table} from 'types'
+// Utils
+import {getRangeLabel} from 'utils/legend/tooltip'
 
 export const findHoveredRects = (
   rectTable: Table,

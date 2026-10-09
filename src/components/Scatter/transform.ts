@@ -1,16 +1,14 @@
 // Libraries
-import {range} from 'd3-array'
-import {scaleOrdinal} from 'd3-scale'
 
-// Types
-import type {ColumnGroupMap, Scale, SymbolType, Table} from 'types'
-
-// Utils
-import {createGroupIDColumn, getNominalColorScale} from 'utils/transform'
-
+import {FILL, SYMBOL} from 'constants/columnKeys'
 // Constants
 import {ALL_SYMBOL_TYPES} from 'constants/index'
-import {FILL, SYMBOL} from 'constants/columnKeys'
+import {range} from 'd3-array'
+import {scaleOrdinal} from 'd3-scale'
+// Types
+import type {ColumnGroupMap, Scale, SymbolType, Table} from 'types'
+// Utils
+import {createGroupIDColumn, getNominalColorScale} from 'utils/transform'
 
 export const scatterTransform = (
   inputTable: Table,

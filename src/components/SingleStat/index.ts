@@ -1,2 +1,2 @@
-export type {SingleStatConfig, SingleStatProps} from './SingleStat'
+export type {SingleStatProps} from './SingleStat'
 export {SingleStat} from './SingleStat'

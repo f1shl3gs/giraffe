@@ -1,11 +1,11 @@
 import type {Meta, StoryObj} from '@storybook/react'
-import type {HistogramConfig} from 'components/Histogram'
+import type {HistogramProps} from 'components/Histogram'
 import {Histogram} from 'components/Histogram'
-import type {LineConfig} from 'components/Line'
 import {Line} from 'components/Line'
+import type {LineProps} from 'components/Line'
 import type {PlotConfig} from 'components/Plot'
 import {Plot} from 'components/Plot'
-import type {ScatterConfig} from 'components/Scatter'
+import type {ScatterProps} from 'components/Scatter'
 import {Scatter} from 'components/Scatter'
 
 import {binaryPrefixFormatter, timeFormatter} from 'utils/formatters'
@@ -55,12 +55,12 @@ export const SnapshotWithMultipleMinimumValues: Story = {
       yColumn: '_value',
     }
 
-    const lineConfig: LineConfig = {
+    const lineConfig: LineProps = {
     }
 
     return (
       <Plot table={table} config={config}>
-        <Line config={lineConfig} />
+        <Line {...lineConfig} />
       </Plot>
     )
   },
@@ -75,7 +75,7 @@ export const SnapshotLineLayerWithShadedAreaAndStepInterpolation: Story = {
       yColumn: '_value',
     }
 
-    const lineConfig: LineConfig = {
+    const lineConfig: LineProps = {
       fill: ['cpu'],
       interpolation: 'step',
       shadeBelow: true,
@@ -83,7 +83,7 @@ export const SnapshotLineLayerWithShadedAreaAndStepInterpolation: Story = {
 
     return (
       <Plot table={CPU} config={config}>
-        <Line config={lineConfig} />
+        <Line {...lineConfig} />
       </Plot>
     )
   },
@@ -98,7 +98,7 @@ export const SnapshotTimeZoneSupport: Story = {
       yColumn: '_value',
     }
 
-    const lineConfig: LineConfig = {
+    const lineConfig: LineProps = {
       fill: ['cpu'],
     }
 
@@ -139,7 +139,7 @@ export const SnapshotTimeZoneSupport: Story = {
                 },
               }}
             >
-              <Line config={lineConfig} />
+              <Line {...lineConfig} />
             </Plot>
             {timeZone || 'Local Time'}
           </div>
@@ -170,12 +170,12 @@ export const SnapshotBinaryPrefixFormatting: Story = {
       },
     }
 
-    const lineConfig: LineConfig = {
+    const lineConfig: LineProps = {
     }
 
     return (
       <Plot table={table} config={config}>
-        <Line config={lineConfig} />
+        <Line {...lineConfig} />
       </Plot>
     )
   },
@@ -207,12 +207,12 @@ export const SnapshotWithFromRowsAdapter: Story = {
       {x: 0.19812217061286364, y: 0.6097573428446372},
     ])
 
-    const config: ScatterConfig = {}
+    const scatterConfig: ScatterProps = {}
 
     return (
       <div style={{width: 600, height: 400}}>
         <Plot table={table} config={{xColumn: 'x', yColumn: 'y'}}>
-          <Scatter config={config} />
+          <Scatter {...scatterConfig} />
         </Plot>
       </div>
     )
@@ -229,13 +229,13 @@ export const SnapshotCustomYTicks: Story = {
       yTicks: [13, 19, 23],
     }
 
-    const lineConfig: LineConfig = {
+    const lineConfig: LineProps = {
       fill: ['cpu'],
     }
 
     return (
       <Plot table={CPU} config={config}>
-        <Line config={lineConfig} />
+        <Line {...lineConfig} />
       </Plot>
     )
   },
@@ -259,7 +259,7 @@ export const SnapshotSpecificHistogramBinSettingsShouldNotCrash: Story = {
 ,,1,2019-07-29T21:50:31.093428Z,2019-07-29T22:50:31.093428Z,2019-07-29T22:50:24Z,6296612864,active,mem,oox4k.local`,
     )
 
-    const config: HistogramConfig = {
+    const histogramProps: Omit<HistogramProps, 'table'> = {
       x: '_value',
       binCount: 30,
       xDomain: [5472854016, 7661821952],
@@ -272,7 +272,7 @@ export const SnapshotSpecificHistogramBinSettingsShouldNotCrash: Story = {
     */
     return (
       <div style={{width: 600, height: 400}}>
-        <Histogram table={table} config={config} />
+        <Histogram table={table} {...histogramProps} />
       </div>
     )
   },
@@ -285,14 +285,14 @@ export const StressTestLine: Story = {
       yColumn: 'y',
     }
 
-    const lineConfig: LineConfig = {
+    const lineConfig: LineProps = {
       fill: ['tag'],
     }
 
     return (
       <StoryFrame>
         <Plot table={SIN} config={config}>
-          <Line config={lineConfig} />
+          <Line {...lineConfig} />
         </Plot>
       </StoryFrame>
     )

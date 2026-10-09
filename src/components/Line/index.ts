@@ -1,2 +1,2 @@
-export type {LineConfig, LineProps} from './Line'
+export type {LineProps} from './Line'
 export {Line} from './Line'

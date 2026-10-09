@@ -1,73 +1,66 @@
 // Libraries
 import {CSSProperties, FunctionComponent, useMemo, useRef} from 'react'
 
-import {usePlot} from 'components/Plot/PlotEnv'
-import {usePlotInteraction} from 'components/Plot/PlotInteractionContext'
-import type {AnnotationMark, LineHoverDimension, SVGAttributes} from 'types'
 // Components
 import {AnnotationHover} from './AnnotationHover'
 import {AnnotationLine} from './AnnotationLine'
+
+// Types
+import type {AnnotationMark, LineHoverDimension} from 'types'
+
+// Utils
 import {
   getAnnotationHoverIndices,
   getAnnotationsPositions,
   getVisibleAnnotations,
 } from './annotationData'
-
-export interface AnnotationConfig {
-  x: string
-  y: string
-  annotations: AnnotationMark[]
-  /*
-    Accepted and ignored. It used to group rows into a FILL column inside the
-    layer transform, but nothing ever read that column -- each mark carries its
-    own `color`. Kept because it is part of the published config.
-  */
-  fill: string[]
-  hoverDimension?: LineHoverDimension | 'auto'
-  hoverMargin?: number
-  svgAttributes?: SVGAttributes
-  svgStyle?: CSSProperties
-  lineWidth?: number
-  handleAnnotationClick?: (id: string) => void
-}
-
-export interface AnnotationProps {
-  config: AnnotationConfig
-}
+import {usePlot} from 'components/Plot/PlotEnv'
+import {usePlotInteraction} from 'components/Plot/PlotInteractionContext'
 
 // Constants
 import {ANNOTATION_DEFAULT_HOVER_MARGIN} from 'constants/index'
+
+export interface AnnotationProps {
+  annotations: AnnotationMark[]
+  hoverDimension?: LineHoverDimension | 'auto'
+  hoverMargin?: number
+  lineWidth?: number
+  handleAnnotationClick?: (id: string) => void
+}
 
 const ANNOTATION_OVERLAY_DEFAULT_STYLE = {
   position: 'absolute',
 } as CSSProperties
 
-export const Annotation: FunctionComponent<AnnotationProps> = ({config}) => {
+export const Annotation: FunctionComponent<AnnotationProps> = ({
+  annotations,
+  hoverDimension: hoverDimensionProp = 'auto',
+  hoverMargin = ANNOTATION_DEFAULT_HOVER_MARGIN,
+  lineWidth = 2,
+  handleAnnotationClick,
+}) => {
   const env = usePlot()
   const {hoverX, hoverY} = usePlotInteraction()
   const {innerWidth, innerHeight, xScale, yScale, xDomain, yDomain} = env
 
   const annotationData = useMemo(
-    () => getVisibleAnnotations(config.annotations, xDomain, yDomain),
-    [config.annotations, xDomain, yDomain],
+    () => getVisibleAnnotations(annotations, xDomain, yDomain),
+    [annotations, xDomain, yDomain],
   )
 
   const onHover = () => {}
-  const lineWidth = config.lineWidth || 2
   const annotationsPositions = useMemo(
     () => getAnnotationsPositions(annotationData, xScale, yScale),
     [annotationData, xScale, yScale],
   )
   const svgRef = useRef<SVGSVGElement>(null)
 
-  let hoverDimension = 'xy' as LineHoverDimension
-  if (config.hoverDimension === 'x' || config.hoverDimension === 'y') {
-    hoverDimension = config.hoverDimension
-  }
-
-  const hoverMargin = config.hoverMargin
-    ? config.hoverMargin
-    : ANNOTATION_DEFAULT_HOVER_MARGIN
+  /* 'auto' resolves to 'xy': an annotation is a region rather than a series, so
+     hovering anywhere inside the margin counts. */
+  const hoverDimension: LineHoverDimension =
+    hoverDimensionProp === 'x' || hoverDimensionProp === 'y'
+      ? hoverDimensionProp
+      : 'xy'
 
   const hoverRowIndices = getAnnotationHoverIndices(
     hoverDimension,
@@ -83,8 +76,8 @@ export const Annotation: FunctionComponent<AnnotationProps> = ({config}) => {
   }
 
   const handleClick = ev => {
-    if (config.handleAnnotationClick && ev.target.id) {
-      config.handleAnnotationClick(ev.target.id)
+    if (handleAnnotationClick && ev.target.id) {
+      handleAnnotationClick(ev.target.id)
     }
   }
 

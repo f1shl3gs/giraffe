@@ -1,7 +1,4 @@
 // Libraries
-import {range} from 'd3-array'
-import {area, curveLinear, line} from 'd3-shape'
-import {FunctionComponent, useMemo} from 'react'
 
 import {
   alignMinMaxWithBand,
@@ -12,35 +9,33 @@ import {
 } from 'components/Band/transform'
 import {getFormatterForColumn, usePlot} from 'components/Plot/PlotEnv'
 import {usePlotInteraction} from 'components/Plot/PlotInteractionContext'
-
+// Constants
+import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
+import {FILL, LOWER, UPPER} from 'constants/columnKeys'
+import {CURVES} from 'constants/index'
+import {range} from 'd3-array'
+import {area, curveLinear, line} from 'd3-shape'
+import {FunctionComponent, useMemo} from 'react'
 // Types
 import {
   BandLineMap,
   LineData,
   LineHoverDimension,
   LineInterpolation,
-  LinePosition,
 } from 'types'
-
-// Constants
-import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
-import {FILL, LOWER, UPPER} from 'constants/columnKeys'
-import {CURVES} from 'constants/index'
-
+import {useCanvas} from 'utils/useCanvas'
+import {useHoverPointIndices} from 'utils/useHoverPointIndices'
+// Components
+import {BandHover} from './BandHover'
 // Utils
 import {getBandHoverIndices, getLineLengths} from './bandHover'
 import {useBandHoverColumns} from './useBandHover'
-import {useCanvas} from 'utils/useCanvas'
-import {useHoverPointIndices} from 'utils/useHoverPointIndices'
 
-// Components
-import {BandHover} from './BandHover'
+const HIGHLIGHT_HOVERED_LINE = 0.4
+const NO_HIGHLIGHT = 1
 
-export interface BandConfig {
-  x: string
-  y: string
-  fill: string[]
-  position?: LinePosition
+export interface BandProps {
+  fill?: string[]
   hoverDimension?: LineHoverDimension | 'auto'
   maxTooltipRows?: number
   interpolation?: LineInterpolation
@@ -53,40 +48,53 @@ export interface BandConfig {
   lowerColumnName?: string
 }
 
-export interface BandProps {
-  config: BandConfig
-}
-
-const HIGHLIGHT_HOVERED_LINE = 0.4
-const NO_HIGHLIGHT = 1
-
-export const Band: FunctionComponent<BandProps> = ({config}) => {
-  const env = usePlot()
+export const Band: FunctionComponent<BandProps> = ({
+  fill = [],
+  hoverDimension = 'auto',
+  maxTooltipRows = 24,
+  interpolation = 'linear',
+  lineWidth = 1,
+  lineOpacity = 1,
+  colors = NINETEEN_EIGHTY_FOUR,
+  shadeOpacity = 0.8,
+  mainColumnName,
+  upperColumnName = '',
+  lowerColumnName = '',
+}) => {
+  const {
+    width,
+    height,
+    xScale,
+    yScale,
+    table,
+    config: {xColumn, yColumn, valueFormatters, legend = {hide: true}},
+  } = usePlot()
   const {hoverX, hoverY} = usePlotInteraction()
-  const {width, height, xScale, yScale, table} = env
-  const legendHide = env.config.legend?.hide ?? false
+  const legendHide = legend?.hide ?? false
 
   const {bandLineMap, fillTable, lineData, fillColumnMap} = useMemo(
     () =>
       bandTransform(
         table,
-        env.config.xColumn,
-        env.config.yColumn,
-        config.fill,
-        config.colors ?? NINETEEN_EIGHTY_FOUR,
-        config.lowerColumnName ?? '',
-        config.mainColumnName,
-        config.upperColumnName ?? '',
+        xColumn,
+        yColumn,
+        fill,
+        colors,
+        lowerColumnName,
+        mainColumnName,
+        upperColumnName,
       ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [table, config, env.config.xColumn, env.config.yColumn],
+    [
+      table,
+      xColumn,
+      yColumn,
+      fill,
+      colors,
+      lowerColumnName,
+      mainColumnName,
+      upperColumnName,
+    ],
   )
-
-  const {
-    lowerColumnName,
-    mainColumnName: rowColumnName,
-    upperColumnName,
-  } = config
 
   const simplifiedLineData = useMemo(
     () =>
@@ -104,34 +112,29 @@ export const Band: FunctionComponent<BandProps> = ({config}) => {
     ctx =>
       draw(
         ctx,
-        config.interpolation ?? 'linear',
+        interpolation,
         simplifiedLineData,
         bandLineMap,
-        config.lineWidth,
-        config.lineOpacity,
-        config.shadeOpacity,
+        lineWidth,
+        lineOpacity,
+        shadeOpacity,
       ),
     [
       bandLineMap,
-      config.interpolation,
+      interpolation,
       simplifiedLineData,
-      config.lineWidth,
-      config.lineOpacity,
-      config.shadeOpacity,
+      lineWidth,
+      lineOpacity,
+      shadeOpacity,
     ],
   )
 
-  const {hoverDimension: hoverDimensionConfig = 'auto', maxTooltipRows} = config
-
-  /* 'auto' widens the hover to both axes once there are more series than a
-     single-axis tooltip should list. `size` is the number of series;
-     `Object.keys` on the Map would always be empty. */
-  const hoverDimension: LineHoverDimension =
-    hoverDimensionConfig === 'auto'
-      ? lineData.size > (maxTooltipRows ?? Infinity)
+  const resolvedHoverDimension: LineHoverDimension =
+    hoverDimension === 'auto'
+      ? lineData.size > maxTooltipRows
         ? 'xy'
         : 'x'
-      : hoverDimensionConfig
+      : hoverDimension
 
   // Band Plot allows hovering on the nearest band or bands,
   // and any hoverable point should be associated with a band
@@ -146,7 +149,7 @@ export const Band: FunctionComponent<BandProps> = ({config}) => {
   )
 
   const hoverRowIndices = useHoverPointIndices(
-    hoverDimension,
+    resolvedHoverDimension,
     hoverX,
     hoverY,
     hoverableColumnData.xs,
@@ -167,7 +170,7 @@ export const Band: FunctionComponent<BandProps> = ({config}) => {
     groupLineIndicesIntoBands(
       fillColumnMap,
       lowerColumnName,
-      rowColumnName,
+      mainColumnName,
       upperColumnName,
     ),
   )
@@ -183,7 +186,7 @@ export const Band: FunctionComponent<BandProps> = ({config}) => {
         style={{
           position: 'absolute',
           opacity:
-            hoverDimension === 'xy' && hasHoverData
+            resolvedHoverDimension === 'xy' && hasHoverData
               ? HIGHLIGHT_HOVERED_LINE
               : NO_HIGHLIGHT,
         }}
@@ -196,12 +199,18 @@ export const Band: FunctionComponent<BandProps> = ({config}) => {
           lineData={lineData}
           fillTable={fillTable}
           columnFormatter={(colKey: string) =>
-            getFormatterForColumn(env.table, colKey, env.config.valueFormatters)
+            getFormatterForColumn(table, colKey, valueFormatters)
           }
-          config={config}
-          dimension={hoverDimension}
+          dimension={resolvedHoverDimension}
           height={height}
           simplifiedLineData={simplifiedLineData}
+          interpolation={interpolation}
+          fill={fill}
+          lineWidth={lineWidth}
+          lowerColumnName={lowerColumnName}
+          mainColumnName={mainColumnName}
+          shadeOpacity={shadeOpacity}
+          upperColumnName={upperColumnName}
           width={width}
           xScale={xScale}
           yScale={yScale}

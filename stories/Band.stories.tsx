@@ -10,7 +10,7 @@ import type {LineInterpolation} from 'types'
 import {timeFormatter} from 'utils/formatters'
 import {fromFlux} from 'utils/fromFlux'
 import type {PlotConfig} from 'components/Plot/PlotConfig'
-import type {BandConfig} from 'components/Band'
+import type {BandProps} from 'components/Band'
 import {Band} from 'components/Band'
 import {
   colors6,
@@ -925,9 +925,7 @@ const render = (args: BandArgs) => {
 
   const {table} = fromFlux(hoverAlignment3)
 
-  const bandConfig: BandConfig = {
-    x: '_time',
-    y: '_value',
+  const bandConfig: BandProps = {
     fill: ['result', 'env'],
     interpolation,
     colors: COLOR_SCHEME_OPTIONS[colorScheme],
@@ -970,7 +968,7 @@ const render = (args: BandArgs) => {
   return (
     <StoryFrame>
       <Plot table={table} config={config}>
-        <Band config={bandConfig} />
+        <Band {...bandConfig} />
       </Plot>
     </StoryFrame>
   )
@@ -1024,9 +1022,7 @@ const renderAllStringColumns = (args: BandArgs) => {
 
   const table = fromFlux(staticData).table
 
-  const bandConfig: BandConfig = {
-    x: '_time',
-    y: '_value',
+  const bandConfig: BandProps = {
     fill: findStringColumns(table),
     interpolation,
     colors: COLOR_SCHEME_OPTIONS[colorScheme],
@@ -1067,7 +1063,7 @@ const renderAllStringColumns = (args: BandArgs) => {
   return (
     <StoryFrame>
       <Plot table={table} config={config}>
-        <Band config={bandConfig} />
+        <Band {...bandConfig} />
       </Plot>
     </StoryFrame>
   )
@@ -1132,9 +1128,7 @@ const renderCustomCSV = (args: BandArgs) => {
 
   const table = fromFlux(csv).table
 
-  const bandConfig: BandConfig = {
-    x: '_time',
-    y: '_value',
+  const bandConfig: BandProps = {
     fill: findStringColumns(table),
     interpolation,
     colors: COLOR_SCHEME_OPTIONS[colorScheme],
@@ -1174,7 +1168,7 @@ const renderCustomCSV = (args: BandArgs) => {
   return (
     <StoryFrame>
       <Plot table={table} config={config}>
-        <Band config={bandConfig} />
+        <Band {...bandConfig} />
       </Plot>
     </StoryFrame>
   )

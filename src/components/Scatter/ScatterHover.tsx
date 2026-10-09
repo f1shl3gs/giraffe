@@ -50,9 +50,9 @@ export const ScatterHover: FunctionComponent<Props> = ({
   columnFormatter,
   legendHide,
 }) => {
-  const xColData = table.getColumn(plotConfig.xColumn, 'number')
-  const yColData = table.getColumn(plotConfig.yColumn, 'number')
-  const fillColData = table.getColumn(FILL, 'number')
+  const xColData = table.getColumn(plotConfig.xColumn, 'number') ?? []
+  const yColData = table.getColumn(plotConfig.yColumn, 'number') ?? []
+  const fillColData = table.getColumn(FILL, 'number') ?? []
   const symbolColData = table.getColumn(SYMBOL, 'number')
 
   const rowIndices = useHoverPointIndices(

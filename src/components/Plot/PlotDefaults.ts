@@ -1,12 +1,5 @@
 import type {PlotConfig} from './PlotConfig'
 
-/*
-  Plot-level defaults. These are not layer defaults (D9 put those in each layer
-  component) -- they are the styling a plot falls back to when the consumer says
-  nothing, and they used to live in CONFIG_DEFAULTS, which was deleted along
-  with the old layer dispatcher. Without them axisColor / gridColor /
-  tickFontColor arrive as undefined and canvas falls back to black.
-*/
 export const PLOT_DEFAULTS: PlotConfig = {
   xColumn: '',
   yColumn: '',

@@ -1,13 +1,5 @@
 // Libraries
 import {CSSProperties, FunctionComponent, useMemo} from 'react'
-
-// Types
-import type {DecimalPlaces, SVGAttributes, Table} from 'types'
-
-// Utils
-import {formatStatValue} from 'utils/formatStatValue'
-import {getLatestValues} from './getLatestValues'
-
 // Constants
 import {
   SINGLE_STAT_DEFAULT_TEST_ID,
@@ -16,11 +8,17 @@ import {
   SINGLE_STAT_SVG_TEXT_DEFAULT_ATTRIBUTES,
   SINGLE_STAT_SVG_TEXT_DEFAULT_STYLE,
 } from 'style/singleStatStyles'
+// Types
+import type {DecimalPlaces, SVGAttributes, Table} from 'types'
+// Utils
+import {formatStatValue} from 'utils/formatStatValue'
+import {getLatestValues} from './getLatestValues'
 
 // Styles
 import './SingleStat.scss'
 
-export interface SingleStatConfig {
+export interface SingleStatProps {
+  table: Table
   prefix: string
   suffix: string
   decimalPlaces: DecimalPlaces
@@ -36,20 +34,21 @@ export interface SingleStatConfig {
   svgTextStyle?: CSSProperties
 }
 
-/*
-  SingleStat is standalone (D13, same shape as Gauge and Geo). The number it
-  shows is the latest value in the table, so it needs no axes, no scales and no
-  plot environment. It still works as a child of <Plot> -- the third story puts
-  it above a line -- because nothing here reads the environment.
-*/
-export interface SingleStatProps {
-  config: SingleStatConfig
-  table: Table
-}
-
 export const SingleStat: FunctionComponent<SingleStatProps> = ({
-  config,
   table,
+  prefix,
+  suffix,
+  decimalPlaces,
+  textColor,
+  textOpacity = 1,
+  backgroundColor = null,
+  testID = SINGLE_STAT_DEFAULT_TEST_ID,
+  style = {},
+  resizerStyle = {},
+  svgAttributes = {viewBox: ''},
+  svgStyle = {},
+  svgTextAttributes = {},
+  svgTextStyle = {},
 }) => {
   const latestValues = useMemo(() => getLatestValues(table), [table])
   if (latestValues.length === 0) {
@@ -60,12 +59,43 @@ export const SingleStat: FunctionComponent<SingleStatProps> = ({
     )
   }
 
-  return <SingleStatView stat={latestValues[0]} config={config} />
+  return (
+    <SingleStatView
+      stat={latestValues[0]}
+      prefix={prefix}
+      suffix={suffix}
+      decimalPlaces={decimalPlaces}
+      textColor={textColor}
+      textOpacity={textOpacity}
+      backgroundColor={backgroundColor}
+      testID={testID}
+      style={style}
+      resizerStyle={resizerStyle}
+      svgAttributes={svgAttributes}
+      svgStyle={svgStyle}
+      svgTextAttributes={svgTextAttributes}
+      svgTextStyle={svgTextStyle}
+    />
+  )
 }
 
+/* Every field the view needs is already resolved by <SingleStat>, so none of
+   them are optional here. */
 interface SingleStatViewProps {
   stat: number
-  config: SingleStatConfig
+  prefix: string
+  suffix: string
+  decimalPlaces: DecimalPlaces
+  textColor: string
+  textOpacity: number
+  backgroundColor: string | null
+  testID: string
+  style: CSSProperties
+  resizerStyle: CSSProperties
+  svgAttributes: SVGAttributes
+  svgStyle: CSSProperties
+  svgTextAttributes: SVGAttributes
+  svgTextStyle: CSSProperties
 }
 
 const getDefaultViewBox = (stat: string): string =>
@@ -73,24 +103,20 @@ const getDefaultViewBox = (stat: string): string =>
 
 const SingleStatView: FunctionComponent<SingleStatViewProps> = ({
   stat,
-  config,
+  prefix,
+  suffix,
+  decimalPlaces,
+  textColor,
+  textOpacity,
+  backgroundColor,
+  testID,
+  style,
+  resizerStyle,
+  svgAttributes,
+  svgStyle,
+  svgTextAttributes,
+  svgTextStyle,
 }) => {
-  const {
-    backgroundColor = null,
-    decimalPlaces,
-    prefix,
-    resizerStyle = {},
-    style = {},
-    suffix,
-    svgAttributes = {viewBox: ''},
-    svgStyle = {},
-    svgTextAttributes = {},
-    svgTextStyle = {},
-    testID = SINGLE_STAT_DEFAULT_TEST_ID,
-    textColor,
-    textOpacity = 1,
-  } = config
-
   const formattedValue = formatStatValue(stat, {
     decimalPlaces,
     prefix,

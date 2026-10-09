@@ -1,2 +1,2 @@
-export type {HeatmapConfig, HeatmapProps} from './Heatmap'
+export type {HeatmapProps} from './Heatmap'
 export {Heatmap} from './Heatmap'

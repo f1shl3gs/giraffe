@@ -17,14 +17,10 @@ import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
 import {FILL, SYMBOL} from 'constants/columnKeys'
 import {SCATTER_POINT_SIZE} from 'constants/index'
 
-export interface ScatterConfig {
+export interface ScatterProps {
   fill?: string[]
   colors?: string[]
   symbol?: string[]
-}
-
-export interface ScatterProps {
-  config: ScatterConfig
 }
 
 const FULL_SIZE_STYLE: CSSProperties = {
@@ -43,15 +39,17 @@ const FULL_SIZE_STYLE: CSSProperties = {
   axes used to end up with. Leaving the domains to <Plot> is both consistent
   across the two axes and the same thing the axes showed before.)
 */
-export const Scatter: FunctionComponent<ScatterProps> = ({config}) => {
-  const {fill = [], symbol = [], colors = NINETEEN_EIGHTY_FOUR} = config
+export const Scatter: FunctionComponent<ScatterProps> = ({
+  fill = [],
+  symbol = [],
+  colors = NINETEEN_EIGHTY_FOUR,
+}) => {
   const env = usePlot()
   const {table, width, height, xScale, yScale} = env
 
   /*
     The plot owns which columns the axes show, so the transform and everything
-    downstream read those. `config.x` / `config.y` stay for the hover layer,
-    which names them separately -- the same split <Line> has.
+    downstream read those -- the same split <Line> and <Band> have.
   */
   const {xColumn, yColumn} = env.config
 
@@ -63,7 +61,7 @@ export const Scatter: FunctionComponent<ScatterProps> = ({config}) => {
     symbolScale,
   } = useMemo(
     () => scatterTransform(table, fill, symbol, colors),
-    [table, config],
+    [table, fill, symbol, colors],
   )
 
   const columnFormatter = (colKey: string) =>

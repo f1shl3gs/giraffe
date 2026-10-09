@@ -3,30 +3,24 @@ import './style/fonts.scss'
 
 // Components
 export {Annotation} from './components/Annotation'
-export type {
-  AnnotationConfig,
-  AnnotationProps,
-} from './components/Annotation'
+export type {AnnotationProps} from './components/Annotation'
 export {Band} from './components/Band'
-export type {BandConfig, BandProps} from './components/Band'
+export type {BandProps} from './components/Band'
 export {CustomLayer} from './components/CustomLayer'
 export type {
   CustomLayerProps,
   CustomLayerRenderProps,
 } from './components/CustomLayer'
 export {Gauge} from './components/Gauge'
-export type {GaugeConfig, GaugeProps} from './components/Gauge'
+export type {GaugeProps} from './components/Gauge'
 export {Geo} from './components/Geo'
 export type {GeoConfig, GeoProps} from './components/Geo'
 export {Heatmap} from './components/Heatmap'
-export type {HeatmapConfig, HeatmapProps} from './components/Heatmap'
+export type {HeatmapProps} from './components/Heatmap'
 export {Histogram} from './components/Histogram'
-export type {
-  HistogramConfig,
-  HistogramProps,
-} from './components/Histogram'
+export type {HistogramProps} from './components/Histogram'
 export {Line} from './components/Line'
-export type {LineConfig, LineProps} from './components/Line'
+export type {LineProps} from './components/Line'
 export {Plot} from './components/Plot'
 export type {
   PlotConfig,
@@ -38,12 +32,12 @@ export type {
   StaticLegendConfig,
   StaticLegendRenderEffectOptions,
 } from './components/StaticLegend'
-export type {ScatterProps, ScatterConfig} from './components/Scatter'
 export {Scatter} from './components/Scatter'
-export type {SingleStatConfig, SingleStatProps} from './components/SingleStat'
+export type {ScatterProps} from './components/Scatter'
 export {SingleStat} from './components/SingleStat'
-export type {MosaicConfig, MosaicProps} from './components/Mosaic'
+export type {SingleStatProps} from './components/SingleStat'
 export {Mosaic} from './components/Mosaic'
+export type {MosaicProps} from './components/Mosaic'
 
 // Types the configs above are written in terms of
 export type {

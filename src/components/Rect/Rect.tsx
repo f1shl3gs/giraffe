@@ -1,23 +1,22 @@
 // Libraries
-import {FunctionComponent} from 'react'
-
-// Components
-import {Tooltip} from 'components/Tooltip'
 
 // Types
 import type {LegendConfig} from 'components/Legend/LegendConfig'
-import type {ColumnGroupMap, Formatter, Scale, Table} from 'types'
 
-// Utils
-import {findHoveredRects, get1DTooltipData, get2DTooltipData} from './tooltip'
+// Components
+import {Tooltip} from 'components/Tooltip'
+import {FunctionComponent} from 'react'
+import type {ColumnGroupMap, Formatter, Scale, Table} from 'types'
 import {drawRects} from 'utils/drawRects'
 import {useCanvas} from 'utils/useCanvas'
+// Utils
+import {findHoveredRects, get1DTooltipData, get2DTooltipData} from './tooltip'
 
 /*
   The rect body, shared by <Heatmap> and <Histogram>.
 
   It takes the values it needs already resolved. It deliberately does NOT take a
-  `HeatmapConfig | HistogramConfig` union: the old RectLayer did, and had to
+  layer-config union: the old RectLayer did, and had to
   reach through it with `config as any` to read `y`, because the two configs
   disagree about whether there is a y column. Here the caller passes `x` and `y`
   as plain strings and the only branch left is `binDimension`, which is a fact

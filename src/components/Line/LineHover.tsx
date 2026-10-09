@@ -1,25 +1,34 @@
 // Libraries
-import {FunctionComponent} from 'react'
-
-// Components
-import {Tooltip} from 'components/Tooltip'
-
-// Types
-import {ColumnGroupMap, LineData, LineHoverDimension, Scale, Table} from 'types'
-import type {LineConfig} from './Line'
 
 // Utils
 import {usePlot} from 'components/Plot/PlotEnv'
-import {getPointsTooltipData} from 'utils/legend/tooltip'
-import {useCanvas} from 'utils/useCanvas'
-import {drawLineHoverData} from 'utils/drawLineHoverData'
-import {drawLines} from 'utils/drawLines'
 
+// Components
+import {Tooltip} from 'components/Tooltip'
 // Constants
 import {FILL} from 'constants/columnKeys'
+import {FunctionComponent} from 'react'
+// Types
+import {
+  ColumnGroupMap,
+  LineData,
+  LineHoverDimension,
+  LineInterpolation,
+  Scale,
+  Table,
+} from 'types'
+import {drawLineHoverData} from 'utils/drawLineHoverData'
+import {drawLines} from 'utils/drawLines'
+import {getPointsTooltipData} from 'utils/legend/tooltip'
+import {useCanvas} from 'utils/useCanvas'
 
 interface Props {
-  config: LineConfig
+  interpolation: LineInterpolation
+  fill: string[]
+  lineWidth: number
+  shadeBelow: boolean
+  shadeBelowOpacity: number
+  colorMapping?: ColumnGroupMap
   table: Table
   fillScale: Scale<number, string>
   width: number
@@ -36,7 +45,12 @@ export const LineHover: FunctionComponent<Props> = ({
   rowIndices,
   dimension,
   simplifiedLineData,
-  config,
+  interpolation,
+  fill: fillColKeys,
+  lineWidth,
+  shadeBelow,
+  shadeBelowOpacity,
+  colorMapping,
   table,
   fillScale,
   width,
@@ -45,15 +59,6 @@ export const LineHover: FunctionComponent<Props> = ({
   yScale,
   columnFormatter,
 }) => {
-  const {
-    interpolation,
-    fill: fillColKeys,
-    lineWidth,
-    shadeBelow,
-    shadeBelowOpacity,
-    colorMapping,
-  } = config
-
   const env = usePlot()
   const {xColumn, yColumn, legend} = env.config
 

@@ -1,2 +1,2 @@
-export type {AnnotationConfig, AnnotationProps} from './Annotation'
+export type {AnnotationProps} from './Annotation'
 export {Annotation} from './Annotation'

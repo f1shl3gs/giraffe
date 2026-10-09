@@ -1,8 +1,8 @@
 import type {ArgTypes, Meta, StoryObj} from '@storybook/react'
-import type {BandConfig} from 'components/Band'
+import type {BandProps} from 'components/Band'
 import {Band} from 'components/Band'
-import type {LineConfig} from 'components/Line'
 import {Line} from 'components/Line'
+import type {LineProps} from 'components/Line'
 import {PlotConfig, StaticLegendRenderEffectOptions} from 'components/Plot'
 import {Plot} from 'components/Plot'
 import {getRandomTable} from 'utils/fixtures/randomTable'
@@ -306,7 +306,7 @@ export const LineGraphWithRandomFillColumnNames: Story = {
       },
     }
 
-    const lineConfig: LineConfig = {
+    const lineConfig: LineProps = {
       fill,
       interpolation,
       colors,
@@ -319,7 +319,7 @@ export const LineGraphWithRandomFillColumnNames: Story = {
     return (
       <StoryFrame>
         <Plot table={table} config={config}>
-          <Line config={lineConfig} />
+          <Line {...lineConfig} />
         </Plot>
       </StoryFrame>
     )
@@ -344,8 +344,6 @@ export const LineGraphWithRandomFillColumnNames: Story = {
     staticLegendBorder: '1px solid orange',
     staticLegendBackgroundColor: 'transparent',
     tickFont: '10px sans-serif',
-    x: '_time',
-    y: '_value',
     valueAxisLabel: 'foo',
     xScale: 'linear',
     yScale: 'linear',
@@ -451,7 +449,7 @@ export const LineGraphWithRandomCustomFillColumns: Story = {
       },
     }
 
-    const lineConfig: LineConfig = {
+    const lineConfig: LineProps = {
       fill,
       interpolation,
       colors,
@@ -464,7 +462,7 @@ export const LineGraphWithRandomCustomFillColumns: Story = {
     return (
       <StoryFrame>
         <Plot table={table} config={config}>
-          <Line config={lineConfig} />
+          <Line {...lineConfig} />
         </Plot>
       </StoryFrame>
     )
@@ -488,8 +486,6 @@ export const LineGraphWithRandomCustomFillColumns: Story = {
     staticLegendBorder: '1px solid orange',
     staticLegendBackgroundColor: 'transparent',
     tickFont: '10px sans-serif',
-    x: '_time',
-    y: '_value',
     valueAxisLabel: 'foo',
     xScale: 'linear',
     yScale: 'linear',
@@ -589,9 +585,7 @@ export const BandPlotWithStaticCSV: Story = {
       },
     }
 
-    const bandConfig: BandConfig = {
-      x: '_time',
-      y: '_value',
+    const bandConfig: BandProps = {
       fill,
       interpolation,
       colors,
@@ -607,7 +601,7 @@ export const BandPlotWithStaticCSV: Story = {
     return (
       <StoryFrame>
         <Plot table={table} config={config}>
-          <Band config={bandConfig} />
+          <Band {...bandConfig} />
         </Plot>
       </StoryFrame>
     )
@@ -732,7 +726,7 @@ export const ColumnAlignment: Story = {
       },
     }
 
-    const lineConfig: LineConfig = {
+    const lineConfig: LineProps = {
       fill,
       interpolation,
       colors,
@@ -745,7 +739,7 @@ export const ColumnAlignment: Story = {
     return (
       <StoryFrame>
         <Plot table={columnAlignmentTable} config={config}>
-          <Line config={lineConfig} />
+          <Line {...lineConfig} />
         </Plot>
       </StoryFrame>
     )
@@ -766,8 +760,6 @@ export const ColumnAlignment: Story = {
     staticLegendBorder: '1px solid orange',
     staticLegendBackgroundColor: 'transparent',
     tickFont: '10px sans-serif',
-    x: '_time',
-    y: '_value',
     xScale: 'linear',
     yScale: 'linear',
     timeZone: 'UTC',
@@ -872,7 +864,7 @@ export const CustomCSV: Story = {
       },
     }
 
-    const lineConfig: LineConfig = {
+    const lineConfig: LineProps = {
       fill,
       interpolation,
       colors,
@@ -885,7 +877,7 @@ export const CustomCSV: Story = {
     return (
       <StoryFrame>
         <Plot table={table} config={config}>
-          <Line config={lineConfig} />
+          <Line {...lineConfig} />
         </Plot>
       </StoryFrame>
     )
@@ -907,8 +899,6 @@ export const CustomCSV: Story = {
     staticLegendBorder: '1px solid orange',
     staticLegendBackgroundColor: 'transparent',
     tickFont: '10px sans-serif',
-    x: '_time',
-    y: '_value',
     xScale: 'linear',
     yScale: 'linear',
     timeZone: 'UTC',
@@ -1031,7 +1021,7 @@ export const RenderEffect: Story = {
       },
     }
 
-    const lineConfig: LineConfig = {
+    const lineConfig: LineProps = {
       fill,
       interpolation,
       colors,
@@ -1044,7 +1034,7 @@ export const RenderEffect: Story = {
     return (
       <StoryFrame>
         <Plot table={table} config={config}>
-          <Line config={lineConfig} />
+          <Line {...lineConfig} />
         </Plot>
       </StoryFrame>
     )
@@ -1069,8 +1059,6 @@ export const RenderEffect: Story = {
     staticLegendBorder: '1px solid orange',
     staticLegendBackgroundColor: 'transparent',
     tickFont: '10px sans-serif',
-    x: '_time',
-    y: '_value',
     valueAxisLabel: 'foo',
     xScale: 'linear',
     yScale: 'linear',

@@ -1,8 +1,8 @@
 // Types
-import {AnnotationMark, LineHoverDimension, Scale} from 'types'
 
 // Constants
 import {ANNOTATION_DEFAULT_OVERLAP_HOVER_MARGIN} from 'constants/index'
+import {AnnotationMark, LineHoverDimension, Scale} from 'types'
 
 /*
   Which annotations are visible, given the domains the plot is currently

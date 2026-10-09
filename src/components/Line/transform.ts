@@ -1,11 +1,16 @@
-import {FILL} from 'constants/columnKeys'
-import {createGroupIDColumn, getNominalColorScale} from 'utils/transform'
+// Types
 import {ColumnGroupMap, LineData, Table} from 'types'
+
+// Utils
+import {createGroupIDColumn, getNominalColorScale} from 'utils/transform'
+
+// Constants
+import {FILL} from 'constants/columnKeys'
 
 export const lineTransform = (
   inputTable: Table,
-  xColumnKey: string,
-  yColumnKey: string,
+  xColumn: string,
+  yColumn: string,
   fillColKeys: string[],
   colors: string[],
   colorMapping?: ColumnGroupMap,
@@ -16,8 +21,8 @@ export const lineTransform = (
   )
 
   const table = inputTable.addColumn(FILL, 'system', 'number', fillColumn)
-  const xCol = table.getColumn(xColumnKey, 'number') || []
-  const yCol = table.getColumn(yColumnKey, 'number') || []
+  const xCol = table.getColumn(xColumn, 'number') || []
+  const yCol = table.getColumn(yColumn, 'number') || []
   const fillScale = getNominalColorScale(fillColumnMap, colors)
   const lineData: LineData = new Map()
 

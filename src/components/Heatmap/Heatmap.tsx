@@ -1,6 +1,4 @@
 // Libraries
-import type {CSSProperties} from 'react'
-import {FunctionComponent, useMemo} from 'react'
 
 // Components
 import {AutoSizer} from 'components/AutoSizer'
@@ -12,10 +10,13 @@ import {PLOT_DEFAULTS} from 'components/Plot/PlotDefaults'
 import {getFormatterForColumn} from 'components/Plot/PlotEnv'
 import {Rect} from 'components/Rect/Rect'
 import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
+import type {CSSProperties} from 'react'
+import {FunctionComponent, useMemo} from 'react'
 import type {Table, ValueFormatters} from 'types'
 import {useMousePos} from 'utils/useMousePos'
 
-export interface HeatmapConfig {
+export interface HeatmapProps {
+  table: Table
   x: string
   y: string
   xDomain?: number[]
@@ -27,14 +28,9 @@ export interface HeatmapConfig {
   strokeWidth?: number
   strokePadding?: number
   /* Reaches the same place <Scatter>'s does: PlotConfig.valueFormatters, which
-       both the axis ticks and the tooltip resolve their formatter from. */
+     both the axis ticks and the tooltip resolve their formatter from. */
   valueFormatters?: ValueFormatters
   showAxes?: boolean
-}
-
-export interface HeatmapProps {
-  config: HeatmapConfig
-  table: Table
 }
 
 const FULL_SIZE_STYLE: CSSProperties = {
@@ -45,13 +41,38 @@ const FULL_SIZE_STYLE: CSSProperties = {
   bottom: 0,
 }
 
-export const Heatmap: FunctionComponent<HeatmapProps> = ({table, config}) => {
+export const Heatmap: FunctionComponent<HeatmapProps> = ({
+  table,
+  x,
+  y,
+  xDomain,
+  yDomain,
+  binSize = 10,
+  colors = NINETEEN_EIGHTY_FOUR,
+  fillOpacity = 1,
+  strokeOpacity = 0,
+  strokeWidth = 0,
+  strokePadding = 0,
+  valueFormatters,
+  showAxes = true,
+}) => {
   return (
     <AutoSizer>
       {(width, height) => (
         <HeatmapSized
           table={table}
-          config={config}
+          x={x}
+          y={y}
+          xDomain={xDomain}
+          yDomain={yDomain}
+          binSize={binSize}
+          colors={colors}
+          fillOpacity={fillOpacity}
+          strokeOpacity={strokeOpacity}
+          strokeWidth={strokeWidth}
+          strokePadding={strokePadding}
+          valueFormatters={valueFormatters}
+          showAxes={showAxes}
           width={width}
           height={height}
         />
@@ -60,9 +81,24 @@ export const Heatmap: FunctionComponent<HeatmapProps> = ({table, config}) => {
   )
 }
 
-interface HeatmapSizedProps extends HeatmapProps {
+/* Every field the sizing wrapper needs is already resolved by <Heatmap>, so
+   none of them are optional here. */
+interface HeatmapSizedProps {
+  table: Table
   width: number
   height: number
+  x: string
+  y: string
+  xDomain: number[] | undefined
+  yDomain: number[] | undefined
+  binSize: number
+  colors: string[]
+  fillOpacity: number
+  strokeOpacity: number
+  strokeWidth: number
+  strokePadding: number
+  valueFormatters: ValueFormatters | undefined
+  showAxes: boolean
 }
 
 /*
@@ -73,25 +109,21 @@ interface HeatmapSizedProps extends HeatmapProps {
 */
 const HeatmapSized: FunctionComponent<HeatmapSizedProps> = ({
   table,
-  config,
   width,
   height,
+  x,
+  y,
+  xDomain,
+  yDomain,
+  binSize,
+  colors,
+  fillOpacity,
+  strokeOpacity,
+  strokeWidth,
+  strokePadding,
+  valueFormatters,
+  showAxes,
 }) => {
-  const {
-    x,
-    y,
-    xDomain,
-    yDomain,
-    binSize = 10,
-    colors = NINETEEN_EIGHTY_FOUR,
-    valueFormatters,
-    fillOpacity = 1,
-    strokeOpacity = 0,
-    strokePadding = 0,
-    strokeWidth = 0,
-    showAxes = true,
-  } = config
-
   const {position, onMouseMove, onMouseLeave} = useMousePos()
 
   const {binnedTable, fillScale} = useMemo(
@@ -108,7 +140,7 @@ const HeatmapSized: FunctionComponent<HeatmapSizedProps> = ({
         colors,
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [table, config, width, height],
+    [table, x, y, xDomain, yDomain, width, height, binSize, colors],
   )
 
   const plotConfig: PlotConfig = {

@@ -1,2 +1,2 @@
-export type {HistogramConfig, HistogramProps} from './Histogram'
+export type {HistogramProps} from './Histogram'
 export {Histogram} from './Histogram'

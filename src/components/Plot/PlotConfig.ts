@@ -4,14 +4,6 @@ import type {LegendConfig} from 'components/Legend/LegendConfig'
 import {StaticLegendConfig} from 'components/StaticLegend/StaticLegend'
 
 export interface PlotConfig {
-  /*
-    Which columns the axes read (D4a), and the only two required fields. Every
-    other axis property was already on this object, so the keys belong here too
-    — one axis, one definition.
-
-    Both are plain numeric columns. There is no categorical y axis (D13) and no
-    stacked y axis (D12), so a y column is always a column and nothing else.
-  */
   xColumn: string
   yColumn: string
 
