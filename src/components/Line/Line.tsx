@@ -1,15 +1,17 @@
 // Libraries
-import {FunctionComponent, useMemo} from 'react'
 
 // Components
 import {LineHover} from 'components/Line/LineHover'
-import {lineTransform} from 'components/Line/transform'
+import {
+  useLineTransform,
+} from 'components/Line/useLineTransform'
 // Utils
 import {getFormatterForColumn, usePlot} from 'components/Plot/PlotEnv'
 import {usePlotInteraction} from 'components/Plot/PlotInteractionContext'
 // Constants
 import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
 import {FILL} from 'constants/columnKeys'
+import {FunctionComponent, useMemo} from 'react'
 
 // Types
 import type {ColumnGroupMap, LineHoverDimension, LineInterpolation} from 'types'
@@ -53,9 +55,13 @@ export const Line: FunctionComponent<LineProps> = ({
   } = usePlot()
   const {hoverX, hoverY} = usePlotInteraction()
 
-  const {fillTable, lineData, fillScale} = useMemo(
-    () => lineTransform(table, xColumn, yColumn, fill, colors, colorMapping),
-    [table, xColumn, yColumn, fill, colors, colorMapping],
+  const {fillTable, lineData, fillScale} = useLineTransform(
+    table,
+    xColumn,
+    yColumn,
+    fill,
+    colors,
+    colorMapping,
   )
 
   const simplifiedLineData = useMemo(

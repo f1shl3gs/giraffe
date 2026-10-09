@@ -1,4 +1,4 @@
-import {lineTransform} from 'components/Line/transform'
+import {lineTransform} from 'components/Line/useLineTransform'
 import {DomainLabel} from 'types'
 import {dataSize, FILL_COL, largeTable, lineData} from './fixtures/line'
 import {getDomainDataFromLines} from './lineData'

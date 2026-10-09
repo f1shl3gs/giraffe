@@ -3,7 +3,7 @@ import {FILL, TIME, VALUE} from 'constants/columnKeys'
 import type {ColumnGroupMap, LineData} from 'types'
 import {newTable} from 'utils/newTable'
 
-import {lineTransform} from './transform'
+import {lineTransform} from './useLineTransform'
 
 const seriesAt = (data: LineData, id: number) => data.get(id)!
 

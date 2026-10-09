@@ -1,3 +1,6 @@
+// Libraries
+import {useMemo} from 'react'
+
 // Types
 import {ColumnGroupMap, LineData, Table} from 'types'
 
@@ -5,6 +8,7 @@ import {ColumnGroupMap, LineData, Table} from 'types'
 import {createGroupIDColumn, getNominalColorScale} from 'utils/transform'
 
 // Constants
+import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
 import {FILL} from 'constants/columnKeys'
 
 export const lineTransform = (
@@ -55,4 +59,19 @@ export const lineTransform = (
     lineData,
     fillScale,
   }
+}
+
+export const useLineTransform = (
+  table: Table,
+  xColumn: string,
+  yColumn: string,
+  fillColKeys: string[] = [],
+  colors: string[] = NINETEEN_EIGHTY_FOUR,
+  colorMapping?: ColumnGroupMap,
+) => {
+  return useMemo(
+    () =>
+      lineTransform(table, xColumn, yColumn, fillColKeys, colors, colorMapping),
+    [table, xColumn, yColumn, fillColKeys, colors, colorMapping],
+  )
 }
