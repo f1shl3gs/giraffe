@@ -1,21 +1,11 @@
 // Libraries
-
-import {
-  alignMinMaxWithBand,
-  bandTransform,
-  getBands,
-  groupLineIndicesIntoBands,
-  simplifyBandData,
-} from 'components/Band/transform'
-import {getFormatterForColumn, usePlot} from 'components/Plot/PlotEnv'
-import {usePlotInteraction} from 'components/Plot/PlotInteractionContext'
-// Constants
-import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
-import {FILL, LOWER, UPPER} from 'constants/columnKeys'
-import {CURVES} from 'constants/index'
 import {range} from 'd3-array'
 import {area, curveLinear, line} from 'd3-shape'
 import {FunctionComponent, useMemo} from 'react'
+
+// Components
+import {BandHover} from './BandHover'
+
 // Types
 import {
   BandLineMap,
@@ -23,13 +13,27 @@ import {
   LineHoverDimension,
   LineInterpolation,
 } from 'types'
-import {useCanvas} from 'utils/useCanvas'
-import {useHoverPointIndices} from 'utils/useHoverPointIndices'
-// Components
-import {BandHover} from './BandHover'
+
 // Utils
+import {
+  alignMinMaxWithBand,
+  getBands,
+  groupLineIndicesIntoBands,
+  simplifyBandData,
+  useBandTransform,
+} from 'components/Band/useBandTransform'
+import {getFormatterForColumn, usePlot} from 'components/Plot/PlotEnv'
+import {usePlotInteraction} from 'components/Plot/PlotInteractionContext'
 import {getBandHoverIndices, getLineLengths} from './bandHover'
 import {useBandHoverColumns} from './useBandHover'
+import {useCanvas} from 'utils/useCanvas'
+import {useHoverPointIndices} from 'utils/useHoverPointIndices'
+
+// Constants
+import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
+import {FILL, LOWER, UPPER} from 'constants/columnKeys'
+import {CURVES} from 'constants/index'
+import {NO_FILL_COLUMNS} from 'utils/transform'
 
 const HIGHLIGHT_HOVERED_LINE = 0.4
 const NO_HIGHLIGHT = 1
@@ -49,7 +53,7 @@ export interface BandProps {
 }
 
 export const Band: FunctionComponent<BandProps> = ({
-  fill = [],
+  fill = NO_FILL_COLUMNS,
   hoverDimension = 'auto',
   maxTooltipRows = 24,
   interpolation = 'linear',
@@ -72,28 +76,15 @@ export const Band: FunctionComponent<BandProps> = ({
   const {hoverX, hoverY} = usePlotInteraction()
   const legendHide = legend?.hide ?? false
 
-  const {bandLineMap, fillTable, lineData, fillColumnMap} = useMemo(
-    () =>
-      bandTransform(
-        table,
-        xColumn,
-        yColumn,
-        fill,
-        colors,
-        lowerColumnName,
-        mainColumnName,
-        upperColumnName,
-      ),
-    [
-      table,
-      xColumn,
-      yColumn,
-      fill,
-      colors,
-      lowerColumnName,
-      mainColumnName,
-      upperColumnName,
-    ],
+  const {bandLineMap, fillTable, lineData, fillColumnMap} = useBandTransform(
+    table,
+    xColumn,
+    yColumn,
+    fill,
+    colors,
+    lowerColumnName,
+    mainColumnName,
+    upperColumnName,
   )
 
   const simplifiedLineData = useMemo(

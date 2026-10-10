@@ -453,7 +453,6 @@ export interface GaugeProps {
   gaugeTheme?: Partial<GaugeTheme>
 }
 
-
 /*
   Gauge is standalone: it is an AutoSizer plus a canvas and needs no shared
   coordinate system, so it renders without a <Plot> wrapper.

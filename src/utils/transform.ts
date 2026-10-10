@@ -6,10 +6,33 @@ import {scaleOrdinal} from 'd3-scale'
 // Types
 import {ColumnGroupMap, NumericColumnData, Scale, Table} from 'types'
 
+/*
+  A shared identity for "no grouping columns".
+
+  An inline `fill = []` default is a fresh array on every render. Hand one to a
+  memo dependency and it misses every time, which here rebuilds the line data,
+  rebuilds the simplified copy, and repaints -- on every mouse move, since
+  hovering re-renders the layer through PlotInteractionContext. Nothing warns
+  about it; the chart just gets quietly expensive.
+
+  <Line> and <Band> both need a real array to pass on to their hover layer, so
+  the constant lives here rather than being duplicated per component.
+*/
+export const NO_FILL_COLUMNS: string[] = []
+
 export const createGroupIDColumn = (
   table: Table,
   columnKeys: string[],
 ): [NumericColumnData, ColumnGroupMap] => {
+  /*
+    Resolved once, up front. Reading `table.getColumn(k)` inside the row loop
+    meant one lookup per row per grouping column -- 100,000 of them for a
+    5,000-row table over 20 columns, where the table holds 20. This runs on every
+    `table` change, which for a live dashboard is often, and it was the single
+    largest cost in both <Line> and <Band>.
+  */
+  const columns = columnKeys.map(key => table.getColumn(key))
+
   const groupIDColumn = new Float64Array(table.length)
   const mappings = []
   const groupIDs = {}
@@ -19,8 +42,8 @@ export const createGroupIDColumn = (
   for (let i = 0; i < table.length; i++) {
     const mapping = {}
 
-    for (const k of columnKeys) {
-      mapping[k] = table.getColumn(k)[i]
+    for (let c = 0; c < columnKeys.length; c++) {
+      mapping[columnKeys[c]] = columns[c][i]
     }
 
     const hashedGroupValues = Object.values(mapping).sort().join('')

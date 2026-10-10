@@ -26,7 +26,7 @@ import {useCanvas} from 'utils/useCanvas'
 import {Tooltip} from '../Tooltip'
 // Utils
 import {getBandHoverPoints} from './bandHover'
-import {createLatestBandIndices, sortBandLines} from './transform'
+import {createLatestBandIndices, sortBandLines} from './useBandTransform'
 
 interface Props {
   bandHoverIndices: BandLineMap

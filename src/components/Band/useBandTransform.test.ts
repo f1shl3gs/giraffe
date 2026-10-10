@@ -14,7 +14,7 @@ import {
   groupLineIndicesIntoBands,
   simplifyBandData,
   sortBandLines,
-} from './transform'
+} from './useBandTransform'
 
 /* Several cases deliberately push nulls into xs/ys, which LineData forbids. */
 const seriesAt = (

@@ -1,8 +1,10 @@
-// Types
+// Libraries
 
 // Constants
+import {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'
 import {FILL, LOWER, RESULT, UPPER} from 'constants/columnKeys'
 import {BAND_COLOR_SCALE_CONSTANT} from 'constants/index'
+import {useMemo} from 'react'
 import {
   Band,
   BandLineMap,
@@ -17,7 +19,11 @@ import {
 import {isSortable, sortIndicesByValueColumn} from 'utils/legend/sort'
 import {scalePoints} from 'utils/lineData'
 // Utils
-import {createGroupIDColumn, createNominalColorScale} from 'utils/transform'
+import {
+  createGroupIDColumn,
+  createNominalColorScale,
+  NO_FILL_COLUMNS,
+} from 'utils/transform'
 
 /* The transform's output, consumed only by Band and BandHover. */
 export const getBands = (
@@ -617,3 +623,37 @@ export const sortBandLines = (
 
   return bandLineMap
 }
+
+export const useBandTransform = (
+  table: Table,
+  xColumnKey: string,
+  yColumnKey: string,
+  fillColKeys: string[] = NO_FILL_COLUMNS,
+  colors: string[] = NINETEEN_EIGHTY_FOUR,
+  lowerColumnName: string = '',
+  rowColumnName: string = '',
+  upperColumnName: string = '',
+) =>
+  useMemo(
+    () =>
+      bandTransform(
+        table,
+        xColumnKey,
+        yColumnKey,
+        fillColKeys,
+        colors,
+        lowerColumnName,
+        rowColumnName,
+        upperColumnName,
+      ),
+    [
+      table,
+      xColumnKey,
+      yColumnKey,
+      fillColKeys,
+      colors,
+      lowerColumnName,
+      rowColumnName,
+      upperColumnName,
+    ],
+  )

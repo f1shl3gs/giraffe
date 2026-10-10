@@ -2,9 +2,7 @@
 
 // Components
 import {LineHover} from 'components/Line/LineHover'
-import {
-  useLineTransform,
-} from 'components/Line/useLineTransform'
+import {useLineTransform} from 'components/Line/useLineTransform'
 // Utils
 import {getFormatterForColumn, usePlot} from 'components/Plot/PlotEnv'
 import {usePlotInteraction} from 'components/Plot/PlotInteractionContext'
@@ -17,6 +15,7 @@ import {FunctionComponent, useMemo} from 'react'
 import type {ColumnGroupMap, LineHoverDimension, LineInterpolation} from 'types'
 import {drawLines} from 'utils/drawLines'
 import {simplifyLineData} from 'utils/lineData'
+import {NO_FILL_COLUMNS} from 'utils/transform'
 import {useCanvas} from 'utils/useCanvas'
 import {useHoverPointIndices} from 'utils/useHoverPointIndices'
 
@@ -34,7 +33,7 @@ export interface LineProps {
 }
 
 export const Line: FunctionComponent<LineProps> = ({
-  fill = [],
+  fill = NO_FILL_COLUMNS,
   colors = NINETEEN_EIGHTY_FOUR,
   colorMapping,
   colorMappingCallback,
