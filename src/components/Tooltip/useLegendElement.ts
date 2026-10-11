@@ -2,7 +2,7 @@
 
 // Constants
 import {CLOCKFACE_Z_INDEX, LEAFLET_Z_INDEX} from 'constants/index'
-import {useEffect, useRef} from 'react'
+import {useLayoutEffect, useRef} from 'react'
 // Utils
 import {useLayoutStyle} from 'utils/useLayoutStyle'
 import {useRefMousePos} from 'utils/useMousePos'
@@ -48,18 +48,32 @@ export const useLegendElement = (className: string) => {
       it must never take the pointer.
     */
     ref.current.style.pointerEvents = 'none'
-    /* Appended here, during render, rather than in an effect. The tooltip
-       positions itself in a layout effect by reading its own offsetWidth, and a
-       node that is not in the document yet measures 0. Reading 0 makes the
-       overflow test below pass, so a freshly mounted tooltip would sit on the
-       right of the cursor and then jump to the left on the next frame, once the
-       node was attached and the real width was measured. */
-    document.body.appendChild(ref.current)
   }
 
-  useEffect(() => {
+  /*
+    Attached here rather than during render, but still ahead of the positioning
+    effect below: a node that is not in the document measures 0, so reading 0
+    makes that effect's overflow test pick the right of the cursor and the
+    tooltip then jumps left a frame later once the real width is measured.
+
+    Appending during render is what produced "Failed to execute 'removeChild':
+    the node to be removed is not a child of this node". Append and remove then
+    lived in different phases, and StrictMode re-runs an effect's cleanup without
+    re-running render, so the first cleanup detached the node and the second one
+    tried to detach it again. Keeping both here makes the pair symmetric, and
+    `remove()` rather than `removeChild()` makes the detach idempotent.
+  */
+  useLayoutEffect(() => {
+    const el = ref.current
+
+    if (!el) {
+      return
+    }
+
+    document.body.appendChild(el)
+
     return () => {
-      document.body.removeChild(ref.current)
+      el.remove()
     }
   }, [])
 

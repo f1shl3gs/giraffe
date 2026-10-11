@@ -899,7 +899,7 @@ TableGraphLayerConfig uses the `fluxResponse` property from `config` as the data
 
   - **type**: _'custom'. **Required**._ Specifies that this LayerConfig is a custom layer.
 
-  - **render**: _function(Object). **Required**._ A configuration-defined callback function called with a `CustomLayerRenderProps` and returns a JSX Element. The `CustomerLayerRenderProps` Object has the following properties available to use in the callback function:
+  - **render**: _function (Object). **Required**._ A configuration-defined callback function called with a `CustomRenderProps` and returns a JSX Element. The `CustomerLayerRenderProps` Object has the following properties available to use in the callback function:
 
     - **key**: _string | number._ As part of a [React list of rendered elements](https://reactjs.org/docs/lists-and-keys.html), a unique `key` prop is required on the JSX Element returned by the custom layer's render function. Use this **key** for the `key` prop in the JSX Element.
 

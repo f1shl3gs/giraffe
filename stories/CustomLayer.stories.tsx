@@ -1,6 +1,6 @@
 import type {Meta, StoryObj} from '@storybook/react'
 
-import {CustomLayer} from 'components/CustomLayer'
+import {Custom} from 'components/Custom'
 import {Line} from 'components/Line'
 import type {LineProps} from 'components/Line'
 import type {PlotConfig} from 'components/Plot'
@@ -43,7 +43,7 @@ export const HighlightedRegion: Story = {
     <StoryFrame>
       <Plot table={TABLE} config={PLOT_CONFIG}>
         <Line {...LINE_CONFIG} />
-        <CustomLayer>
+        <Custom>
           {({yScale}) => (
             <div
               style={{
@@ -57,7 +57,7 @@ export const HighlightedRegion: Story = {
               }}
             />
           )}
-        </CustomLayer>
+        </Custom>
       </Plot>
     </StoryFrame>
   ),
@@ -68,7 +68,7 @@ export const HorizontalThreshold: Story = {
     <StoryFrame>
       <Plot table={TABLE} config={PLOT_CONFIG}>
         <Line {...LINE_CONFIG} />
-        <CustomLayer>
+        <Custom>
           {({yScale, columnFormatter}) => (
             <>
               <div
@@ -91,7 +91,7 @@ export const HorizontalThreshold: Story = {
               </div>
             </>
           )}
-        </CustomLayer>
+        </Custom>
       </Plot>
     </StoryFrame>
   ),
@@ -107,7 +107,7 @@ export const VerticalMarker: Story = {
     <StoryFrame>
       <Plot table={TABLE} config={PLOT_CONFIG}>
         <Line {...LINE_CONFIG} />
-        <CustomLayer>
+        <Custom>
           {({xScale, innerHeight}) => {
             const xCol = TABLE.getColumn('_time', 'number') || []
             const first = xCol[0] + (xCol[xCol.length - 1] - xCol[0]) * 0.62
@@ -136,7 +136,7 @@ export const VerticalMarker: Story = {
               </>
             )
           }}
-        </CustomLayer>
+        </Custom>
       </Plot>
     </StoryFrame>
   ),
@@ -163,7 +163,7 @@ const HoverReadout = () => {
   const {hoverX, hoverY} = usePlotInteraction()
 
   return (
-    <CustomLayer>
+    <Custom>
       {({yScale, innerHeight}) => {
         if (hoverX === null || hoverY === null) {
           return <div style={fullWidthBox} />
@@ -205,6 +205,6 @@ const HoverReadout = () => {
           </>
         )
       }}
-    </CustomLayer>
+    </Custom>
   )
 }

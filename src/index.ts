@@ -6,11 +6,11 @@ export {Annotation} from './components/Annotation'
 export type {AnnotationProps} from './components/Annotation'
 export {Band} from './components/Band'
 export type {BandProps} from './components/Band'
-export {CustomLayer} from './components/CustomLayer'
+export {Custom} from './components/Custom'
 export type {
-  CustomLayerProps,
-  CustomLayerRenderProps,
-} from './components/CustomLayer'
+  CustomProps,
+  CustomRenderProps,
+} from './components/Custom'
 export {Gauge} from './components/Gauge'
 export type {GaugeProps} from './components/Gauge'
 export {Geo} from './components/Geo'
@@ -108,3 +108,6 @@ export {
   siPrefixFormatter,
   timeFormatter,
 } from './utils/formatters'
+
+// Constants
+export {NINETEEN_EIGHTY_FOUR} from 'constants/colorSchemes'

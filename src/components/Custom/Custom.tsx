@@ -16,7 +16,7 @@ import type {ColumnType, Formatter, Scale} from 'types'
   `usePlotInteraction()` itself, so this render prop is a convenience rather than
   a gate: if you need hoverX / hoverY, or any state of your own, reach past it.
 */
-export interface CustomLayerRenderProps {
+export interface CustomRenderProps {
   xScale: Scale<number, number>
   yScale: Scale<number, number>
   xDomain: number[]
@@ -29,8 +29,8 @@ export interface CustomLayerRenderProps {
   columnFormatter: (columnKey: string) => Formatter
 }
 
-export interface CustomLayerProps {
-  children: (props: CustomLayerRenderProps) => ReactElement
+export interface CustomProps {
+  children: (props: CustomRenderProps) => ReactElement
 }
 
 /*
@@ -45,9 +45,7 @@ export interface CustomLayerProps {
   Note that everything inside `.giraffe-plot` is absolutely positioned, so what
   you return has to position itself.
 */
-export const CustomLayer: FunctionComponent<CustomLayerProps> = ({
-  children,
-}) => {
+export const Custom: FunctionComponent<CustomProps> = ({children}) => {
   const env = usePlot()
 
   return children({
