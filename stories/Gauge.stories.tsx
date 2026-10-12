@@ -78,12 +78,12 @@ const render = (args: GaugeArgs) => {
       isEnforced: true,
       digits: Number(decimalPlaces),
     },
-    gaugeColors: [
+    colors: [
       {...DEFAULT_GAUGE_COLORS[0], value: Number(gaugeMin)},
       {...DEFAULT_GAUGE_COLORS[1], value: Number(gaugeMax)},
     ],
-    gaugeSize,
-    gaugeTheme: {
+    size: gaugeSize,
+    theme: {
       valuePositionYOffset,
       valuePositionXOffset,
       lineCount: Number(lineCount),

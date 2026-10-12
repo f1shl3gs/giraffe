@@ -98,6 +98,7 @@ export type {FromFluxResult} from './utils/fromFlux'
 export {fromFlux} from './utils/fromFlux'
 export {fromRows} from './utils/fromRows'
 export {newTable} from './utils/newTable'
+export {getLatestValues} from './utils/getLatestValues'
 
 // Formatting
 export type {TimeFormatterFactoryOptions} from './utils/formatters'

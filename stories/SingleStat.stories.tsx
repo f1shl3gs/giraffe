@@ -49,7 +49,7 @@ const singleStatTable = newTable(numberOfRecords)
 
 interface SingleStatArgs {
   decimalPlaces: number
-  textOpacity: number
+  opacity: number
   viewBoxWidth: number
   viewBoxX: number
   viewBoxY: number
@@ -87,7 +87,7 @@ type Story = StoryObj<SingleStatArgs>
 const COLUMNS = findXYColumns(singleStatTable)
 const STRING_COLUMNS = findStringColumns(singleStatTable)
 
-const textOpacityControl = {
+const opacityControl = {
   control: {type: 'range', min: 0, max: 1, step: 0.01},
 } as const
 const viewBoxWidthControl = {
@@ -106,7 +106,7 @@ export const SingleStat: Story = {
       prefix,
       suffix,
       decimalPlaces,
-      textOpacity,
+      opacity,
       viewBoxWidth,
       viewBoxX,
       viewBoxY,
@@ -118,8 +118,8 @@ export const SingleStat: Story = {
         isEnforced: true,
         digits: decimalPlaces,
       },
-      textColor: LASER,
-      textOpacity,
+      color: LASER,
+      opacity,
       svgAttributes: {
         viewBox: stat =>
           `${viewBoxX} ${viewBoxY} ${stat.length * viewBoxWidth} 100`,
@@ -140,7 +140,7 @@ export const SingleStat: Story = {
   },
   args: {
     decimalPlaces: 4,
-    textOpacity: 1,
+    opacity: 1,
     viewBoxWidth: 55,
     viewBoxX: 0,
     viewBoxY: 0,
@@ -149,7 +149,7 @@ export const SingleStat: Story = {
   },
   argTypes: {
     decimalPlaces: {control: {type: 'number'}},
-    textOpacity: textOpacityControl,
+    opacity: opacityControl,
     viewBoxWidth: viewBoxWidthControl,
     viewBoxX: viewBoxXControl,
     viewBoxY: viewBoxYControl,
@@ -163,7 +163,7 @@ export const SingleStatCustomCsv: Story = {
       prefix,
       suffix,
       decimalPlaces,
-      textOpacity,
+      opacity,
       viewBoxWidth,
       viewBoxX,
       viewBoxY,
@@ -175,8 +175,8 @@ export const SingleStatCustomCsv: Story = {
         isEnforced: true,
         digits: decimalPlaces,
       },
-      textColor: LASER,
-      textOpacity,
+      color: LASER,
+      opacity,
       svgAttributes: {
         viewBox: stat =>
           `${viewBoxX} ${viewBoxY} ${stat.length * viewBoxWidth} 100`,
@@ -198,7 +198,7 @@ export const SingleStatCustomCsv: Story = {
   args: {
     csv: '',
     decimalPlaces: 4,
-    textOpacity: 1,
+    opacity: 1,
     viewBoxWidth: 55,
     viewBoxX: 0,
     viewBoxY: 0,
@@ -207,7 +207,7 @@ export const SingleStatCustomCsv: Story = {
   },
   argTypes: {
     decimalPlaces: {control: {type: 'number'}},
-    textOpacity: textOpacityControl,
+    opacity: opacityControl,
     viewBoxWidth: viewBoxWidthControl,
     viewBoxX: viewBoxXControl,
     viewBoxY: viewBoxYControl,
@@ -219,7 +219,7 @@ export const SingleStatOnTopOfLineLayer: Story = {
     const {
       includeSingleStatLayer,
       decimalPlaces,
-      textOpacity,
+      opacity,
       viewBoxWidth,
       viewBoxX,
       viewBoxY,
@@ -286,8 +286,8 @@ export const SingleStatOnTopOfLineLayer: Story = {
         isEnforced: true,
         digits: decimalPlaces,
       },
-      textColor: LASER,
-      textOpacity,
+      color: LASER,
+      opacity,
       svgAttributes: {
         viewBox: stat =>
           `${viewBoxX} ${viewBoxY} ${stat.length * viewBoxWidth} 100`,
@@ -329,7 +329,7 @@ export const SingleStatOnTopOfLineLayer: Story = {
   args: {
     includeSingleStatLayer: true,
     decimalPlaces: 2,
-    textOpacity: 1,
+    opacity: 1,
     viewBoxWidth: 55,
     viewBoxX: 0,
     viewBoxY: 0,
@@ -357,7 +357,7 @@ export const SingleStatOnTopOfLineLayer: Story = {
   },
   argTypes: {
     decimalPlaces: {control: {type: 'number'}},
-    textOpacity: textOpacityControl,
+    opacity: opacityControl,
     viewBoxWidth: viewBoxWidthControl,
     viewBoxX: viewBoxXControl,
     viewBoxY: viewBoxYControl,

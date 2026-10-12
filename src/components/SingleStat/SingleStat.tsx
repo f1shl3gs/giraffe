@@ -1,5 +1,13 @@
 // Libraries
 import {CSSProperties, FunctionComponent, useMemo} from 'react'
+
+// Types
+import type {DecimalPlaces, SVGAttributes, Table} from 'types'
+
+// Utils
+import {formatStatValue} from 'utils/formatStatValue'
+import {getLatestValues} from 'utils/getLatestValues'
+
 // Constants
 import {
   SINGLE_STAT_DEFAULT_TEST_ID,
@@ -8,11 +16,6 @@ import {
   SINGLE_STAT_SVG_TEXT_DEFAULT_ATTRIBUTES,
   SINGLE_STAT_SVG_TEXT_DEFAULT_STYLE,
 } from 'style/singleStatStyles'
-// Types
-import type {DecimalPlaces, SVGAttributes, Table} from 'types'
-// Utils
-import {formatStatValue} from 'utils/formatStatValue'
-import {getLatestValues} from './getLatestValues'
 
 // Styles
 import './SingleStat.scss'
@@ -22,8 +25,8 @@ export interface SingleStatProps {
   prefix: string
   suffix: string
   decimalPlaces: DecimalPlaces
-  textColor: string
-  textOpacity?: number
+  color: string
+  opacity?: number
   backgroundColor?: string
   testID?: string
   style?: CSSProperties
@@ -39,8 +42,8 @@ export const SingleStat: FunctionComponent<SingleStatProps> = ({
   prefix,
   suffix,
   decimalPlaces,
-  textColor,
-  textOpacity = 1,
+  color,
+  opacity = 1,
   backgroundColor = null,
   testID = SINGLE_STAT_DEFAULT_TEST_ID,
   style = {},
@@ -65,8 +68,8 @@ export const SingleStat: FunctionComponent<SingleStatProps> = ({
       prefix={prefix}
       suffix={suffix}
       decimalPlaces={decimalPlaces}
-      textColor={textColor}
-      textOpacity={textOpacity}
+      textColor={color}
+      opacity={opacity}
       backgroundColor={backgroundColor}
       testID={testID}
       style={style}
@@ -87,7 +90,7 @@ interface SingleStatViewProps {
   suffix: string
   decimalPlaces: DecimalPlaces
   textColor: string
-  textOpacity: number
+  opacity: number
   backgroundColor: string | null
   testID: string
   style: CSSProperties
@@ -107,7 +110,7 @@ const SingleStatView: FunctionComponent<SingleStatViewProps> = ({
   suffix,
   decimalPlaces,
   textColor,
-  textOpacity,
+  opacity,
   backgroundColor,
   testID,
   style,
@@ -158,7 +161,7 @@ const SingleStatView: FunctionComponent<SingleStatViewProps> = ({
             {...({
               ...SINGLE_STAT_SVG_TEXT_DEFAULT_ATTRIBUTES,
               ...svgTextAttributes,
-              opacity: textOpacity,
+              opacity,
             } as any)}
             className='giraffe-single-stat--text'
             style={{

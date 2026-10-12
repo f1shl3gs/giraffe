@@ -25,6 +25,10 @@ import {
    The canvas gauge: draws the arc, ticks, labels, needle and value.
    ------------------------------------------------------------------- */
 
+/* Hoisted so the default is a stable identity: `GaugeCanvas` lists
+   `decimalPlaces` in its effect dependencies. */
+const EMPTY_DECIMAL_PLACES: DecimalPlaces = {}
+
 interface GaugeCanvasProps {
   width: number
   height: number
@@ -61,9 +65,18 @@ const resetCanvas = (
 
 const updateCanvas = (
   canvasRef: RefObject<HTMLCanvasElement>,
-  props: GaugeCanvasProps,
+  width: number,
+  height: number,
+  colors: Color[],
+  theme: GaugeTheme,
+  gaugeSize: number,
+  gaugePosition: number,
+  prefix: string,
+  suffix: string,
+  tickPrefix: string,
+  tickSuffix: string,
+  decimalPlaces: DecimalPlaces,
 ): void => {
-  const {width, height, colors, theme, gaugeSize} = props
   resetCanvas(canvasRef, width, height)
 
   const canvas = canvasRef.current
@@ -124,9 +137,38 @@ const updateCanvas = (
     theme,
     gaugeSize,
   )
-  drawGaugeLabels(ctx, radius, gradientThickness, minValue, maxValue, props)
-  drawGaugeValue(ctx, radius, labelValueFontSize, props)
-  drawNeedle(ctx, radius, minValue, maxValue, props)
+  drawGaugeLabels(
+    ctx,
+    radius,
+    gradientThickness,
+    minValue,
+    maxValue,
+    tickPrefix,
+    tickSuffix,
+    decimalPlaces,
+    gaugeSize,
+    theme,
+  )
+  drawGaugeValue(
+    ctx,
+    radius,
+    labelValueFontSize,
+    gaugePosition,
+    prefix,
+    suffix,
+    decimalPlaces,
+    theme,
+  )
+  drawNeedle(
+    ctx,
+    radius,
+    minValue,
+    maxValue,
+    gaugePosition,
+    gaugeSize,
+    decimalPlaces,
+    theme,
+  )
 }
 
 const drawGradientGauge = (
@@ -297,10 +339,13 @@ const drawGaugeLabels = (
   gradientThickness: number,
   minValue: number,
   maxValue: number,
-  props: GaugeCanvasProps,
+  tickPrefix: string,
+  tickSuffix: string,
+  decimalPlaces: DecimalPlaces,
+  gaugeSize: number,
+  theme: GaugeTheme,
 ): void => {
-  const {tickPrefix, tickSuffix, decimalPlaces, gaugeSize} = props
-  const {lineCount, labelColor, labelFontSize} = props.theme
+  const {lineCount, labelColor, labelFontSize} = theme
 
   const tickValues = [
     ...range(minValue, maxValue, Math.abs(maxValue - minValue) / lineCount),
@@ -353,10 +398,13 @@ const drawGaugeValue = (
   ctx: CanvasRenderingContext2D,
   radius: number,
   labelValueFontSize: number,
-  props: GaugeCanvasProps,
+  gaugePosition: number,
+  prefix: string,
+  suffix: string,
+  decimalPlaces: DecimalPlaces,
+  theme: GaugeTheme,
 ): void => {
-  const {gaugePosition, prefix, suffix, decimalPlaces} = props
-  const {valueColor, valuePositionYOffset, valuePositionXOffset} = props.theme
+  const {valueColor, valuePositionYOffset, valuePositionXOffset} = theme
 
   ctx.font = `${labelValueFontSize}px 'Proxima Nova', Helvetica, Arial, Tahoma, Verdana, sans-serif`
   ctx.fillStyle = valueColor
@@ -379,10 +427,12 @@ const drawNeedle = (
   radius: number,
   minValue: number,
   maxValue: number,
-  props: GaugeCanvasProps,
+  gaugePosition: number,
+  gaugeSize: number,
+  decimalPlaces: DecimalPlaces,
+  theme: GaugeTheme,
 ): void => {
-  const {gaugePosition, gaugeSize, decimalPlaces} = props
-  const {needleColor0, needleColor1, overflowDelta} = props.theme
+  const {needleColor0, needleColor1, overflowDelta} = theme
   const arcDistance = gaugeSize
 
   let needleRotation: number
@@ -421,15 +471,49 @@ const drawNeedle = (
   ctx.fill()
 }
 
-const GaugeCanvas: FunctionComponent<GaugeCanvasProps> = (
-  props: GaugeCanvasProps,
-) => {
-  const {width, height} = props
+const GaugeCanvas: FunctionComponent<GaugeCanvasProps> = ({
+  width,
+  height,
+  colors,
+  theme,
+  gaugeSize,
+  gaugePosition,
+  prefix,
+  suffix,
+  tickPrefix,
+  tickSuffix,
+  decimalPlaces,
+}) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
-    updateCanvas(canvasRef, props)
-  }, [props])
+    updateCanvas(
+      canvasRef,
+      width,
+      height,
+      colors,
+      theme,
+      gaugeSize,
+      gaugePosition,
+      prefix,
+      suffix,
+      tickPrefix,
+      tickSuffix,
+      decimalPlaces,
+    )
+  }, [
+    width,
+    height,
+    colors,
+    theme,
+    gaugeSize,
+    gaugePosition,
+    prefix,
+    suffix,
+    tickPrefix,
+    tickSuffix,
+    decimalPlaces,
+  ])
 
   return (
     <canvas
@@ -443,14 +527,16 @@ const GaugeCanvas: FunctionComponent<GaugeCanvasProps> = (
 
 export interface GaugeProps {
   value: number
-  gaugeColors: Color[]
+  decimalPlaces?: DecimalPlaces
+
   prefix?: string
   suffix?: string
   tickPrefix?: string
   tickSuffix?: string
-  decimalPlaces?: DecimalPlaces
-  gaugeSize?: number
-  gaugeTheme?: Partial<GaugeTheme>
+
+  colors: Color[]
+  size?: number
+  theme?: Partial<GaugeTheme>
 }
 
 /*
@@ -459,14 +545,14 @@ export interface GaugeProps {
 */
 export const Gauge: FunctionComponent<GaugeProps> = ({
   value,
-  gaugeColors,
+  colors,
   prefix = '',
   suffix = '',
   tickPrefix = '',
   tickSuffix = '',
-  decimalPlaces = {},
-  gaugeSize = Math.PI,
-  gaugeTheme = {},
+  decimalPlaces = EMPTY_DECIMAL_PLACES,
+  size = Math.PI,
+  theme = {},
 }) => {
   const MAX_PI_DECIMALS = 3 // values above 3 distort Gauge styling
 
@@ -476,9 +562,7 @@ export const Gauge: FunctionComponent<GaugeProps> = ({
       maximum: 2 * pi (whole circle)
   */
   const validGaugeSize = Number(
-    Math.min(Math.max(gaugeSize, Math.PI), 2 * Math.PI).toFixed(
-      MAX_PI_DECIMALS,
-    ),
+    Math.min(Math.max(size, Math.PI), 2 * Math.PI).toFixed(MAX_PI_DECIMALS),
   )
 
   return (
@@ -491,7 +575,7 @@ export const Gauge: FunctionComponent<GaugeProps> = ({
           <GaugeCanvas
             width={width}
             height={height}
-            colors={gaugeColors}
+            colors={colors}
             prefix={prefix}
             tickPrefix={tickPrefix}
             suffix={suffix}
@@ -499,7 +583,7 @@ export const Gauge: FunctionComponent<GaugeProps> = ({
             gaugePosition={value}
             decimalPlaces={decimalPlaces}
             gaugeSize={validGaugeSize}
-            theme={{...GAUGE_THEME_DARK, ...gaugeTheme}}
+            theme={{...GAUGE_THEME_DARK, ...theme}}
           />
         </div>
       )}
