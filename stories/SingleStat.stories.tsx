@@ -16,6 +16,7 @@ import type {LineHoverDimension, LineInterpolation} from 'types'
 import {timeFormatter} from 'utils/formatters'
 import {fromFlux} from 'utils/fromFlux'
 import {newTable} from 'utils/newTable'
+import {getLatestValues} from 'utils/getLatestValues'
 
 const numberOfRecords = 20
 const recordsPerLine = 20
@@ -132,9 +133,12 @@ export const SingleStat: Story = {
         letterSpacing: '-0.05em',
       },
     }
+
+    const latestValues = getLatestValues(singleStatTable);
+
     return (
       <StoryFrame>
-        <SingleStatComponent table={singleStatTable} {...singleStatProps} />
+        <SingleStatComponent {...singleStatProps}  value={latestValues[0]} />
       </StoryFrame>
     )
   },
@@ -189,9 +193,11 @@ export const SingleStatCustomCsv: Story = {
         letterSpacing: '-0.05em',
       },
     }
+    const latestValues = getLatestValues(fromFlux(csv).table)
+
     return (
       <StoryFrame>
-        <SingleStatComponent table={fromFlux(csv).table} {...singleStatProps} />
+        <SingleStatComponent value={latestValues[0]} {...singleStatProps} />
       </StoryFrame>
     )
   },
@@ -310,6 +316,8 @@ export const SingleStatOnTopOfLineLayer: Story = {
       plot's margins and let the axes paint on top of it. Overlaying a number on
       a chart is a layout decision, so it belongs to the consumer.
     */
+    const singleStatLayerValues = getLatestValues(singleStatTable)
+
     return (
       <StoryFrame>
         <div style={{position: 'relative', width: '100%', height: '100%'}}>
@@ -318,7 +326,7 @@ export const SingleStatOnTopOfLineLayer: Story = {
           </Plot>
           {includeSingleStatLayer && (
             <SingleStatComponent
-              table={singleStatTable}
+              value={singleStatLayerValues[0]}
               {...singleStatProps}
             />
           )}

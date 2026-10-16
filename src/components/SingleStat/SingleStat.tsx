@@ -1,12 +1,11 @@
 // Libraries
-import {CSSProperties, FunctionComponent, useMemo} from 'react'
+import {CSSProperties, FunctionComponent} from 'react'
 
 // Types
-import type {DecimalPlaces, SVGAttributes, Table} from 'types'
+import type {DecimalPlaces, SVGAttributes} from 'types'
 
 // Utils
 import {formatStatValue} from 'utils/formatStatValue'
-import {getLatestValues} from 'utils/getLatestValues'
 
 // Constants
 import {
@@ -21,7 +20,7 @@ import {
 import './SingleStat.scss'
 
 export interface SingleStatProps {
-  table: Table
+  value?: number
   prefix: string
   suffix: string
   decimalPlaces: DecimalPlaces
@@ -37,8 +36,11 @@ export interface SingleStatProps {
   svgTextStyle?: CSSProperties
 }
 
+const getDefaultViewBox = (stat: string): string =>
+  `0 0 ${stat.length * 55} 100`
+
 export const SingleStat: FunctionComponent<SingleStatProps> = ({
-  table,
+  value,
   prefix,
   suffix,
   decimalPlaces,
@@ -53,8 +55,7 @@ export const SingleStat: FunctionComponent<SingleStatProps> = ({
   svgTextAttributes = {},
   svgTextStyle = {},
 }) => {
-  const latestValues = useMemo(() => getLatestValues(table), [table])
-  if (latestValues.length === 0) {
+  if (value === undefined) {
     return (
       <div>
         <h4>No latest value found</h4>
@@ -62,65 +63,7 @@ export const SingleStat: FunctionComponent<SingleStatProps> = ({
     )
   }
 
-  return (
-    <SingleStatView
-      stat={latestValues[0]}
-      prefix={prefix}
-      suffix={suffix}
-      decimalPlaces={decimalPlaces}
-      textColor={color}
-      opacity={opacity}
-      backgroundColor={backgroundColor}
-      testID={testID}
-      style={style}
-      resizerStyle={resizerStyle}
-      svgAttributes={svgAttributes}
-      svgStyle={svgStyle}
-      svgTextAttributes={svgTextAttributes}
-      svgTextStyle={svgTextStyle}
-    />
-  )
-}
-
-/* Every field the view needs is already resolved by <SingleStat>, so none of
-   them are optional here. */
-interface SingleStatViewProps {
-  stat: number
-  prefix: string
-  suffix: string
-  decimalPlaces: DecimalPlaces
-  textColor: string
-  opacity: number
-  backgroundColor: string | null
-  testID: string
-  style: CSSProperties
-  resizerStyle: CSSProperties
-  svgAttributes: SVGAttributes
-  svgStyle: CSSProperties
-  svgTextAttributes: SVGAttributes
-  svgTextStyle: CSSProperties
-}
-
-const getDefaultViewBox = (stat: string): string =>
-  `0 0 ${stat.length * 55} 100`
-
-const SingleStatView: FunctionComponent<SingleStatViewProps> = ({
-  stat,
-  prefix,
-  suffix,
-  decimalPlaces,
-  textColor,
-  opacity,
-  backgroundColor,
-  testID,
-  style,
-  resizerStyle,
-  svgAttributes,
-  svgStyle,
-  svgTextAttributes,
-  svgTextStyle,
-}) => {
-  const formattedValue = formatStatValue(stat, {
+  const formattedValue = formatStatValue(value, {
     decimalPlaces,
     prefix,
     suffix,
@@ -167,7 +110,7 @@ const SingleStatView: FunctionComponent<SingleStatViewProps> = ({
             style={{
               ...SINGLE_STAT_SVG_TEXT_DEFAULT_STYLE,
               ...svgTextStyle,
-              fill: textColor,
+              fill: color,
             }}
           >
             {formattedValue}
