@@ -36,9 +36,6 @@ export interface SingleStatProps {
   svgTextStyle?: CSSProperties
 }
 
-const getDefaultViewBox = (stat: string): string =>
-  `0 0 ${stat.length * 55} 100`
-
 export const SingleStat: FunctionComponent<SingleStatProps> = ({
   value,
   prefix,
@@ -69,7 +66,7 @@ export const SingleStat: FunctionComponent<SingleStatProps> = ({
     suffix,
   })
 
-  let viewBox = getDefaultViewBox(formattedValue)
+  let viewBox = `0 0 ${formattedValue.length * 55} 100`
 
   if (svgAttributes.viewBox) {
     viewBox =
