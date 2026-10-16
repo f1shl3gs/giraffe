@@ -308,29 +308,25 @@ export const SingleStatOnTopOfLineLayer: Story = {
       },
     }
 
-    /*
-      <SingleStat> is not a child of <Plot> and does not need to be. It reads
-      nothing from the plot environment -- no axes, no scales, no geometry -- and
-      .giraffe-layer-single-stat is position:absolute inset:0, so all it wants is
-      a positioned ancestor. Putting it inside <Plot> would only hand it the
-      plot's margins and let the axes paint on top of it. Overlaying a number on
-      a chart is a layout decision, so it belongs to the consumer.
-    */
     const singleStatLayerValues = getLatestValues(singleStatTable)
 
+    /*
+      <Plot> renders its children into .giraffe-layers, which sits inside
+      .giraffe-inner-plot -- already inset by the axis margins. So a child that is
+      position:absolute inset:0 (which is what .giraffe-layer-single-stat is) fills
+      the plot area and stops short of the axes, with no positioning code here.
+    */
     return (
       <StoryFrame>
-        <div style={{position: 'relative', width: '100%', height: '100%'}}>
-          <Plot table={singleStatTable} config={config}>
-            <Line {...lineConfig} />
-          </Plot>
+        <Plot table={singleStatTable} config={config}>
+          <Line {...lineConfig} />
           {includeSingleStatLayer && (
             <SingleStatComponent
               value={singleStatLayerValues[0]}
               {...singleStatProps}
             />
           )}
-        </div>
+        </Plot>
       </StoryFrame>
     )
   },
